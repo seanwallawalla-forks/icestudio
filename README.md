@@ -1,15 +1,15 @@
 <img src="https://raw.githubusercontent.com/FPGAwars/icestudio/develop/docs/resources/images/logo/icestudio-logo-label.png" align="center">
 
-[![Build Status](https://travis-ci.org/FPGAwars/icestudio.svg?branch=v0.5.0)](https://travis-ci.org/FPGAwars/icestudio)
+[![Documentation Status](https://img.shields.io/website.svg?label=juanmard.github.io%2Ficestudio&longCache=true&url=http%3A%2F%2Fjuanmard.github.io%2Ficestudio%2Findex.html&logo=github)](https://juanmard.github.io/icestudio)
+[![Build Status](https://img.shields.io/github/workflow/status/umarcor/hwstudio/icestudio?longCache=true&label=icestudio&logo=github)](https://github.com/umarcor/hwstudio/actions?query=workflow%3Aicestudio)
 [![Version](https://img.shields.io/badge/version-v0.5.0-orange.svg)](https://github.com/FPGAwars/icestudio/releases)
 [![License](http://img.shields.io/:license-gpl-blue.svg)](http://opensource.org/licenses/GPL-2.0)
-[![Documentation Status](https://readthedocs.org/projects/icestudio/badge/?version=latest)](http://icestudio.readthedocs.io/en/latest)
 
 Visual editor for open FPGA boards. Built on top of the [Icestorm project](http://www.clifford.at/icestorm/) using [Apio](https://github.com/FPGAwars/apio).
 
     Graphic design -> Verilog, PCF -> Bistream -> FPGA
 
-For more information visit our site [icestudio.io](https://icestudio.io)
+For more information visit [juanmard.github.io/icestudio](https://juanmard.github.io/icestudio)
 
 ### Supported boards
 
