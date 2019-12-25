@@ -387,7 +387,7 @@
     'cssmin',
     'usemin',
     'nwjs',
-    'toolchain'
+    //'toolchain'
   ]
   .concat(distCommands)
   .concat([
