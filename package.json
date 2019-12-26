@@ -33,7 +33,7 @@
     "fix": "eslint --fix app/scripts/**/*.js tasks/*.js gruntfile.js",
     "start": "grunt serve",
     "dist": "grunt dist",
-    "gettext": "grunt gettext",
+    "gettext": "grunt nggettext_extract",
     "postinstall": "npmpd && cd app && npm install && bower install --allow-root && cd ../tasks && npm install && cd .. && grunt getcollection"
   },
   "devDependencies": {
