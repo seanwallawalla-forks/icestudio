@@ -28,9 +28,7 @@
       "tinyfpgab",
       "tinyprog",
       "icefunprog"
-    ],
-    "external": "",
-    "branch": ""
+    ]
   },
   "engines": {
     "node": ">= 0.10.0"
