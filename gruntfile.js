@@ -416,9 +416,6 @@
   grunt.registerTask('default', function() {
     console.log('Icestudio');
   });
-  grunt.registerTask('gettext', [
-    'nggettext_extract'
-  ]);
   grunt.registerTask('getcollection', [
     'clean:collection',
     'wget:collection',
