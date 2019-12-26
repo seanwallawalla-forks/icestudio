@@ -37,7 +37,7 @@ angular.module('icestudio')
         } else {
           possibleExecutables.push('/usr/local/Cellar/python/3.8.2/bin/python3');
           possibleExecutables.push('/usr/local/Cellar/python/3.7.7/bin/python3');
-          
+
           possibleExecutables.push('/usr/bin/python3.8');
           possibleExecutables.push('/usr/bin/python3.7');
           possibleExecutables.push('/usr/bin/python3.6');
@@ -948,7 +948,7 @@ angular.module('icestudio')
       // that contains the same arguments that shell call, in this way the two calls will be
       // compatible.
       // If in the future you will add more paremeters to the new window , you should review
-      // scripts/controllers/menu.js even if all parameters that arrive are automatically parse
+      // js/controllers/menu.js even if all parameters that arrive are automatically parse
 
       var url = 'index.html' + ((params === false) ? '' : '?icestudio_argv=' + encodeURI(btoa(JSON.stringify(params))));
       // Create a new window and get it.
