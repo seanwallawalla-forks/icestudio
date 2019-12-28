@@ -114,7 +114,7 @@ module.exports = function (grunt) {
 
   gruntCfg.nwjs = {
     options: {
-      version: '0.35.5',
+      version: '0.21.6',
       flavor: 'sdk', // 'normal' (stable) | 'sdk' (development)
       zip: false,
       buildDir: 'dist/',
