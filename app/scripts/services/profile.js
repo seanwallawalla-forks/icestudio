@@ -13,7 +13,6 @@ angular
       uiTheme: 'light',
       remoteHostname: '',
       showFPGAResources: false,
-      displayVersionInfoWindow: 'yes',
     };
 
     if (common.DARWIN) {
@@ -35,8 +34,6 @@ angular
             externalPlugins: data.externalPlugins || '',
             remoteHostname: data.remoteHostname || '',
             showFPGAResources: data.showFPGAResources || false,
-            displayVersionInfoWindow: data.displayVersionInfoWindow || 'yes',
-            lastVersionReview: data.lastVersionReview || false,
           };
           //-- Custom Theme support
           if (self.data.uiTheme !== 'light') {

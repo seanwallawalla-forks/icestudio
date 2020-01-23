@@ -71,17 +71,14 @@ angular
       // https://developer.mozilla.org/es/docs/Web/JavaScript/Referencia/Objetos_globales/unescape
       // unescape is deprecated javascript function, should use decodeURI instead
 
-      var queryStr = '';
-      if (window.location.search.indexOf('?icestudio_argv=') === 0) {
-        queryStr =
-          '?icestudio_argv=' +
-          atob(
-            decodeURI(window.location.search.replace('?icestudio_argv=', ''))
-          ) +
-          '&';
-      } else {
-        queryStr = decodeURI(window.location.search) + '&';
-      }
+      var queryStr =
+        window.location.search.indexOf('?icestudio_argv=') === 0
+          ? '?icestudio_argv=' +
+            atob(
+              decodeURI(window.location.search.replace('?icestudio_argv=', ''))
+            ) +
+            '&'
+          : decodeURI(window.location.search) + '&';
       var regex = new RegExp('.*?[&\\?]icestudio_argv=(.*?)&.*');
       var val = queryStr.replace(regex, '$1');
 
@@ -94,7 +91,6 @@ angular
       var prop;
       if (params !== false) {
         params = JSON.parse(decodeURI(params));
-
         for (prop in params) {
           gui.App.argv.push(params[prop]);
         }
@@ -127,13 +123,6 @@ angular
       } else {
         project.path = '';
       }
-      var versionW = $scope.profile.get('displayVersionInfoWindow');
-      var lastversionReview = $scope.profile.get('lastVersionReview');
-      var hasNewVersion =
-        !lastversionReview || lastversionReview < _package.version;
-      if (versionW === 'yes' || hasNewVersion) {
-        $scope.openVersionInfoWindow(hasNewVersion);
-      }
     }, 500);
 
     function processArg(arg) {
@@ -151,37 +140,6 @@ angular
         win.moveTo(offset.x, offset.y);
       }
     }
-
-    /*
-     * This function triggers when version info window will be closed
-     *                                                                 */
-    $scope.closeVersionInfoWindow = function () {
-      $('#version-info-tab').addClass('hidden');
-      var nodisplay = $('input[name="version-info-tab--no-display"]').is(
-        ':checked'
-      );
-      if (nodisplay) {
-        profile.set('displayVersionInfoWindow', 'no');
-      } else {
-        profile.set('displayVersionInfoWindow', 'yes');
-      }
-    };
-
-    $scope.openVersionInfoWindow = function (showPopUp) {
-      $('#version-info-tab').removeClass('hidden');
-      var noShowVersion =
-        $scope.profile.get('displayVersionInfoWindow') === 'no';
-      if (typeof showPopUp !== 'undefined' && showPopUp === true) {
-        profile.set('displayVersionInfoWindow', 'yes');
-        profile.set('lastVersionReview', _package.version);
-        noShowVersion = false;
-      }
-
-      $('input[name="version-info-tab--no-display"]').prop(
-        'checked',
-        noShowVersion
-      );
-    };
 
     //-- File
 
