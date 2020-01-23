@@ -13,7 +13,6 @@ angular
       uiTheme: 'light',
       remoteHostname: '',
       showFPGAResources: false,
-      displayVersionInfoWindow: 'yes',
       pythonEnv:{'python':'','pip':''}
     };
 
@@ -36,8 +35,6 @@ angular
             externalPlugins: data.externalPlugins || '',
             remoteHostname: data.remoteHostname || '',
             showFPGAResources: data.showFPGAResources || false,
-            displayVersionInfoWindow: data.displayVersionInfoWindow || 'yes',
-            lastVersionReview: data.lastVersionReview || false,
             pythonEnv: data.pythonEnv || {'python':'','pip':''}
           };
 

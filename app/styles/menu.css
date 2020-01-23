@@ -144,19 +144,3 @@
 .alertify .ajs-dialog {
   max-width: 600px;
 }
-
-.credits-developers-list {
-  list-style: none;
-  margin-top: 15px;
-  padding: 0;
-  margin-left: 15px;
-}
-
-.credits-developers-list li {
-  vertical-align: middle;
-  padding-bottom: 5px;
-  margin-bottom: 10px;
-}
-.credits-developers-list img {
-  vertical-align: middle;
-}
