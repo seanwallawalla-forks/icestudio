@@ -71,14 +71,11 @@ angular.module('icestudio')
       // https://developer.mozilla.org/es/docs/Web/JavaScript/Referencia/Objetos_globales/unescape
       // unescape is deprecated javascript function, should use decodeURI instead
 
-
-      var queryStr = '';
-      if (window.location.search.indexOf('?icestudio_argv=') === 0) {
-        queryStr = '?icestudio_argv=' + atob(decodeURI(window.location.search.replace('?icestudio_argv=', ''))) + '&';
-      } else {
-
-        queryStr = decodeURI(window.location.search) + '&';
-      }
+      var queryStr = (window.location.search.indexOf('?icestudio_argv=')===0) ?
+        '?icestudio_argv='+atob(decodeURI(window.location.search.replace('?icestudio_argv=','')))+'&'
+      :
+        decodeURI(window.location.search) + '&'
+      ;
       var regex = new RegExp('.*?[&\\?]icestudio_argv=(.*?)&.*');
       var val = queryStr.replace(regex, '$1');
 
@@ -91,7 +88,6 @@ angular.module('icestudio')
       var prop;
       if (params !== false) {
         params = JSON.parse(decodeURI(params));
-
         for (prop in params) {
           gui.App.argv.push(params[prop]);
         }
@@ -102,12 +98,10 @@ angular.module('icestudio')
         argv = [];
       }
 
-
-      if (params !== false) {
-        for (prop in params) {
+      if(params !==false){
+         for (prop in params) {
           argv.push(params[prop]);
         }
-
       }
       var local = false;
       for (var i in argv) {
@@ -116,22 +110,14 @@ angular.module('icestudio')
         local = arg === 'local' || local;
       }
 
-
       var editable = !project.path.startsWith(common.DEFAULT_COLLECTION_DIR) &&
         !project.path.startsWith(common.INTERNAL_COLLECTIONS_DIR) &&
         project.path.startsWith(common.selectedCollection.path);
 
       if (editable || !local) {
-
         updateWorkingdir(project.path);
       } else {
         project.path = '';
-      }
-      var versionW = $scope.profile.get('displayVersionInfoWindow');
-      let lastversionReview = $scope.profile.get('lastVersionReview');
-      let hasNewVersion=lastversionReview===false || lastversionReview < _package.version;
-      if (versionW === 'yes' ||hasNewVersion ) {
-        $scope.openVersionInfoWindow(hasNewVersion);
       }
 
     }, 500);
@@ -151,38 +137,6 @@ angular.module('icestudio')
         win.moveTo(offset.x, offset.y);
       }
     }
-
-    /*
-     * This function triggers when version info window will be closed
-     *                                                                 */
-    $scope.closeVersionInfoWindow = function () {
-      $('#version-info-tab').addClass('hidden');
-      var nodisplay = $('input[name="version-info-tab--no-display"]').is(':checked');
-      if (nodisplay) {
-        profile.set('displayVersionInfoWindow', 'no');
-      } else {
-        profile.set('displayVersionInfoWindow', 'yes');
-      }
-    };
-
-    $scope.openVersionInfoWindow = function (showPopUp) {
-
-      $('#version-info-tab').removeClass('hidden');
-      var versionW = $scope.profile.get('displayVersionInfoWindow');
-      let noShowVersion=false;
-      if (versionW === 'no') {
-        noShowVersion=true;
-      }
-      if(typeof showPopUp !== 'undefined' && showPopUp===true){
-        profile.set('displayVersionInfoWindow','yes');
-        profile.set('lastVersionReview',_package.version);
-        noShowVersion=false;
-
-      }
-
-
-      $('input[name="version-info-tab--no-display"]').prop('checked', noShowVersion);
-    };
 
     //-- File
 

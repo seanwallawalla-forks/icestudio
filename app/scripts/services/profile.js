@@ -15,8 +15,7 @@ angular.module('icestudio')
       'language': '',
       'uiTheme': 'light',
       'remoteHostname': '',
-      'showFPGAResources': false,
-      'displayVersionInfoWindow': 'yes'
+      'showFPGAResources': false
     };
 
     if (common.DARWIN) {
@@ -27,7 +26,7 @@ angular.module('icestudio')
       var self = this;
       utils.readFile(common.PROFILE_PATH)
         .then(function (data) {
-          
+
           self.data = {
             'board': data.board || '',
             'boardRules': data.boardRules !== false,
@@ -37,10 +36,7 @@ angular.module('icestudio')
             'externalCollections': data.externalCollections || '',
             'externalPlugins': data.externalPlugins || '',
             'remoteHostname': data.remoteHostname || '',
-            'showFPGAResources': data.showFPGAResources || false,
-            'displayVersionInfoWindow': data.displayVersionInfoWindow || 'yes',
-            'lastVersionReview':data.lastVersionReview || false
-
+            'showFPGAResources': data.showFPGAResources || false
           };
           //-- Custom Theme support
           if(self.data.uiTheme !== 'light'){
