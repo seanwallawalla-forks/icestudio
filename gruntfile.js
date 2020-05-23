@@ -23,7 +23,7 @@
   }
   function targetWin(bits) {
     platforms.push('win' + bits);
-    distCommands.push('compress:win' + bits, 'wget:python' + bits, 'exec:nsis' + bits);
+    distCommands.push('compress:win' + bits);
   }
   function targetOSX() {
     platforms.push('osx64');
