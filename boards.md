@@ -37,3 +37,9 @@
 | [UPDuino v2.0](http://gnarlygrey.atspace.cc/development-platform.html#upduino_v2l) | FTDI |
 | [FPGA 101 Workshop Badge Board](https://github.com/mmicko/workshop_badge) | FTDI |
 | [iCE40 UltraPlus Breakout Board](http://www.latticesemi.com/en/Products/DevelopmentBoardsAndKits/iCE40UltraPlusBreakoutBoard) | FTDI |
+
+# Planned support
+
+| Board name | Interface | |
+|:-|:-:|:-|
+| [Orange Crab](https://github.com/gregdavill/OrangeCrab) | FTDI | [#392](https://github.com/FPGAwars/icestudio/issues/392) |
