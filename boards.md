@@ -2,11 +2,11 @@
 
 ## HX1K
 
-| Board name                                                              | Interface |
-| :---------------------------------------------------------------------- | :-------: |
-| [IceZUM Alhambra](https://github.com/FPGAwars/icezum)                   |   FTDI    |
-| [Nandland Go board](https://www.nandland.com/goboard/introduction.html) |   FTDI    |
-| [iCEstick Evaluation Kit](http://www.latticesemi.com/icestick)          |   FTDI    |
+| Board name                                                              | Interface |                                                          |
+| :---------------------------------------------------------------------- | :-------: | :------------------------------------------------------- |
+| [IceZUM Alhambra](https://github.com/FPGAwars/icezum)                   |   FTDI    |                                                          |
+| [Nandland Go board](https://www.nandland.com/goboard/introduction.html) |   FTDI    | [#394](https://github.com/FPGAwars/icestudio/issues/394) |
+| [iCEstick Evaluation Kit](http://www.latticesemi.com/icestick)          |   FTDI    |                                                          |
 
 ## HX8K
 
