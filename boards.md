@@ -39,3 +39,9 @@
 | [iCE40 UltraPlus Breakout Board](http://www.latticesemi.com/en/Products/DevelopmentBoardsAndKits/iCE40UltraPlusBreakoutBoard) |   FTDI          |
 | [dadamachines doppler](https://dadamachines.com/product/doppler/)                                                             | samd51 on board |
 | [iCESugar v1.5](https://github.com/wuxx/icesugar)                                                                             |   HID           |
+
+# Planned support
+
+| Board name                                              | Interface |                                                          |
+| :------------------------------------------------------ | :-------: | :------------------------------------------------------- |
+| [Orange Crab](https://github.com/gregdavill/OrangeCrab) |   FTDI    | [#392](https://github.com/FPGAwars/icestudio/issues/392) |
