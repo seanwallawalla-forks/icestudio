@@ -89,6 +89,29 @@ jobs:
           git remote add origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY"
           git push -u origin +HEAD:gh-pages
 
+  nightly:
+    needs: [linwin, mac]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v2
+      - name: Append GITHUB_SHA to release assets
+        run: |
+          for item in lin32/* lin64/* win32/* win64/* osx64/*; do
+            mv "$item" "${item%.*}-${GITHUB_SHA}.zip"
+          done
+      - uses: eine/tip@master
+        if: github.ref == 'refs/heads/moon' && github.event_name != 'pull_request'
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: 'nightly'
+          rm: true
+          files: |
+            lin32/*
+            lin64/*
+            win32/*
+            win64/*
+            osx64/*
+
 #---
 
 # Generated artifacts (depending on the platform) are:

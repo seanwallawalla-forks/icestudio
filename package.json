@@ -1,24 +1,4 @@
 {
-  "name": "icestudio",
-  "version": "0.5.1n201120",
-  "description": "Visual editor for open FPGA boards",
-  "contributors": [
-    {
-      "name": "Jesús Arroyo Torrens",
-      "email": "jesus.arroyo.torrens@gmail.com",
-      "url": "https://github.com/Jesus89"
-    },
-    {
-      "name": "Carlos Venegas Arrabe",
-      "url": "https://github.com/cavearr"
-    },
-    {
-      "name": "Juan González Gómez",
-      "url": "https://github.com/Obijuan"
-    }
-  ],
-  "repository": "https://github.com/FPGAwars/icestudio",
-  "license": "GPL-2.0",
   "prettier": {
     "bracketSpacing": false,
     "trailingComma": "es5",
@@ -66,6 +46,5 @@
   },
   "darwinDependencies": {
     "grunt-appdmg": "^1.0.0"
-  },
-  "dependencies": {}
+  }
 }

@@ -1,26 +1,9 @@
 {
   "name": "icestudio",
-  "version": "0.5.1n201120",
-  "nightly": "0.5.1n201120",
-  "flavour": "develop",
-  "description": "Visual editor for open FPGA boards",
-  "contributors": [
-    {
-      "name": "Jesús Arroyo Torrens",
-      "email": "jesus.arroyo.torrens@gmail.com",
-      "url": "https://github.com/Jesus89"
-    },
-    {
-      "name": "Carlos Venegas Arrabe",
-      "url": "https://github.com/cavearr"
-    },
-    {
-      "name": "Juan González Gómez",
-      "url": "https://github.com/Obijuan"
-    }
-  ],
-  "repository": "https://github.com/FPGAwars/icestudio",
-  "updatecheck": "https://raw.githubusercontent.com/FPGAwars/icestudio/develop/app/package.json",
+  "version": "0.5.1dev",
+  "sha": "00000000",
+  "description": "Visual editor for Verilog designs",
+  "repository": "https://github.com/juanmard/icestudio",
   "license": "GPL-2.0",
   "main": "index.html",
   "chromium-args": "--enable-experimental-web-platform-features",
@@ -28,14 +11,15 @@
     "mode": false
   },
   "window": {
-    "width": 900,
-    "height": 620,
+    "width": 1024,
+    "height": 700,
     "min_width": 800,
     "min_height": 200,
     "resizable": true,
     "position": "center",
     "icon": "resources/images/icestudio-logo.png"
   },
+  "collection": "0.3.3",
   "apio": {
     "min": "0.6.0",
     "max": "1.0.0",
@@ -50,7 +34,6 @@
     "external": "",
     "branch": ""
   },
-  "collection": "0.3.3",
   "engines": {
     "node": ">= 0.10.0"
   },
@@ -84,8 +67,10 @@
   "readme": "../README.md",
   "keywords": [
     "FPGA",
-    "open",
-    "editor",
-    "hardware"
+    "FOSS",
+    "hardware",
+    "HDL",
+    "ICE",
+    "verilog"
   ]
 }

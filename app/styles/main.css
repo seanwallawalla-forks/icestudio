@@ -98,9 +98,6 @@ body {
   width: auto;
   max-width: 100%;
 }
-.ajs-header {
-  display: none;
-}
 
 .ajs-footer {
   padding: 8px !important;
