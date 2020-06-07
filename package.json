@@ -20,6 +20,7 @@
   "repository": "https://github.com/FPGAwars/icestudio",
   "license": "GPL-2.0",
   "scripts": {
+    "lint": "grunt jshint",
     "start": "grunt serve",
     "dist": "grunt dist",
     "gettext": "grunt nggettext_extract",

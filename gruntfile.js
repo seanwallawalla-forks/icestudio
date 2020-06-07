@@ -375,7 +375,7 @@
   ]);
   grunt.registerTask('dist', [
     'checksettings',
-    'jshint',
+    //'jshint',
     'clean:dist',
     'clean:toolchain',
     'nggettext_compile',
