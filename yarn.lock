@@ -2205,9 +2205,10 @@ grunt-contrib-cssmin@^1.0.1:
     clean-css "~3.4.2"
     maxmin "^1.1.0"
 
-"grunt-contrib-uglify@github:gruntjs/grunt-contrib-uglify#harmony":
+grunt-contrib-uglify-es@^3.3.0:
   version "3.3.0"
-  resolved "https://codeload.github.com/gruntjs/grunt-contrib-uglify/tar.gz/ccb95a70cad6a4e9e902d3bd5d0e38a4de09a1e1"
+  resolved "https://registry.yarnpkg.com/grunt-contrib-uglify-es/-/grunt-contrib-uglify-es-3.3.0.tgz#c15f7b11fd413203d4e0c9137f5d3faf55a8df80"
+  integrity sha1-wV97Ef1BMgPU4MkTf10/r1Wo34A=
   dependencies:
     chalk "^1.0.0"
     maxmin "^1.1.0"
