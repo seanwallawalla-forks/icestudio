@@ -72,41 +72,6 @@ jobs:
       with:
         name: docs
         path: docs/_build/html
-    - name: 'publish site to gh-pages'
-      if: github.event_name != 'pull_request' && github.repository == 'juanmard/icestudio'
-      run: |
-        cd docs/_build/html
-        touch .nojekyll
-        git init
-        git add .
-        git config --local user.email "push@gha"
-        git config --local user.name "GHA"
-        git commit -a -m "update ${{ github.sha }}"
-        git remote add origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY"
-        git push -u origin +HEAD:gh-pages
-
-  nightly:
-    needs: [ linwin, mac ]
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/download-artifact@v2
-    - name: Append GITHUB_SHA to release assets
-      run: |
-        for item in lin32/* lin64/* win32/* win64/* osx64/*; do
-          mv "$item" "${item%.*}-${GITHUB_SHA}.zip"
-        done
-    - uses: eine/tip@master
-      if: github.ref == 'refs/heads/moon' && github.event_name != 'pull_request'
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        tag: 'nightly'
-        rm: true
-        files: |
-          lin32/*
-          lin64/*
-          win32/*
-          win64/*
-          osx64/*
 
 #---
 
