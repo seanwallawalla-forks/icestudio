@@ -4,16 +4,17 @@
     "boards": ["icezum", "go-board", "icestick"]
   },
   {
+    "type": "HX4K",
+    "boards": ["alhambra-ii", "edu-ciaa-fpga", "kefir"]
+  },
+  {
     "type": "HX8K",
     "boards": [
       "Alchitry-Cu",
-      "alhambra-ii",
       "blackice",
       "blackice-ii",
       "blackice-mx",
-      "edu-ciaa-fpga",
       "icoboard",
-      "kefir",
       "iCE40-HX8K",
       "icefun"
     ]
