@@ -1301,37 +1301,27 @@ angular.module('icestudio')
       collections.loadInternalCollections();
       alertify.success(gettextCatalog.getString('All collections removed'));
     };
+
+    this.canCheckVersion = _package.repository !== undefined && _package.sha !== undefined;
+
     this.checkForNewVersion = function () {
-      if (typeof _package.updatecheck !== 'undefined') {
-
-        $.getJSON(_package.updatecheck + '?_tsi=' + new Date().getTime(), function (result) {
-          var hasNewVersion = false;
-          if (result !== false) {
-            if (typeof result.version !== 'undefined' && _package.version < result.version) {
-              hasNewVersion = 'stable';
-            }
-            if (typeof result.nightly !== 'undefined' && _package.version < result.nightly) {
-              hasNewVersion = 'nightly';
-            }
-            if (hasNewVersion !== false) {
-              var msg = '';
-              if (hasNewVersion === 'stable') {
-                msg = '<div class="new-version-notifier-box"><div class="new-version-notifier-box--icon"><img src="resources/images/confetti.svg"></div>\
-                                          <div class="new-version-notifier-box--text">' + gettextCatalog.getString('There is a new stable version available') + '<br/><a class="action-open-url-external-browser" href="https://icestudio.io" target="_blank">Click here to download it.</a></div></div>';
-
-              } else {
-                msg = '<div class="new-version-notifier-box"><div class="new-version-notifier-box--icon"><img src="resources/images/confetti.svg"></div>\
-                                          <div class="new-version-notifier-box--text">' + gettextCatalog.getString('There is a new nightly version available') + '<br/><a class="action-open-url-external-browser" href="https://icestudio.io" target="_blank">Click here to download it.</a></div></div>';
-
-              }
-              alertify.notify(msg, 'notify', 30);
-
-
-            }
-          }
-        });
-      }
+      $.getJSON(_package.repository.replace('github.com', 'api.github.com/repos') + '/tags' + '?_tsi=' + new Date().getTime(), function (result) {
+        if (result != undefined) {
+          const latest = result.find(x => x.name == 'nightly').commit.sha.substring(0,8);
+          alertify.notify(
+            '<div class="new-version-notifier-box">' +
+              '<div class="new-version-notifier-box--text">' +
+                (( latest != _package.sha ) ? (
+                  'Current: ' + _package.sha + '<br/>Latest: ' + latest + '<br/>' +
+                  '<a class="action-open-url-external-browser" href="' + _package.repository + '/releases" target="_blank">Go to GitHub Releases</a>'
+                ) : 'Icestudio is up to date!' ) +
+              '</div>' +
+            '</div>',
+            'notify', 10);
+        }
+      });
     };
+
     this.ifDevelopmentMode = function () {
       if (typeof _package.development !== 'undefined' &&
         typeof _package.development.mode !== 'undefined' &&

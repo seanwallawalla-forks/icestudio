@@ -26,7 +26,6 @@ angular.module('icestudio')
     $scope.tools = tools;
     $scope.common = common;
 
-    $scope.version = _package.version;
     $scope.toolchain = tools.toolchain;
 
     $scope.workingdir = '';
@@ -528,20 +527,12 @@ angular.module('icestudio')
     };
 
     function getProjectInformation() {
-      var p = false;
-      if (subModuleActive && typeof common.submoduleId !== 'undefined' && typeof common.allDependencies[common.submoduleId] !== 'undefined') {
-        p = common.allDependencies[common.submoduleId].package;
-
-      } else {
-        p = project.get('package');
-      }
-      return [
-        p.name,
-        p.version,
-        p.description,
-        p.author,
-        p.image
-      ];
+      var p = (
+        subModuleActive &&
+        common.submoduleId != undefined &&
+        common.allDependencies[common.submoduleId] != undefined
+      ) ? common.allDependencies[common.submoduleId].package : project.get('package');
+      return [ p.name, p.version, p.description, p.author, p.image ];
     }
 
     $scope.setRemoteHostname = function () {
@@ -554,16 +545,10 @@ angular.module('icestudio')
 
     $scope.toggleBoardRules = function () {
       graph.setBoardRules(!profile.get('boardRules'));
-      if (profile.get('boardRules')) {
-        alertify.success(gettextCatalog.getString('Board rules enabled'));
-      } else {
-        alertify.success(gettextCatalog.getString('Board rules disabled'));
-      }
+      alertify.success(gettextCatalog.getString('Board rules ' + (profile.get('boardRules') ? 'enabled' : 'disabled')));
     };
 
-    $(document).on('langChanged', function (evt, lang) {
-      $scope.selectLanguage(lang);
-    });
+    $(document).on('langChanged', function (evt, lang) { $scope.selectLanguage(lang); });
 
     $scope.selectLanguage = function (language) {
       if (profile.get('language') !== language) {
@@ -586,13 +571,9 @@ angular.module('icestudio')
     $scope.selectTheme = function (theme) {
       if (profile.get('uiTheme') !== theme) {
         profile.set('uiTheme', theme);
-      alertify.warning(gettextCatalog.getString('Icestudio needs to be restarted to switch the new UI Theme.'), 15);
-
-
+        alertify.warning(gettextCatalog.getString('Icestudio needs to be restarted to switch the new UI Theme.'), 15);
       }
     };
-
-
 
     //-- View
 
@@ -650,7 +631,7 @@ angular.module('icestudio')
         gui.Window.open('resources/viewers/table/rules.html?rules=' + encRules, {
           title: common.selectedBoard.info.label + ' - Rules',
           focus: true,
-          //toolbar: false,
+          // toolbar: false,
           resizable: false,
           width: 500,
           height: 500,
@@ -676,7 +657,7 @@ angular.module('icestudio')
         gui.Window.open('resources/viewers/markdown/readme.html?readme=' + readme, {
           title: (collection.name ? collection.name : 'Default') + ' Collection - Data',
           focus: true,
-          //toolbar: false,
+          // toolbar: false,
           resizable: true,
           width: 700,
           height: 700,
@@ -695,7 +676,7 @@ angular.module('icestudio')
       winCommandOutput = gui.Window.open('resources/viewers/plain/output.html?content=' + encodeURIComponent(common.commandOutput), {
         title: gettextCatalog.getString('Command output'),
         focus: true,
-        /*        toolbar: false,*/
+        // toolbar: false,
         resizable: true,
         width: 700,
         height: 400,
@@ -734,20 +715,20 @@ angular.module('icestudio')
 
     $(document).on('boardChanged', function (evt, board) {
       if (common.selectedBoard.name !== board.name) {
-        var newBoard = graph.selectBoard(board);
-        profile.set('board', newBoard.name);
+        profile.set('board', graph.selectBoard(board).name);
       }
     });
 
     $scope.selectBoard = function (board) {
       if (common.selectedBoard.name !== board.name) {
         if (!graph.isEmpty()) {
-          alertify.confirm(gettextCatalog.getString('The current FPGA I/O configuration will be lost. Do you want to change to {{name}} board?', {
-              name: utils.bold(board.info.label)
-            }),
-            function () {
-              _boardSelected();
-            });
+          alertify.confirm(
+            gettextCatalog.getString(
+              'The current FPGA I/O configuration will be lost. Do you want to change to {{name}} board?',
+              { name: utils.bold(board.info.label) }
+            ),
+            function () { _boardSelected(); }
+          );
         } else {
           _boardSelected();
         }
@@ -757,9 +738,11 @@ angular.module('icestudio')
         var reset = true;
         var newBoard = graph.selectBoard(board, reset);
         profile.set('board', newBoard.name);
-        alertify.success(gettextCatalog.getString('Board {{name}} selected', {
-          name: utils.bold(newBoard.info.label)
-        }));
+        alertify.success(
+          gettextCatalog.getString('Board {{name}} selected', {
+            name: utils.bold(newBoard.info.label)
+          })
+        );
       }
     };
 
@@ -767,31 +750,32 @@ angular.module('icestudio')
     //-- Tools
 
     $scope.verifyCode = function () {
-      var startMessage = gettextCatalog.getString('Start verification');
-      var endMessage = gettextCatalog.getString('Verification done');
       checkGraph()
         .then(function () {
-          return tools.verifyCode(startMessage, endMessage);
+          return tools.verifyCode(
+            gettextCatalog.getString('Start verification'),
+            gettextCatalog.getString('Verification done')
+          );
         })
-        .catch(function () {
-
-        });
+        .catch(function () {});
     };
 
     $scope.buildCode = function () {
       if (typeof common.isEditingSubmodule !== 'undefined' &&
         common.isEditingSubmodule === true) {
-        alertify.alert(gettextCatalog.getString('Build'),
+        alertify.alert(
+          gettextCatalog.getString('Build'),
           gettextCatalog.getString('You can only build at top-level design. Inside submodules you only can <strong>Verify</strong>'),
           function () {});
         return;
       }
 
-      var startMessage = gettextCatalog.getString('Start build');
-      var endMessage = gettextCatalog.getString('Build done');
       checkGraph()
         .then(function () {
-          return tools.buildCode(startMessage, endMessage);
+          return tools.buildCode(
+            gettextCatalog.getString('Start build'),
+            gettextCatalog.getString('Build done')
+          );
         })
         .then(function () {
           resetBuildStack();
@@ -802,23 +786,21 @@ angular.module('icestudio')
     $scope.uploadCode = function () {
       if (typeof common.isEditingSubmodule !== 'undefined' &&
         common.isEditingSubmodule === true) {
-        alertify.alert(gettextCatalog.getString('Upload'),
+        alertify.alert(
+          gettextCatalog.getString('Upload'),
           gettextCatalog.getString('You can only upload  your design at top-level design. Inside submodules you only can <strong>Verify</strong>'),
           function () {});
-
         return;
       }
 
-
-      var startMessage = gettextCatalog.getString('Start upload');
-      var endMessage = gettextCatalog.getString('Upload done');
       checkGraph()
         .then(function () {
-          return tools.uploadCode(startMessage, endMessage);
+          return tools.uploadCode(
+            gettextCatalog.getString('Start upload'),
+            gettextCatalog.getString('Upload done')
+          );
         })
-        .then(function () {
-          resetBuildStack();
-        })
+        .then(function () { resetBuildStack(); })
         .catch(function () {});
     };
 
@@ -849,31 +831,34 @@ angular.module('icestudio')
     };
 
     $scope.removeCollection = function (collection) {
-      alertify.confirm(gettextCatalog.getString('Do you want to remove the {{name}} collection?', {
+      alertify.confirm(
+        gettextCatalog.getString('Do you want to remove the {{name}} collection?', {
           name: utils.bold(collection.name)
-        }),
+        } ),
         function () {
           tools.removeCollection(collection);
           updateSelectedCollection();
           utils.rootScopeSafeApply();
-        });
+        }
+      );
     };
 
     $scope.removeAllCollections = function () {
       if (common.internalCollections.length > 0) {
-        alertify.confirm(gettextCatalog.getString('All stored collections will be lost. Do you want to continue?'),
+        alertify.confirm(
+          gettextCatalog.getString('All stored collections will be lost. Do you want to continue?'),
           function () {
             tools.removeAllCollections();
             updateSelectedCollection();
             utils.rootScopeSafeApply();
-          });
+          }
+        );
       } else {
         alertify.warning(gettextCatalog.getString('No collections stored'), 5);
       }
     };
 
     $scope.showChromeDevTools = function () {
-
       //win.showDevTools();
       utils.openDevToolsUI();
     };
@@ -881,32 +866,33 @@ angular.module('icestudio')
     //-- Help
 
     $scope.openUrl = function (url ,$event ) {
-       $event.preventDefault();
-
+      $event.preventDefault();
       utils.openUrlExternalBrowser(url);
       return false;
     };
 
     $scope.about = function () {
-      alertify.alert([
-        '<div class="row">',
-        '  <div class="col-sm-12">',
-        '    <h4><a class="action-open-url-external-browser" href="https://github.com/juanmard/icestudio">Icestudio</a></h4>',
-        '    <p><i>Visual editor for Verilog designs</i></p>',
-        '  </div>',
-        '</div>',
+      const ref = (_package.sha != '00000000') ? '/commit/' + _package.sha : '';
+      alertify.alert('Icestudio, visual editor for Verilog designs', [
         '<div class="row" style="margin-top:15px;">',
         '  <div class="col-sm-12">',
-        '    <p>Version: ' + $scope.version + '</p>',
+        '    <p>Version: <a class="action-open-url-external-browser" href="https://github.com/juanmard/icestudio' + ref + '">' + _package.version + '-g' + _package.sha + '</a></p>',
         '    <p>License: <a class="action-open-url-external-browser" href="https://www.gnu.org/licenses/old-licenses/gpl-2.0.html">GPL-2.0</a></p>',
         '    <p>Documentation: <a class="action-open-url-external-browser" href="http://juanmard.github.io/icestudio">juanmard.github.io/icestudio</a></p>',
         '  </div>',
         '</div>',
          '<div class="row" style="margin-top:15px;">',
         '  <div class="col-sm-12">',
-        '    <p>Thanks to all the <a class="action-open-url-external-browser" href="https://github.com/juanmard/icestudio/contributors">contributors</a></p>',
+        '    <p>Thanks to all the <a class="action-open-url-external-browser" href="https://github.com/juanmard/icestudio/contributors">contributors</a>!</p>',
         '  </div>',
-        '</div>'].join('\n'));
+        '</div>'].join('\n'),
+        function(){ if (tools.canCheckVersion) { tools.checkForNewVersion(); }}
+      ).setting({
+        'closable': true,
+        'modal': true,
+        'label': tools.canCheckVersion ? 'Check for Updates...' : 'Close',
+        'invokeOnCloseOff': true,
+      });
     };
 
     // Events
@@ -936,23 +922,13 @@ angular.module('icestudio')
     // Detect prompt
 
     var promptShown = false;
-
     alertify.prompt().set({
-      onshow: function () {
-        promptShown = true;
-      },
-      onclose: function () {
-        promptShown = false;
-      }
+      onshow:  function () { promptShown = true; },
+      onclose: function () { promptShown = false; }
     });
-
     alertify.confirm().set({
-      onshow: function () {
-        promptShown = true;
-      },
-      onclose: function () {
-        promptShown = false;
-      }
+      onshow:  function () { promptShown = true; },
+      onclose: function () { promptShown = false; }
     });
 
     // Configure all shortcuts
@@ -1046,8 +1022,7 @@ angular.module('icestudio')
     $(document).on('mousedown', '.paper', function () {
       mousedown = true;
       // Close current menu
-      if (typeof $scope.status !== 'undefined' &&
-        typeof $scope.status[menu] !== 'undefined') {
+      if (typeof $scope.status !== 'undefined' && typeof $scope.status[menu] !== 'undefined') {
         $scope.status[menu] = false;
       }
       utils.rootScopeSafeApply();
@@ -1089,7 +1064,5 @@ angular.module('icestudio')
         event.preventDefault();
       }
     });
-
-
 
   });
