@@ -440,6 +440,13 @@ isarray@~1.0.0:
   resolved "https://registry.yarnpkg.com/isarray/-/isarray-1.0.0.tgz#bb935d48582cba168c06834957a54a3e07124f11"
   integrity sha1-u5NdSFgsuhaMBoNJV6VKPgcSTxE=
 
+jexcel@^3.9.1:
+  version "3.9.1"
+  resolved "https://registry.yarnpkg.com/jexcel/-/jexcel-3.9.1.tgz#5a106adcc5e2e7f46668b63d760935ac5c35d982"
+  integrity sha512-/jzt+pNHzoOxCYzmNMIvBY75xLnN0ppgVgVmyPIgngbLLzje3f2bLQUW1ZXD9dnPRcWfB6WeIntlQZ5l5YfxKQ==
+  dependencies:
+    jsuites "^2.7.1"
+
 jquery@~3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/jquery/-/jquery-3.0.0.tgz#95a2a9541291a9f819e016f85ba247116d03e4ab"
@@ -459,6 +466,11 @@ jsonfile@^2.1.0:
   integrity sha1-NzaitCi4e72gzIO1P6PWM6NcKug=
   optionalDependencies:
     graceful-fs "^4.1.6"
+
+jsuites@^2.7.1:
+  version "2.8.0"
+  resolved "https://registry.yarnpkg.com/jsuites/-/jsuites-2.8.0.tgz#dd73c2b7b18b40eba97874d5b8c44c2e562f379f"
+  integrity sha512-/0vEJv7OPOGjQMYcDlJ+bF4nB+MTCAJjywPFcaOf76BMHGGm0ubYm5Cheesc9q6waXPkzshQh0IBR+pfy4hbtA==
 
 klaw@^1.0.0:
   version "1.3.1"
@@ -532,6 +544,11 @@ ms@2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/ms/-/ms-2.0.0.tgz#5608aeadfc00be6c2901df5f9861788de0d597c8"
   integrity sha1-VgiurfwAvmwpAd9fmGF4jeDVl8g=
+
+mustache@^4.0.0:
+  version "4.0.1"
+  resolved "https://registry.yarnpkg.com/mustache/-/mustache-4.0.1.tgz#d99beb031701ad433338e7ea65e0489416c854a2"
+  integrity sha512-yL5VE97+OXn4+Er3THSmTdCFCtx5hHWzrolvH+JObZnUYwuaG7XV+Ch4fR2cIrcYI0tFHxS7iyFYl14bW8y2sA==
 
 node-emoji@~1.8.1:
   version "1.8.1"
