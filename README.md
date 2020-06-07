@@ -1,5 +1,5 @@
 <p align="center">
-<a href="http://juanmard.github.io/icestudio"><img src="https://raw.githubusercontent.com/juanmard/icestudio/develop/docs/resources/images/logo/icestudio-logo-label.png" align="center"></a>
+<a href="http://juanmard.github.io/icestudio"><img src="./docs/resources/images/logo/icestudio-logo-label-nightly.png" align="center"></a>
 </p>
 
 <p align="center">
