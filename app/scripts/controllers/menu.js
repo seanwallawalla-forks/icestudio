@@ -28,7 +28,6 @@ angular
     $scope.tools = tools;
     $scope.common = common;
 
-    $scope.version = _package.version;
     $scope.toolchain = tools.toolchain;
 
     $scope.workingdir = '';
@@ -588,16 +587,12 @@ angular
     };
 
     function getProjectInformation() {
-      var p = false;
-      if (
-        common.isEditingSubmodule &&
+      var p =
+        subModuleActive &&
         common.submoduleId &&
         common.allDependencies[common.submoduleId]
-      ) {
-        p = common.allDependencies[common.submoduleId].package;
-      } else {
-        p = project.get('package');
-      }
+          ? common.allDependencies[common.submoduleId].package
+          : project.get('package');
       return [p.name, p.version, p.description, p.author, p.image];
     }
 
@@ -614,11 +609,11 @@ angular
 
     $scope.toggleBoardRules = function () {
       graph.setBoardRules(!profile.get('boardRules'));
-      if (profile.get('boardRules')) {
-        alertify.success(gettextCatalog.getString('Board rules enabled'));
-      } else {
-        alertify.success(gettextCatalog.getString('Board rules disabled'));
-      }
+      alertify.success(
+        gettextCatalog.getString(
+          'Board rules ' + (profile.get('boardRules') ? 'enabled' : 'disabled')
+        )
+      );
     };
 
     $(document).on('langChanged', function (evt, lang) {
@@ -732,7 +727,7 @@ angular
           {
             title: common.selectedBoard.info.label + ' - Rules',
             focus: true,
-            //toolbar: false,
+            // toolbar: false,
             resizable: false,
             width: 500,
             height: 500,
@@ -766,7 +761,7 @@ angular
               (collection.name ? collection.name : 'Default') +
               ' Collection - Data',
             focus: true,
-            //toolbar: false,
+            // toolbar: false,
             resizable: true,
             width: 700,
             height: 700,
@@ -795,7 +790,7 @@ angular
         {
           title: gettextCatalog.getString('Command output'),
           focus: true,
-          /*        toolbar: false,*/
+          // toolbar: false,
           resizable: true,
           width: 700,
           height: 400,
@@ -844,8 +839,7 @@ angular
 
     $(document).on('boardChanged', function (evt, board) {
       if (common.selectedBoard.name !== board.name) {
-        var newBoard = graph.selectBoard(board);
-        profile.set('board', newBoard.name);
+        profile.set('board', graph.selectBoard(board).name);
       }
     });
 
@@ -855,9 +849,7 @@ angular
           alertify.confirm(
             gettextCatalog.getString(
               'The current FPGA I/O configuration will be lost. Do you want to change to {{name}} board?',
-              {
-                name: utils.bold(board.info.label),
-              }
+              {name: utils.bold(board.info.label)}
             ),
             function () {
               _boardSelected();
@@ -883,11 +875,12 @@ angular
     //-- Tools
 
     $scope.verifyCode = function () {
-      var startMessage = gettextCatalog.getString('Start verification');
-      var endMessage = gettextCatalog.getString('Verification done');
       checkGraph()
         .then(function () {
-          return tools.verifyCode(startMessage, endMessage);
+          return tools.verifyCode(
+            gettextCatalog.getString('Start verification'),
+            gettextCatalog.getString('Verification done')
+          );
         })
         .catch(function () {});
     };
@@ -907,11 +900,12 @@ angular
         return;
       }
 
-      var startMessage = gettextCatalog.getString('Start build');
-      var endMessage = gettextCatalog.getString('Build done');
       checkGraph()
         .then(function () {
-          return tools.buildCode(startMessage, endMessage);
+          return tools.buildCode(
+            gettextCatalog.getString('Start build'),
+            gettextCatalog.getString('Build done')
+          );
         })
         .then(function () {
           resetBuildStack();
@@ -931,15 +925,15 @@ angular
           ),
           function () {}
         );
-
         return;
       }
 
-      var startMessage = gettextCatalog.getString('Start upload');
-      var endMessage = gettextCatalog.getString('Upload done');
       checkGraph()
         .then(function () {
-          return tools.uploadCode(startMessage, endMessage);
+          return tools.uploadCode(
+            gettextCatalog.getString('Start upload'),
+            gettextCatalog.getString('Upload done')
+          );
         })
         .then(function () {
           resetBuildStack();
@@ -1018,34 +1012,47 @@ angular
 
     $scope.openUrl = function (url, $event) {
       $event.preventDefault();
-
       utils.openUrlExternalBrowser(url);
       return false;
     };
 
     $scope.about = function () {
-      alertify.alert(
-        [
-          '<div class="row">',
-          '  <div class="col-sm-12">',
-          '    <h4><a class="action-open-url-external-browser" href="https://github.com/juanmard/icestudio">Icestudio</a></h4>',
-          '    <p><i>Visual editor for Verilog designs</i></p>',
-          '  </div>',
-          '</div>',
-          '<div class="row" style="margin-top:15px;">',
-          '  <div class="col-sm-12">',
-          '    <p>Version: ' + $scope.version + '</p>',
-          '    <p>License: <a class="action-open-url-external-browser" href="https://www.gnu.org/licenses/old-licenses/gpl-2.0.html">GPL-2.0</a></p>',
-          '    <p>Documentation: <a class="action-open-url-external-browser" href="http://juanmard.github.io/icestudio">juanmard.github.io/icestudio</a></p>',
-          '  </div>',
-          '</div>',
-          '<div class="row" style="margin-top:15px;">',
-          '  <div class="col-sm-12">',
-          '    <p>Thanks to all the <a class="action-open-url-external-browser" href="https://github.com/juanmard/icestudio/contributors">contributors</a></p>',
-          '  </div>',
-          '</div>',
-        ].join('\n')
-      );
+      const ref = _package.sha !== '00000000' ? '/commit/' + _package.sha : '';
+      alertify
+        .alert(
+          'Icestudio, visual editor for Verilog designs',
+          [
+            '<div class="row" style="margin-top:15px;">',
+            '  <div class="col-sm-12">',
+            '    <p>Version: <a class="action-open-url-external-browser" href="https://github.com/juanmard/icestudio' +
+              ref +
+              '">' +
+              _package.version +
+              '-g' +
+              _package.sha +
+              '</a></p>',
+            '    <p>License: <a class="action-open-url-external-browser" href="https://www.gnu.org/licenses/old-licenses/gpl-2.0.html">GPL-2.0</a></p>',
+            '    <p>Documentation: <a class="action-open-url-external-browser" href="http://juanmard.github.io/icestudio">juanmard.github.io/icestudio</a></p>',
+            '  </div>',
+            '</div>',
+            '<div class="row" style="margin-top:15px;">',
+            '  <div class="col-sm-12">',
+            '    <p>Thanks to all the <a class="action-open-url-external-browser" href="https://github.com/juanmard/icestudio/contributors">contributors</a>!</p>',
+            '  </div>',
+            '</div>',
+          ].join('\n'),
+          function () {
+            if (tools.canCheckVersion) {
+              tools.checkForNewVersion();
+            }
+          }
+        )
+        .setting({
+          closable: true,
+          modal: true,
+          label: tools.canCheckVersion ? 'Check for Updates...' : 'Close',
+          invokeOnCloseOff: true,
+        });
     };
 
     // Events
@@ -1076,7 +1083,6 @@ angular
     // Detect prompt
 
     var promptShown = false;
-
     alertify.prompt().set({
       onshow: function () {
         promptShown = true;
@@ -1085,7 +1091,6 @@ angular
         promptShown = false;
       },
     });
-
     alertify.confirm().set({
       onshow: function () {
         promptShown = true;

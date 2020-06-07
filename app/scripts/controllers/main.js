@@ -33,11 +33,6 @@ angular
       }
     );
 
-    /* Functions that checks if new version is available */
-    setTimeout(function () {
-      tools.checkForNewVersion();
-    }, 30000);
-
     /* Plugin menu*/
 
     var icmBodyEl = $('body'),
@@ -66,17 +61,9 @@ angular
         }, 300);
       } else {
         icmBodyEl.addClass('icm-show-menu');
-        // animate path
-        icmPath.animate(
-          {
-            path: icmPathOpen,
-          },
-          400,
-          mina.easeinout,
-          function () {
-            icmIsAnimating = false;
-          }
-        );
+        icmPath.animate({path: icmPathOpen}, 400, mina.easeinout, function () {
+          icmIsAnimating = false;
+        });
       }
       icmIsOpen = !icmIsOpen;
     }
@@ -88,6 +75,4 @@ angular
     }
 
     tools.initializePluginManager(icmToggleMenu);
-
-    /***************************** */
   });
