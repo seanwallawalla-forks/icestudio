@@ -8,15 +8,20 @@
 | [Nandland Go board](https://www.nandland.com/goboard/introduction.html) |   FTDI    | [#394](https://github.com/FPGAwars/icestudio/issues/394) |
 | [iCEstick Evaluation Kit](http://www.latticesemi.com/icestick)          |   FTDI    |                                                          |
 
+## HX4K
+
+| Board name                                                    | Interface |
+| :------------------------------------------------------------ | :-------: |
+| [Alhambra II](https://github.com/FPGAwars/Alhambra-II-FPGA)   |   FTDI    |
+| [Kéfir I iCE40-HX4K](http://fpgalibre.sourceforge.net/Kefir/) |   FTDI    |
+
 ## HX8K
 
 | Board name                                                                                                       | Interface |
 | :--------------------------------------------------------------------------------------------------------------- | :-------: |
-| [Alhambra II](https://github.com/FPGAwars/Alhambra-II-FPGA)                                                      |   FTDI    |
 | [BlackIce](https://hackaday.io/project/12930-blackice-low-cost-open-hardware-fpga-dev-board)                     |  Serial   |
 | [BlackIce II](https://github.com/mystorm-org/BlackIce-II)                                                        |  Serial   |
 | [icoBOARD 1.0](http://icoboard.org/about-icoboard.html)                                                          | GPIO RPi  |
-| [Kéfir I iCE40-HX4K](http://fpgalibre.sourceforge.net/Kefir/)                                                    |   FTDI    |
 | [iCE40-HX8K Breakout Board](http://www.latticesemi.com/Products/DevelopmentBoardsAndKits/iCE40HX8KBreakoutBoard) |   FTDI    |
 | [iceFUN](https://www.robot-electronics.co.uk/icefun.html)                                                        |  Serial   |
 
