@@ -7,9 +7,9 @@
   -->
   <a title="'icestudio' workflow status" href="https://github.com/juanmard/icestudio/actions?query=workflow%3Aicestudio"><img alt="'icestudio' workflow status" src="https://img.shields.io/github/workflow/status/juanmard/icestudio/icestudio?longCache=true&style=flat-square&label=icestudio&logo=github"></a><!--
   -->
-  <a title="DevDependency Status" href="https://david-dm.org/juanmard/icestudio/moon?type=dev"><img src="https://img.shields.io/david/dev/juanmard/icestudio.svg?longCache=true&style=flat-square&label=devdeps&logo=npm"></a><!--
+  <a title="DevDependency Status" href="https://david-dm.org/juanmard/icestudio/develop?type=dev"><img src="https://img.shields.io/david/dev/juanmard/icestudio.svg?longCache=true&style=flat-square&label=devdeps&logo=npm"></a><!--
   -->
-  <a title="Dependency Status" href="https://david-dm.org/juanmard/icestudio/moon?path=app"><img src="https://img.shields.io/david/juanmard/icestudio.svg?path=app&longCache=true&style=flat-square&label=app%20deps&logo=npm"></a>
+  <a title="Dependency Status" href="https://david-dm.org/juanmard/icestudio/develop?path=app"><img src="https://img.shields.io/david/juanmard/icestudio.svg?path=app&longCache=true&style=flat-square&label=app%20deps&logo=npm"></a>
 </p>
 
 Visual editor for Verilog designs, built on top of [Icestorm](http://www.clifford.at/icestorm/) and [Apio](https://github.com/FPGAwars/apio). For more information visit [juanmard.github.io/icestudio](https://juanmard.github.io/icestudio).
