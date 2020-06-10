@@ -10,13 +10,12 @@ angular
     alertify.defaults.notifier.delay = 3;
 
     setTimeout(function () {
-      var labels = {
-        ok: gettextCatalog.getString('OK'),
-        cancel: gettextCatalog.getString('Cancel'),
-      };
-      alertify.set('alert', 'labels', labels);
-      alertify.set('prompt', 'labels', labels);
-      alertify.set('confirm', 'labels', labels);
+      for (const item of ['alert', 'prompt', 'confirm']) {
+        alertify.set(item, 'labels', {
+          ok: gettextCatalog.getString('OK'),
+          cancel: gettextCatalog.getString('Cancel'),
+        });
+      }
     }, 100);
 
     /* If in package.json appears development:{mode:true}*/

@@ -625,44 +625,40 @@ angular
         var spec = specs[i];
         switch (spec.type) {
           case 'text':
-            content.push(`<p>${spec.title}</p>\
-              <input class="ajs-input" type="text" id="form${i}"/>`);
+            content.push(
+              `<input class="ajs-input" type="text" id="form${i}"/>`
+            );
             break;
           case 'checkbox':
             content.push(`<div class="checkbox">
-                <label><input
-                  type="checkbox"
-                  ${spec.value ? 'checked' : ''}
-                  id="form${i}"
-                />${spec.label}</label>
-              </div>`);
+              <label><input
+                type="checkbox"
+                ${spec.value ? 'checked ' : ''}
+                id="form${i}"
+              />${spec.label}</label>
+            </div>`);
             break;
           case 'combobox':
             var options = spec.options
               .map(function (option) {
-                var selected = spec.value === option.value ? ' selected' : '';
-                return (
-                  '<option value="' +
-                  option.value +
-                  '"' +
-                  selected +
-                  '>' +
-                  option.label +
-                  '</option>'
-                );
+                return `<option value="${
+                  option.value
+                }" ${spec.value === option.value ? ' selected' : ''}>${option.label}</option>`;
               })
               .join('');
             content.push(`<div class="form-group">
-                <label style="font-weight:normal">${spec.label}</label>
-                <select class="form-control" id="form${i}">${options}</select>
-              </div>`);
+              <label style="font-weight:normal">${spec.label}</label>
+              <select class="form-control" id="form${i}">${options}</select>
+            </div>`);
             break;
         }
       }
       content.push('</div>');
-      alertify
-        .confirm(content.join('\n'))
-        .set('onok', function (evt) {
+      alertify.confirm(
+        specs[0].type === 'text' ? specs[0].title : 'Form',
+        content.join('\n'),
+        // onok
+        function (evt) {
           var values = [];
           if (callback) {
             for (var i in specs) {
@@ -679,8 +675,12 @@ angular
             }
             callback(evt, values);
           }
-        })
-        .set('oncancel', function (/*evt*/) {});
+        },
+        // oncancel
+        function () {
+          /*evt*/
+        }
+      );
       // Restore input values
       setTimeout(function () {
         $('#form0').select();
@@ -762,45 +762,10 @@ angular
       for (i = 0; i < n; i++) {
         $('#input' + i).val(values[i]);
       }
-      if (image) {
-        $('#preview-svg').attr('src', 'data:image/svg+xml,' + image);
-      } else {
-        $('#preview-svg').attr('src', blankImage);
-      }
-
-      var prevOnshow = alertify.confirm().get('onshow') || function () {};
-
-      alertify.confirm().set('onshow', function () {
-        prevOnshow();
-        registerOpen();
-        registerSave();
-        registerReset();
-      });
-
-      function registerOpen() {
-        // Open SVG
-        var chooserOpen = $('#input-open-svg');
-        chooserOpen.unbind('change');
-        chooserOpen.change(function (/*evt*/) {
-          var filepath = $(this).val();
-
-          nodeFs.readFile(filepath, 'utf8', function (err, data) {
-            if (err) {
-              throw err;
-            }
-            optimizeSVG(data, function (result) {
-              image = encodeURI(result.data);
-              registerSave();
-              $('#preview-svg').attr('src', 'data:image/svg+xml,' + image);
-            });
-          });
-          $(this).val('');
-        });
-      }
-
-      function optimizeSVG(data, callback) {
-        SVGO.optimize(data, callback);
-      }
+      $('#preview-svg').attr(
+        'src',
+        image ? 'data:image/svg+xml,' + image : blankImage
+      );
 
       function registerSave() {
         // Save SVG
@@ -830,7 +795,33 @@ angular
         }
       }
 
-      function registerReset() {
+      // Restore onshow
+      var prevOnshow = alertify.confirm().get('onshow') || function () {};
+
+      alertify.confirm().set('onshow', function () {
+        prevOnshow();
+
+        // Open SVG
+        var chooserOpen = $('#input-open-svg');
+        chooserOpen.unbind('change');
+        chooserOpen.change(function (/*evt*/) {
+          var filepath = $(this).val();
+
+          nodeFs.readFile(filepath, 'utf8', function (err, data) {
+            if (err) {
+              throw err;
+            }
+            SVGO.optimize(data, function (result) {
+              image = encodeURI(result.data);
+              registerSave();
+              $('#preview-svg').attr('src', 'data:image/svg+xml,' + image);
+            });
+          });
+          $(this).val('');
+        });
+
+        registerSave();
+
         // Reset SVG
         var reset = $('#reset-svg');
         reset.click(function (/*evt*/) {
@@ -838,11 +829,13 @@ angular
           registerSave();
           $('#preview-svg').attr('src', blankImage);
         });
-      }
+      });
 
-      alertify
-        .confirm(content.join('\n'))
-        .set('onok', function (evt) {
+      alertify.confirm(
+        'Project Information',
+        content.join('\n'),
+        // onok
+        function (evt) {
           var values = [];
           for (var i = 0; i < n; i++) {
             values.push($('#input' + i).val());
@@ -851,13 +844,13 @@ angular
           if (callback) {
             callback(evt, values);
           }
-          // Restore onshow
           alertify.confirm().set('onshow', prevOnshow);
-        })
-        .set('oncancel', function (/*evt*/) {
-          // Restore onshow
+        },
+        // oncancel'
+        function (/*evt*/) {
           alertify.confirm().set('onshow', prevOnshow);
-        });
+        }
+      );
     };
 
     this.selectBoardPrompt = function (callback) {

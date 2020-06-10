@@ -19,7 +19,7 @@
     "select2": "~4.0.5",
     "async": "~1.5.2",
     "svg-pan-zoom": "~3.4.1",
-    "alertify-js": "~1.11.1",
+    "alertify-js": "~1.13.1",
     "jquery-resize": "v1.1",
     "angular-gettext": "https://github.com/Jesus89/angular-gettext.git#master",
     "Snap.svg": "~0.5.1"
