@@ -130,7 +130,7 @@
                     <ul uib-dropdown-menu ng-include="'views/uithemes.html'"></ul>
                   </li>
                   <li class="divider"></li>
-                  
+
                   <li>
                     <a href ng-click="toggleBoardRules()">
                       {{ 'Board rules' | translate }}&ensp;
@@ -341,25 +341,11 @@
           <li uib-dropdown ng-mouseover="showMenu('help')" ng-mouseleave="hideMenu()" ng-click="fixMenu('help')" is-open="status.help">
             <a href uib-dropdown-toggle>{{ 'Help' | translate }}<span class="caret"></span></a>
             <ul uib-dropdown-menu>
-              <li disabled>
-                <a href ng-click="openUrl('https://www.gnu.org/licenses/old-licenses/gpl-2.0.html',$event)">{{ 'View license' | translate }}</a>
-              </li>
               <li>
                 <a href ng-click="openVersionInfoWindow()">{{ 'Version notes' | translate }}</a>
               </li>
               <li class="disabled">
                 <a href>{{ 'Version' | translate }} {{ version }}</a>
-              </li>
-              <li class="divider"></li>
-              <li>
-                <a href ng-click="openUrl('http://icestudio.readthedocs.io',$event)">{{ 'Documentation' | translate }}</a>
-              </li>
-              <li>
-                <a href ng-click="openUrl('https://github.com/FPGAwars/icestudio',$event)">{{ 'Source code' | translate }}</a>
-              </li>
-              <li class="divider"></li>
-              <li>
-                <a href ng-click="openUrl('https://groups.google.com/forum/#!forum/fpga-wars-explorando-el-lado-libre',$event)">{{ 'Community forum' | translate }}</a>
               </li>
               <li class="divider"></li>
               <li>
