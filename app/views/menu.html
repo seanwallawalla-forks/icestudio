@@ -1,86 +1,84 @@
 <!DOCTYPE html>
 <div ng-controller="MenuCtrl">
   <div id="menu" ondragstart="return false;" ondrop="return false;">
-    <input id="input-open-project" type="file" accept=".ice" class="hidden" />
+    <!-- TODO: rework to (re)use 1-2 'input', instad of +10 -->
+    <input
+      id="input-add-as-block"
+      class="hidden"
+      type="file"
+      accept=".ice,.iceb"
+      multiple
+    />
+    <input
+      id="input-add-collection"
+      class="hidden"
+      type="file"
+      accept=".zip"
+      multiple
+    />
+    <input id="input-open-project" class="hidden" type="file" accept=".ice" />
+    <input
+      id="input-save-snapshot"
+      class="hidden"
+      type="file"
+      accept=".png"
+      nwsaveas="{{ (snapshotdir ? snapshotdir : workingdir) + project.name }}.png"
+    />
     <input
       id="input-save-project"
+      class="hidden"
       type="file"
       accept=".ice"
-      class="hidden"
       nwsaveas="{{ workingdir + project.name }}.ice"
     />
     <input
-      id="input-save-snapshot"
-      type="file"
-      accept=".png"
-      class="hidden"
-      nwsaveas="{{ (snapshotdir ? snapshotdir : workingdir) + project.name }}.png"
-    />
-
-    <input
-      id="input-add-as-block"
-      type="file"
-      accept=".ice,.iceb"
-      class="hidden"
-      multiple
-    />
-
-    <input
       id="input-export-verilog"
+      class="hidden"
       type="file"
       accept=".v"
-      class="hidden"
       nwsaveas="{{ workingdir + project.name }}.v"
     />
     <input
       id="input-export-pcf"
+      class="hidden"
       type="file"
       accept=".pcf"
-      class="hidden"
       nwsaveas="{{ workingdir + project.name }}.pcf"
     />
     <input
       id="input-export-testbench"
+      class="hidden"
       type="file"
       accept=".v"
-      class="hidden"
       nwsaveas="{{ workingdir + project.name }}_tb.v"
     />
     <input
       id="input-export-gtkwave"
+      class="hidden"
       type="file"
       accept=".gtkw"
-      class="hidden"
       nwsaveas="{{ workingdir + project.name }}_tb.gtkw"
     />
     <input
       id="input-export-blif"
+      class="hidden"
       type="file"
       accept=".blif"
-      class="hidden"
       nwsaveas="{{ workingdir + project.name }}.blif"
     />
     <input
       id="input-export-asc"
+      class="hidden"
       type="file"
       accept=".asc"
-      class="hidden"
       nwsaveas="{{ workingdir + project.name }}.asc"
     />
     <input
       id="input-export-bin"
+      class="hidden"
       type="file"
       accept=".bin"
-      class="hidden"
       nwsaveas="{{ workingdir + project.name }}.bin"
-    />
-
-    <input
-      id="input-add-collection"
-      type="file"
-      accept=".zip"
-      class="hidden"
-      multiple
     />
 
     <nav
@@ -115,11 +113,63 @@
                 >
               </li>
               <li class="dropdown-submenu" uib-dropdown>
-                <a href uib-dropdown-toggle>{{ 'Blocks' | translate }}</a>
-                <menutree
-                  data="common.selectedCollection.content.blocks"
-                  callback="openProject(path)"
-                ></menutree>
+                <a href uib-dropdown-toggle>{{ 'Collection' | translate }}</a>
+                <ul uib-dropdown-menu>
+                  <data ng-init="collection = common.defaultCollection" />
+                  <li>
+                    <a
+                      href
+                      ng-click="selectCollection(collection)"
+                      ng-show="collection.name == ''"
+                      >{{ 'Default' | translate }}&ensp;
+                      <span
+                        ng-show="common.selectedCollection.name == ''"
+                        class="glyphicon glyphicon-ok-circle"
+                      ></span>
+                    </a>
+                  </li>
+                  <li
+                    class="divider"
+                    ng-show="common.internalCollections.length > 0"
+                  ></li>
+                  <li ng-repeat="collection in common.internalCollections">
+                    <a
+                      href
+                      ng-click="selectCollection(collection)"
+                      ng-hide="collection.name == ''"
+                    >
+                      {{ collection.name }}&ensp;
+                      <span
+                        ng-show="common.selectedCollection.path == collection.path"
+                        class="glyphicon glyphicon-ok-circle"
+                      ></span>
+                    </a>
+                  </li>
+                  <li
+                    class="divider"
+                    ng-show="common.externalCollections.length > 0"
+                  ></li>
+                  <li ng-repeat="collection in common.externalCollections">
+                    <a
+                      href
+                      ng-click="selectCollection(collection)"
+                      ng-hide="collection.name == ''"
+                      >{{ collection.name }}&ensp;
+                      <span
+                        ng-show="common.selectedCollection.path == collection.path"
+                        class="glyphicon glyphicon-ok-circle"
+                      ></span>
+                    </a>
+                  </li>
+                  <li class="divider"></li>
+                  <li class="dropdown-submenu" uib-dropdown>
+                    <a href uib-dropdown-toggle>{{ 'Blocks' | translate }}</a>
+                    <menutree
+                      data="common.selectedCollection.content.blocks"
+                      callback="openProject(path)"
+                    ></menutree>
+                  </li>
+                </ul>
               </li>
               <li class="dropdown-submenu" uib-dropdown>
                 <a href uib-dropdown-toggle>{{ 'Examples' | translate }}</a>
@@ -149,6 +199,27 @@
                 >
               </li>
               <li class="divider"></li>
+              <li>
+                <a href ng-click="verifyCode()"
+                  >{{ 'Verify' | translate }}<span class="shortcut"
+                    >{{ 'verifyCode' | shortcut }}</span
+                  ></a
+                >
+              </li>
+              <li>
+                <a href ng-click="buildCode()"
+                  >{{ 'Build' | translate }}<span class="shortcut"
+                    >{{ 'buildCode' | shortcut }}</span
+                  ></a
+                >
+              </li>
+              <li>
+                <a href ng-click="uploadCode()"
+                  >{{ 'Upload' | translate }}<span class="shortcut"
+                    >{{ 'uploadCode' | shortcut }}</span
+                  ></a
+                >
+              </li>
               <li class="dropdown-submenu" uib-dropdown>
                 <a href uib-dropdown-toggle>{{ 'Export' | translate }}...</a>
                 <ul uib-dropdown-menu>
@@ -254,22 +325,57 @@
               </li>
               <li class="divider"></li>
               <li class="dropdown-submenu" uib-dropdown>
+                <a href uib-dropdown-toggle>{{ 'Board' | translate }}</a>
+                <ul uib-dropdown-menu>
+                  <li
+                    class="dropdown-submenu"
+                    uib-dropdown
+                    ng-repeat="dev in devices"
+                  >
+                    <a href uib-dropdown-toggle>{{ dev }}</a>
+                    <ul uib-dropdown-menu>
+                      <li ng-repeat="board in common.boards">
+                        <menuboard type="dev" board="board"></menuboard>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </li>
+              <li class="dropdown-submenu" uib-dropdown>
                 <a href uib-dropdown-toggle>{{ 'Preferences' | translate }}</a>
                 <ul uib-dropdown-menu>
                   <li class="dropdown-submenu" uib-dropdown>
                     <a href uib-dropdown-toggle>{{ 'Language' | translate }}</a>
-                    <ul
-                      uib-dropdown-menu
-                      ng-include="'views/languages.html'"
-                    ></ul>
+                    <ul uib-dropdown-menu>
+                      <li>
+                        <a
+                          href
+                          ng-repeat="lang in languages"
+                          ng-click="selectLanguage(lang[0])"
+                          >{{ lang[1] | translate }}&ensp;<span
+                            ng-show="profile.data.language == lang[0]"
+                            class="glyphicon glyphicon-ok-circle"
+                          ></span
+                        ></a>
+                      </li>
+                    </ul>
                   </li>
                   <li class="divider"></li>
                   <li class="dropdown-submenu" uib-dropdown>
                     <a href uib-dropdown-toggle>{{ 'UI theme' | translate }}</a>
-                    <ul
-                      uib-dropdown-menu
-                      ng-include="'views/uithemes.html'"
-                    ></ul>
+                    <ul uib-dropdown-menu>
+                      <li>
+                        <a
+                          href
+                          ng-repeat="theme in themes"
+                          ng-click="selectTheme(theme[0])"
+                          >{{ theme[1] | translate }}&ensp;<span
+                            ng-show="profile.data.uiTheme == theme[0]"
+                            class="glyphicon glyphicon-ok-circle"
+                          ></span
+                        ></a>
+                      </li>
+                    </ul>
                   </li>
                   <li class="divider"></li>
                   <li>
@@ -464,146 +570,9 @@
                   ></span
                 ></a>
               </li>
+              <li class="divider"></li>
+              <li><a href ng-click="about()">{{ 'About' | translate }}</a></li>
             </ul>
-          </li>
-
-          <li
-            uib-dropdown
-            ng-mouseover="showMenu('select')"
-            ng-mouseleave="hideMenu()"
-            ng-click="fixMenu('select')"
-            is-open="status.select"
-          >
-            <a href uib-dropdown-toggle
-              >{{ 'Select' | translate }}<span class="caret"></span
-            ></a>
-            <ul uib-dropdown-menu>
-              <li class="dropdown-submenu" uib-dropdown>
-                <a href uib-dropdown-toggle>{{ 'Board' | translate }}</a>
-                <ul uib-dropdown-menu>
-                  <li>
-                    <a><b>HX1K</b></a>
-                  </li>
-                  <li ng-repeat="board in common.boards">
-                    <menuboard type="'HX1K'" board="board"></menuboard>
-                  </li>
-                  <li>
-                    <a><b>HX8K</b></a>
-                  </li>
-                  <li ng-repeat="board in common.boards">
-                    <menuboard type="'HX8K'" board="board"></menuboard>
-                  </li>
-                  <li>
-                    <a><b>LP8K</b></a>
-                  </li>
-                  <li ng-repeat="board in common.boards">
-                    <menuboard type="'LP8K'" board="board"></menuboard>
-                  </li>
-                  <li>
-                    <a><b>UP5K</b></a>
-                  </li>
-                  <li ng-repeat="board in common.boards">
-                    <menuboard type="'UP5K'" board="board"></menuboard>
-                  </li>
-                  <li>
-                    <a><b>ECP5</b></a>
-                  </li>
-                  <li ng-repeat="board in common.boards">
-                    <menuboard type="'ECP5'" board="board"></menuboard>
-                  </li>
-                </ul>
-              </li>
-              <li class="dropdown-submenu" uib-dropdown>
-                <a href uib-dropdown-toggle>{{ 'Collection' | translate }}</a>
-                <ul uib-dropdown-menu>
-                  <data ng-init="collection = common.defaultCollection" />
-                  <li>
-                    <a
-                      href
-                      ng-click="selectCollection(collection)"
-                      ng-show="collection.name == ''"
-                      >{{ 'Default' | translate }}&ensp;
-                      <span
-                        ng-show="common.selectedCollection.name == ''"
-                        class="glyphicon glyphicon-ok-circle"
-                      ></span>
-                    </a>
-                  </li>
-                  <li
-                    class="divider"
-                    ng-show="common.internalCollections.length > 0"
-                  ></li>
-                  <li ng-repeat="collection in common.internalCollections">
-                    <a
-                      href
-                      ng-click="selectCollection(collection)"
-                      ng-hide="collection.name == ''"
-                    >
-                      {{ collection.name }}&ensp;
-                      <span
-                        ng-show="common.selectedCollection.path == collection.path"
-                        class="glyphicon glyphicon-ok-circle"
-                      ></span>
-                    </a>
-                  </li>
-                  <li
-                    class="divider"
-                    ng-show="common.externalCollections.length > 0"
-                  ></li>
-                  <li ng-repeat="collection in common.externalCollections">
-                    <a
-                      href
-                      ng-click="selectCollection(collection)"
-                      ng-hide="collection.name == ''"
-                      >{{ collection.name }}&ensp;
-                      <span
-                        ng-show="common.selectedCollection.path == collection.path"
-                        class="glyphicon glyphicon-ok-circle"
-                      ></span>
-                    </a>
-                  </li>
-                </ul>
-              </li>
-            </ul>
-          </li>
-
-          <li
-            uib-dropdown
-            ng-mouseover="showMenu('tools')"
-            ng-mouseleave="hideMenu()"
-            ng-click="fixMenu('tools')"
-            is-open="status.tools"
-          >
-            <a href uib-dropdown-toggle
-              >{{ 'Tools' | translate }}<span class="caret"></span
-            ></a>
-            <ul uib-dropdown-menu style="min-width: 180px">
-              <li>
-                <a href ng-click="verifyCode()"
-                  >{{ 'Verify' | translate }}<span class="shortcut"
-                    >{{ 'verifyCode' | shortcut }}</span
-                  ></a
-                >
-              </li>
-              <li>
-                <a href ng-click="buildCode()"
-                  >{{ 'Build' | translate }}<span class="shortcut"
-                    >{{ 'buildCode' | shortcut }}</span
-                  ></a
-                >
-              </li>
-              <li>
-                <a href ng-click="uploadCode()"
-                  >{{ 'Upload' | translate }}<span class="shortcut"
-                    >{{ 'uploadCode' | shortcut }}</span
-                  ></a
-                >
-              </li>
-            </ul>
-          </li>
-
-          <li uib-dropdown>
-            <a href ng-click="about()">{{ 'About' | translate }}</a>
           </li>
         </ul>
 

@@ -33,6 +33,30 @@ angular
     $scope.workingdir = '';
     $scope.snapshotdir = '';
 
+    $scope.languages = [
+      ['ca_ES', 'Catalan'],
+      ['cs_CZ', 'Czech'],
+      ['de_DE', 'German'],
+      ['el_GR', 'Greek'],
+      ['en', 'English'],
+      ['es_ES', 'Spanish'],
+      ['eu_ES', 'Basque'],
+      ['fr_FR', 'French'],
+      ['gl_ES', 'Galician'],
+      ['it_IT', 'Italian'],
+      ['ko_KR', 'Korean'],
+      ['nl_NL', 'Dutch'],
+      ['ru_RU', 'Russian'],
+      ['zh_CN', 'Chinese'],
+    ];
+
+    $scope.themes = [
+      ['dark', 'Dark (default)'],
+      ['light', 'Light'],
+    ];
+
+    $scope.devices = ['HX1K', 'HX4K', 'HX8K', 'LP8K', 'UP5K', 'ECP5'];
+
     var zeroProject = true; // New project without changes
     var resultAlert = null;
     var winCommandOutput = null;
@@ -1259,7 +1283,7 @@ angular
       cancelTimeouts();
       timerClose = $timeout(function () {
         $scope.status[menu] = false;
-      }, 900);
+      }, 250);
     };
 
     // Fix menu
