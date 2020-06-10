@@ -82,34 +82,33 @@ angular
       project = _safeLoad(data, name);
       if (project.design.board !== common.selectedBoard.name) {
         var projectBoard = boards.boardLabel(project.design.board);
-        alertify.set('confirm', 'labels', {
-          ok: gettextCatalog.getString('Load'),
-          cancel: gettextCatalog.getString('Convert'),
-        });
-        alertify.confirm(
-          gettextCatalog.getString(
-            'This project is designed for the {{name}} board.',
-            {name: utils.bold(projectBoard)}
-          ) +
-            '<br>' +
+        alertify
+          .confirm(
             gettextCatalog.getString(
-              'You can load it as it is or convert it for the {{name}} board.',
-              {name: utils.bold(common.selectedBoard.info.label)}
+              'This project is designed for &lt;{{name}}&gt;',
+              {name: projectBoard}
             ),
-          function () {
-            // Load
-            _load();
-          },
-          function () {
-            // Convert
-            project.design.board = common.selectedBoard.name;
-
-            _load(
-              true,
-              boardMigration(projectBoard, common.selectedBoard.name)
-            );
-          }
-        );
+            gettextCatalog.getString(
+              'You can load it as it is or convert it for the &lt;{{name}}&gt; board.',
+              {name: common.selectedBoard.info.label}
+            ),
+            function () {
+              _load();
+            },
+            function () {
+              project.design.board = common.selectedBoard.name;
+              _load(
+                true,
+                boardMigration(projectBoard, common.selectedBoard.name)
+              );
+            }
+          )
+          .setting({
+            labels: {
+              ok: gettextCatalog.getString('Load'),
+              cancel: gettextCatalog.getString('Convert'),
+            },
+          });
       } else {
         _load();
       }
@@ -117,7 +116,7 @@ angular
       function _load(reset, originalBoard) {
         common.allDependencies = project.dependencies;
         var opt = {reset: reset || false, disabled: false};
-        if (typeof originalBoard !== 'undefined' && originalBoard !== false) {
+        if (originalBoard !== undefined && originalBoard !== false) {
           for (var i = 0; i < common.boards.length; i++) {
             if (String(common.boards[i].name) === String(originalBoard)) {
               opt.originalPinout = common.boards[i].pinout;
@@ -129,7 +128,6 @@ angular
             }
           }
         }
-
         var ret = graph.loadDesign(project.design, opt, function () {
           graph.resetCommandStack();
           graph.fitContent();
@@ -140,7 +138,6 @@ angular
           );
           common.hasChangesSinceBuild = true;
         });
-
         if (ret) {
           profile.set('board', boards.selectBoard(project.design.board).name);
           self.updateTitle(name);
@@ -154,18 +151,11 @@ angular
             30
           );
         }
-        setTimeout(function () {
-          alertify.set('confirm', 'labels', {
-            ok: gettextCatalog.getString('OK'),
-            cancel: gettextCatalog.getString('Cancel'),
-          });
-        }, 100);
       }
     };
 
     function boardMigration(oldBoard, newBoard) {
       var pboard = false;
-
       switch (oldBoard.toLowerCase()) {
         case 'icezum alhambra':
         case 'icezum':

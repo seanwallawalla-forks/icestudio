@@ -394,41 +394,32 @@ angular
     };
 
     function exit() {
-      if (project.changed) {
-        alertify.set('confirm', 'labels', {
-          ok: gettextCatalog.getString('Close'),
-        });
-        alertify.set('confirm', 'defaultFocus', 'cancel');
-        alertify.confirm(
-          utils.bold(
-            gettextCatalog.getString('Do you want to close the application?')
-          ) +
-            '<br>' +
-            gettextCatalog.getString(
-              'Your changes will be lost if you don’t save them'
-            ),
-          function () {
-            // Close
-            _exit();
-          },
-          function () {
-            // Cancel
-            setTimeout(function () {
-              alertify.set('confirm', 'labels', {
-                ok: gettextCatalog.getString('OK'),
-              });
-              alertify.set('confirm', 'defaultFocus', 'ok');
-            }, 200);
-          }
-        );
-      } else {
-        _exit();
-      }
-
       function _exit() {
         //win.hide();
         win.close(true);
       }
+
+      if (!project.changed) {
+        _exit();
+        return;
+      }
+      alertify
+        .confirm(
+          gettextCatalog.getString('Do you want to close the application?'),
+          gettextCatalog.getString(
+            'Your changes will be lost if you don’t save them'
+          ),
+          function () {
+            _exit();
+          },
+          function () {}
+        )
+        .setting({
+          labels: {
+            ok: gettextCatalog.getString('Close'),
+          },
+          defaultFocus: 'cancel',
+        });
     }
 
     //-- Edit
@@ -483,44 +474,56 @@ angular
       graph.fitContent();
     };
 
-    $scope.setExternalPlugins = function () {
-      var externalPlugins = profile.get('externalPlugins');
-      var formSpecs = [
-        {
-          type: 'text',
-          title: gettextCatalog.getString('Enter the external plugins path'),
-          value: externalPlugins || '',
-        },
-      ];
-      utils.renderForm(formSpecs, function (evt, values) {
-        var newExternalPlugins = values[0];
-        if (resultAlert) {
-          resultAlert.dismiss(false);
-        }
-        if (newExternalPlugins !== externalPlugins) {
-          if (
-            newExternalPlugins === '' ||
-            nodeFs.existsSync(newExternalPlugins)
-          ) {
-            profile.set('externalPlugins', newExternalPlugins);
-            alertify.success(
-              gettextCatalog.getString('External plugins updated')
-            );
-          } else {
-            evt.cancel = true;
-            resultAlert = alertify.error(
-              gettextCatalog.getString(
-                'Path {{path}} does not exist',
-                {
-                  path: newExternalPlugins,
-                },
-                5
-              )
-            );
+    $scope.setExternalCollections = function () {
+      var externalCollections = profile.get('externalCollections');
+      utils.renderForm(
+        [
+          {
+            type: 'text',
+            title: gettextCatalog.getString(
+              'Enter the external collections path'
+            ),
+            value: externalCollections || '',
+          },
+        ],
+        function (evt, values) {
+          var newExternalCollections = values[0];
+          if (resultAlert) {
+            resultAlert.dismiss(false);
+          }
+          if (newExternalCollections !== externalCollections) {
+            if (
+              newExternalCollections === '' ||
+              nodeFs.existsSync(newExternalCollections)
+            ) {
+              profile.set('externalCollections', newExternalCollections);
+              collections.loadExternalCollections();
+              collections.selectCollection(); // default
+              utils.rootScopeSafeApply();
+              if (
+                common.selectedCollection.path.startsWith(
+                  newExternalCollections
+                )
+              ) {
+              }
+              alertify.success(
+                gettextCatalog.getString('External collections updated')
+              );
+            } else {
+              evt.cancel = true;
+              resultAlert = alertify.error(
+                gettextCatalog.getString(
+                  'Path {{path}} does not exist',
+                  {path: newExternalCollections},
+                  5
+                )
+              );
+            }
           }
         }
-      });
+      );
     };
+
     $scope.setPythonEnv = function () {
       let pythonEnv = profile.get('pythonEnv');
       let formSpecs = [{
@@ -562,53 +565,56 @@ angular
       });
     };
 
-
-    $scope.setExternalCollections = function () {
-      var externalCollections = profile.get('externalCollections');
-      var formSpecs = [
-        {
-          type: 'text',
-          title: gettextCatalog.getString(
-            'Enter the external collections path'
-          ),
-          value: externalCollections || '',
-        },
-      ];
-      utils.renderForm(formSpecs, function (evt, values) {
-        var newExternalCollections = values[0];
-        if (resultAlert) {
-          resultAlert.dismiss(false);
-        }
-        if (newExternalCollections !== externalCollections) {
-          if (
-            newExternalCollections === '' ||
-            nodeFs.existsSync(newExternalCollections)
-          ) {
-            profile.set('externalCollections', newExternalCollections);
-            collections.loadExternalCollections();
-            collections.selectCollection(); // default
-            utils.rootScopeSafeApply();
+    $scope.setExternalPlugins = function () {
+      var externalPlugins = profile.get('externalPlugins');
+      utils.renderForm(
+        [
+          {
+            type: 'text',
+            title: gettextCatalog.getString('Enter the external plugins path'),
+            value: externalPlugins || '',
+          },
+        ],
+        function (evt, values) {
+          var newExternalPlugins = values[0];
+          if (resultAlert) {
+            resultAlert.dismiss(false);
+          }
+          if (newExternalPlugins !== externalPlugins) {
             if (
-              common.selectedCollection.path.startsWith(newExternalCollections)
+              newExternalPlugins === '' ||
+              nodeFs.existsSync(newExternalPlugins)
             ) {
+              profile.set('externalPlugins', newExternalPlugins);
+              alertify.success(
+                gettextCatalog.getString('External plugins updated')
+              );
+            } else {
+              evt.cancel = true;
+              resultAlert = alertify.error(
+                gettextCatalog.getString(
+                  'Path {{path}} does not exist',
+                  {path: newExternalPlugins},
+                  5
+                )
+              );
             }
-            alertify.success(
-              gettextCatalog.getString('External collections updated')
-            );
-          } else {
-            evt.cancel = true;
-            resultAlert = alertify.error(
-              gettextCatalog.getString(
-                'Path {{path}} does not exist',
-                {
-                  path: newExternalCollections,
-                },
-                5
-              )
-            );
           }
         }
-      });
+      );
+    };
+
+    $scope.setRemoteHostname = function () {
+      var current = profile.get('remoteHostname');
+      alertify.prompt(
+        gettextCatalog.getString('Enter the remote hostname user@host'),
+        '',
+        current ? current : '',
+        function (evt, remoteHostname) {
+          profile.set('remoteHostname', remoteHostname);
+        },
+        function () {}
+      );
     };
 
     $(document).on('infoChanged', function (evt, newValues) {
@@ -657,17 +663,6 @@ angular
           : project.get('package');
       return [p.name, p.version, p.description, p.author, p.image];
     }
-
-    $scope.setRemoteHostname = function () {
-      var current = profile.get('remoteHostname');
-      alertify.prompt(
-        gettextCatalog.getString('Enter the remote hostname user@host'),
-        current ? current : '',
-        function (evt, remoteHostname) {
-          profile.set('remoteHostname', remoteHostname);
-        }
-      );
-    };
 
     $scope.toggleBoardRules = function () {
       graph.setBoardRules(!profile.get('boardRules'));
@@ -1083,26 +1078,20 @@ angular
       alertify
         .alert(
           'Icestudio, visual editor for Verilog designs',
-          [
-            '<div class="row" style="margin-top:15px;">',
-            '  <div class="col-sm-12">',
-            '    <p>Version: <a class="action-open-url-external-browser" href="https://github.com/juanmard/icestudio' +
-              ref +
-              '">' +
-              _package.version +
-              '-g' +
-              _package.sha +
-              '</a></p>',
-            '    <p>License: <a class="action-open-url-external-browser" href="https://www.gnu.org/licenses/old-licenses/gpl-2.0.html">GPL-2.0</a></p>',
-            '    <p>Documentation: <a class="action-open-url-external-browser" href="http://juanmard.github.io/icestudio">juanmard.github.io/icestudio</a></p>',
-            '  </div>',
-            '</div>',
-            '<div class="row" style="margin-top:15px;">',
-            '  <div class="col-sm-12">',
-            '    <p>Thanks to all the <a class="action-open-url-external-browser" href="https://github.com/juanmard/icestudio/contributors">contributors</a>!</p>',
-            '  </div>',
-            '</div>',
-          ].join('\n'),
+          `
+<div class="row" style="margin-top:15px;">
+  <div class="col-sm-12">
+    <p>Version: <a class="action-open-url-external-browser" href="https://github.com/juanmard/icestudio${ref}">${_package.version}-g${_package.sha}</a></p>
+    <p>License: <a class="action-open-url-external-browser" href="https://www.gnu.org/licenses/old-licenses/gpl-2.0.html">GPL-2.0</a></p>
+    <p>Documentation: <a class="action-open-url-external-browser" href="http://juanmard.github.io/icestudio">juanmard.github.io/icestudio</a></p>
+  </div>
+</div>
+<div class="row" style="margin-top:15px;">
+  <div class="col-sm-12">
+    <p>Thanks to all the <a class="action-open-url-external-browser" href="https://github.com/juanmard/icestudio/contributors">contributors</a>!</p>
+  </div>
+</div>
+`,
           function () {
             if (tools.canCheckVersion) {
               tools.checkForNewVersion();
