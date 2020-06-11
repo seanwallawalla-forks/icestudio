@@ -75,4 +75,16 @@ angular
         $('body').removeClass('waiting');
       });
     });
-  });
+  })
+  .config([
+    '$compileProvider',
+    function ($compileProvider) {
+      'use strict';
+      $compileProvider.aHrefSanitizationWhitelist(
+        /^\s*(https?|local|data|chrome-extension):/
+      );
+      $compileProvider.imgSrcSanitizationWhitelist(
+        /^\s*(https?|local|data|chrome-extension):/
+      );
+    },
+  ]);

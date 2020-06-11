@@ -178,6 +178,23 @@
                   callback="openProject(path)"
                 ></menutree>
               </li>
+              <li class="dropdown-submenu" uib-dropdown>
+                <a href uib-dropdown-toggle>{{ 'Plugins' | translate }}</a>
+                <ul uib-dropdown-menu>
+                  <li>
+                    <a
+                      ng-repeat="(key, val) in plugins"
+                      ng-href="resources/plugins/{{ val.manifest.id }}/index.html"
+                      target="_blank"
+                      ><img
+                        width="18px"
+                        ng-src="resources/plugins/{{ val.manifest.id }}/{{ val.manifest.icon }}"
+                      />
+                      {{ val.manifest.name }}</a
+                    >
+                  </li>
+                </ul>
+              </li>
               <li>
                 <a href ng-click="addAsBlock()"
                   >{{ 'Add as block' | translate }}...</a

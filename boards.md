@@ -35,17 +35,17 @@
 
 ## UP5K
 
-| Board name                                                                                                                    | Interface       |
+| Board name                                                                                                                    |    Interface    |
 | :---------------------------------------------------------------------------------------------------------------------------- | :-------------: |
-| [Fomu (PVT)](https://github.com/im-tomu/fomu-hardware)                                                                        |   dfu-util      |
-| [iCEBreaker](https://github.com/icebreaker-fpga/icebreaker)                                                                   |   FTDI          |
-| [iCEBreaker bitsy](https://github.com/icebreaker-fpga/icebreaker)                                                             |   FTDI          |
-| [UPDuino v1.0](http://gnarlygrey.atspace.cc/development-platform.html#upduino)                                                |   FTDI          |
-| [UPDuino v2.0](http://gnarlygrey.atspace.cc/development-platform.html#upduino_v2l)                                            |   FTDI          |
-| [FPGA 101 Workshop Badge Board](https://github.com/mmicko/workshop_badge)                                                     |   FTDI          |
-| [iCE40 UltraPlus Breakout Board](http://www.latticesemi.com/en/Products/DevelopmentBoardsAndKits/iCE40UltraPlusBreakoutBoard) |   FTDI          |
+| [Fomu (PVT)](https://github.com/im-tomu/fomu-hardware)                                                                        |    dfu-util     |
+| [iCEBreaker](https://github.com/icebreaker-fpga/icebreaker)                                                                   |      FTDI       |
+| [iCEBreaker bitsy](https://github.com/icebreaker-fpga/icebreaker)                                                             |      FTDI       |
+| [UPDuino v1.0](http://gnarlygrey.atspace.cc/development-platform.html#upduino)                                                |      FTDI       |
+| [UPDuino v2.0](http://gnarlygrey.atspace.cc/development-platform.html#upduino_v2l)                                            |      FTDI       |
+| [FPGA 101 Workshop Badge Board](https://github.com/mmicko/workshop_badge)                                                     |      FTDI       |
+| [iCE40 UltraPlus Breakout Board](http://www.latticesemi.com/en/Products/DevelopmentBoardsAndKits/iCE40UltraPlusBreakoutBoard) |      FTDI       |
 | [dadamachines doppler](https://dadamachines.com/product/doppler/)                                                             | samd51 on board |
-| [iCESugar v1.5](https://github.com/wuxx/icesugar)                                                                             |   HID           |
+| [iCESugar v1.5](https://github.com/wuxx/icesugar)                                                                             |       HID       |
 
 # Planned support
 
