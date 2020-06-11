@@ -28,6 +28,32 @@ angular
     $scope.tools = tools;
     $scope.common = common;
 
+    // Convert the list of boards into a format suitable for 'menutree' directive
+    function _getBoardsMenu(boards) {
+      let boardList = [];
+      for (const val of boards) {
+        let exists = false;
+        for (const fam of boardList) {
+          if (!boardList.hasOwnProperty(fam)) {
+            if (fam.name === val.type) {
+              fam.children.push({path: val.name, name: val.info.label});
+              exists = true;
+              break;
+            }
+          }
+        }
+        if (!exists) {
+          boardList.push({
+            name: val.type,
+            children: [{path: val.name, name: val.info.label}],
+          });
+        }
+      }
+      return boardList;
+    }
+
+    $scope.common.boardMenu = _getBoardsMenu(common.boards);
+
     $scope.toolchain = tools.toolchain;
 
     $scope.workingdir = '';
@@ -54,8 +80,6 @@ angular
       ['dark', 'Dark (default)'],
       ['light', 'Light'],
     ];
-
-    $scope.devices = ['HX1K', 'HX4K', 'HX8K', 'LP8K', 'UP5K', 'ECP5'];
 
     var zeroProject = true; // New project without changes
     var resultAlert = null;
@@ -900,8 +924,16 @@ angular
       }
     });
 
-    $scope.selectBoard = function (board) {
-      if (common.selectedBoard.name !== board.name) {
+    $scope.selectBoard = function (name) {
+      let board = undefined;
+      for (const val of common.boards) {
+        if (val.name === name) {
+          board = val;
+          break;
+        }
+      }
+
+      if (common.selectedBoard.name !== name) {
         if (!graph.isEmpty()) {
           alertify.confirm(
             gettextCatalog.getString(

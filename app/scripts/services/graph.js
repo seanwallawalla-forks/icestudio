@@ -1054,12 +1054,12 @@ angular
 
     this.selectBoard = function (board, reset) {
       graph.startBatch('change');
-      // Trigger board event
-      var data = {
-        previous: common.selectedBoard,
-        next: board,
-      };
-      graph.trigger('board', {data: data});
+      graph.trigger('board', {
+        data: {
+          previous: common.selectedBoard,
+          next: board,
+        },
+      });
       var newBoard = boards.selectBoard(board.name);
       if (reset) {
         resetBlocks();

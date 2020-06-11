@@ -325,23 +325,6 @@
               </li>
               <li class="divider"></li>
               <li class="dropdown-submenu" uib-dropdown>
-                <a href uib-dropdown-toggle>{{ 'Board' | translate }}</a>
-                <ul uib-dropdown-menu>
-                  <li
-                    class="dropdown-submenu"
-                    uib-dropdown
-                    ng-repeat="dev in devices"
-                  >
-                    <a href uib-dropdown-toggle>{{ dev }}</a>
-                    <ul uib-dropdown-menu>
-                      <li ng-repeat="board in common.boards">
-                        <menuboard type="dev" board="board"></menuboard>
-                      </li>
-                    </ul>
-                  </li>
-                </ul>
-              </li>
-              <li class="dropdown-submenu" uib-dropdown>
                 <a href uib-dropdown-toggle>{{ 'Preferences' | translate }}</a>
                 <ul uib-dropdown-menu>
                   <li class="dropdown-submenu" uib-dropdown>
@@ -640,6 +623,23 @@
             <menutree
               data="block.children"
               callback="project.addBlockFile(path)"
+              right="true"
+            ></menutree>
+          </li>
+
+          <li
+            uib-dropdown
+            ng-mouseover="showMenu('board')"
+            ng-mouseleave="hideMenu()"
+            ng-click="fixMenu('board')"
+            is-open="status.board"
+          >
+            <a href uib-dropdown-toggle
+              >{{ common.selectedBoard.info.label }}</a
+            >
+            <menutree
+              data="common.boardMenu"
+              callback="selectBoard(path)"
               right="true"
             ></menutree>
           </li>
