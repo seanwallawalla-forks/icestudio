@@ -13,10 +13,6 @@ var IcePlugManager = function () {
   this.toload = 0;
   this.onload = false;
 
-  this.version = function () {
-    console.log('Icestudio Plugin Manager v0.1');
-  };
-
   this.setPluginDir = function (dir, callback) {
     this.pluginDir = dir;
     let tu = dir.indexOf('resources');
@@ -25,24 +21,15 @@ var IcePlugManager = function () {
   };
 
   this.isFactory = function (name) {
-    if (
-      typeof this.plugins[name] !== 'undefined' &&
+    return (
+      this.plugins[name] !== undefined &&
       this.plugins[name].manifest.type === 'factory'
-    ) {
-      return true;
-    }
-    return false;
+    );
   };
 
   this.runFactory = function (name, str, params, callback) {
-    str = this.plugins[name].factory(str, params);
-    let b = JSON.parse(str);
-
-    if (b) {
-      callback(b);
-    } else {
-      callback(false);
-    }
+    let b = JSON.parse(this.plugins[name].factory(str, params));
+    callback(b ? b : false);
   };
 
   this.promptFactory = function (name, str, callback) {
@@ -61,7 +48,6 @@ var IcePlugManager = function () {
           '<div class="icepm-params-desc" style="margin-bottom:20px;"><p>Configure your parametric block:</p></div><div id="icepm-params-table"></div>',
         onok: function () {
           let p = excel.getData();
-
           excel.destroy(true);
           _this.runFactory(name, str, p, callback);
           // alertify.success('Parametric block ready');
@@ -78,31 +64,29 @@ var IcePlugManager = function () {
   };
 
   this.factory = function (name, str, callback) {
-    if (this.isFactory(name)) {
-      if (typeof this.plugins[name].factory === 'undefined') {
-        const fs = require('fs');
-        let contents = fs.readFileSync(
-          this.pluginDir + '/' + name + '/main.js',
-          'utf8'
-        );
-        /* function ab2str(buf) {
-                      return String.fromCharCode.apply(null, new Uint16Array(buf));
-                  }*/
-        //let code=ab2str(contents);
-        eval(contents);
-        this.promptFactory(name, str, callback);
-      } else {
-        this.promptFactory(name, str, callback);
-      }
-    } else {
+    if (!this.isFactory(name)) {
       callback(false);
+      return;
     }
+    if (this.plugins[name].factory === undefined) {
+      const fs = require('fs');
+      let contents = fs.readFileSync(
+        this.pluginDir + '/' + name + '/main.js',
+        'utf8'
+      );
+      /* function ab2str(buf) {
+                  return String.fromCharCode.apply(null, new Uint16Array(buf));
+              }*/
+      //let code=ab2str(contents);
+      eval(contents);
+    }
+    this.promptFactory(name, str, callback);
   };
+
   this.paramsFactory = function (name, paramsDef) {
     if (!this.isFactory(name)) {
       return false;
     }
-
     this.plugins[name].params = paramsDef;
   };
 
@@ -110,7 +94,6 @@ var IcePlugManager = function () {
     if (!this.isFactory(name)) {
       return false;
     }
-
     this.plugins[name].factory = callback;
   };
 
@@ -154,52 +137,5 @@ var IcePlugManager = function () {
     );
   };
 
-  this.getAll = function () {
-    return this.plugins;
-  };
-  this.getBaseUri = function () {
-    return this.pluginUri;
-  };
-
-  this.getById = function (id) {
-    if (typeof this.plugins[id] === 'undefined') {
-      return false;
-    }
-
-    return this.plugins[id];
-  };
-
-  this.run = function (id) {
-    let plug = this.getById(id);
-
-    if (plug === false) {
-      return false;
-    }
-
-    nw.Window.open(this.pluginUri + '/' + id + '/index.html', {}, function (
-      newWin
-    ) {
-      if (typeof plug.manifest.width !== 'undefined') {
-        newWin.width = plug.manifest.width;
-      }
-      if (typeof plug.manifest.height !== 'undefined') {
-        newWin.height = plug.manifest.height;
-      }
-      newWin.focus();
-      // Listen to main window's close event
-      newWin.on('close', function () {
-        if (typeof this.window.onClose !== 'undefined') {
-          this.window.onClose();
-        }
-
-        this.close(true);
-      });
-    });
-  };
-
-  this.init = function () {
-    this.version();
-  };
-
-  this.init();
+  console.log('Icestudio Plugin Manager v0.1');
 };

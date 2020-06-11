@@ -6,7 +6,6 @@ angular
     $rootScope,
     $scope,
     $timeout,
-    boards,
     profile,
     project,
     collections,
@@ -170,6 +169,10 @@ angular
       } else {
         project.path = '';
       }
+
+      // Plugins
+
+      $scope.plugins = ICEpm.plugins;
     }, 500);
 
     function processArg(arg) {

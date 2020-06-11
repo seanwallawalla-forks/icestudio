@@ -1649,48 +1649,4 @@ angular
         utils.openDevToolsUI();
       }
     };
-
-    this.initializePluginManager = function (callbackOnRun) {
-      if (typeof ICEpm !== 'undefined') {
-        console.log('ENV', common);
-        ICEpm.setPluginDir(common.DEFAULT_PLUGIN_DIR, function () {
-          let plist = ICEpm.getAll();
-          let uri = ICEpm.getBaseUri();
-          let t = $('.icm-icon-list');
-          t.empty();
-          let html = '';
-          for (let prop in plist) {
-            if (
-              typeof plist[prop].manifest.type === 'undefined' ||
-              plist[prop].manifest.type === 'app'
-            ) {
-              html +=
-                '<a href="#" data-action="icm-plugin-run" data-plugin="' +
-                prop +
-                '"><img class="icm-plugin-icon" src="' +
-                uri +
-                '/' +
-                prop +
-                '/' +
-                plist[prop].manifest.icon +
-                '"><span>' +
-                plist[prop].manifest.name +
-                '</span></a>';
-            }
-          }
-          t.append(html);
-
-          $('[data-action="icm-plugin-run"]').off();
-          $('[data-action="icm-plugin-run"]').on('click', function (e) {
-            e.preventDefault();
-            let ptarget = $(this).data('plugin');
-            if (typeof callbackOnRun !== 'undefined') {
-              callbackOnRun();
-            }
-            ICEpm.run(ptarget);
-            return false;
-          });
-        });
-      }
-    };
   });

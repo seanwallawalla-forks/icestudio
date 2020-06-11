@@ -2,8 +2,9 @@
 
 angular
   .module('icestudio')
-  .controller('MainCtrl', function (gettextCatalog, tools, utils) {
+  .controller('MainCtrl', function (gettextCatalog, common, tools, utils) {
     'use strict';
+
     alertify.defaults.movable = false;
     alertify.defaults.closable = false;
     alertify.defaults.transition = 'fade';
@@ -33,45 +34,9 @@ angular
     );
 
     /* Plugin menu*/
-
-    var icmBodyEl = $('body'),
-      icmOpenbtn = document.getElementById('icm-open-button'),
-      icmClosebtn = document.getElementById('icm-close-button'),
-      icmIsOpen = false,
-      icmMorphEl = document.getElementById('icm-morph-shape'),
-      icmTempsnap = Snap(icmMorphEl.querySelector('svg')),
-      icmPath = icmTempsnap.select('path'),
-      icmInitialPath = icmPath.attr('d'),
-      icmPathOpen = icmMorphEl.getAttribute('data-morph-open'),
-      icmIsAnimating = false;
-
-    function icmToggleMenu() {
-      if (icmIsAnimating) {
-        return false;
-      }
-      icmIsAnimating = true;
-      if (icmIsOpen) {
-        icmBodyEl.removeClass('icm-show-menu');
-        // animate path
-        setTimeout(function () {
-          // reset path
-          icmPath.attr('d', icmInitialPath);
-          icmIsAnimating = false;
-        }, 300);
-      } else {
-        icmBodyEl.addClass('icm-show-menu');
-        icmPath.animate({path: icmPathOpen}, 400, mina.easeinout, function () {
-          icmIsAnimating = false;
-        });
-      }
-      icmIsOpen = !icmIsOpen;
+    if (ICEpm !== undefined) {
+      ICEpm.setPluginDir(common.DEFAULT_PLUGIN_DIR, function () {});
     }
 
-    icmOpenbtn.addEventListener('click', icmToggleMenu);
-
-    if (icmClosebtn) {
-      icmClosebtn.addEventListener('click', icmToggleMenu);
-    }
-
-    tools.initializePluginManager(icmToggleMenu);
+    console.log('ENV', common);
   });
