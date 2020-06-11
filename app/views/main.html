@@ -70,74 +70,55 @@
 
     <div class="paper"></div>
 
-    <div class="footer ice-bar">
-      <div class="breadcrumbs-container">
-        <ol class="breadcrumb">
-          <li
-            ng-repeat="item in graph.breadcrumbs"
-            ng-class="{active: $last}"
-            ng-switch="$last"
-          >
-            <span ng-switch-when="true">{{ item.name }}</span>
-            <a href ng-click="breadcrumbsNavitate(item)" ng-switch-default
-              >{{ item.name }}</a
-            >
-          </li>
-        </ol>
-      </div>
-      <div class="board-container">
-        <div
-          class="fpga-resources"
-          ng-show="common.selectedBoard && topModule && profile.data.showFPGAResources"
+    <div class="footer ice-bar" ng-show="common.selectedBoard && topModule">
+      <div class="fpga-resources">
+        <span
+          >LC:&nbsp;&nbsp;{{ (common.hasChangesSinceBuild ||
+          !common.FPGAResources.nextpnr) ? '- / -' :
+          (common.FPGAResources.nextpnr.LC.used+' /
+          '+common.FPGAResources.nextpnr.LC.total+'
+          ('+common.FPGAResources.nextpnr.LC.percentage+'%)') }}</span
         >
-          <span
-            >LC:&nbsp;&nbsp;{{ (common.hasChangesSinceBuild ||
-            !common.FPGAResources.nextpnr) ? '- / -' :
-            (common.FPGAResources.nextpnr.LC.used+' /
-            '+common.FPGAResources.nextpnr.LC.total+'
-            ('+common.FPGAResources.nextpnr.LC.percentage+'%)') }}</span
-          >
-          <span
-            >RAM:&nbsp;&nbsp;{{ (common.hasChangesSinceBuild ||
-            !common.FPGAResources.nextpnr) ? '- / -' :
-            (common.FPGAResources.nextpnr.RAM.used+' /
-            '+common.FPGAResources.nextpnr.RAM.total+'
-            ('+common.FPGAResources.nextpnr.RAM.percentage+'%)') }}</span
-          >
-          <span
-            >IO:&nbsp;&nbsp;{{ (common.hasChangesSinceBuild ||
-            !common.FPGAResources.nextpnr) ? '- / -' :
-            (common.FPGAResources.nextpnr.IO.used+' /
-            '+common.FPGAResources.nextpnr.IO.total+'
-            ('+common.FPGAResources.nextpnr.IO.percentage+'%)') }}</span
-          >
-          <span
-            >GB:&nbsp;&nbsp;{{ (common.hasChangesSinceBuild ||
-            !common.FPGAResources.nextpnr) ? '- / -' :
-            (common.FPGAResources.nextpnr.GB.used+' /
-            '+common.FPGAResources.nextpnr.GB.total+'
-            ('+common.FPGAResources.nextpnr.GB.percentage+'%)') }}</span
-          >
-          <span
-            >PLL:&nbsp;&nbsp;{{ (common.hasChangesSinceBuild ||
-            !common.FPGAResources.nextpnr) ? '- / -' :
-            (common.FPGAResources.nextpnr.PLL.used+' /
-            '+common.FPGAResources.nextpnr.PLL.total+'
-            ('+common.FPGAResources.nextpnr.PLL.percentage+'%)') }}</span
-          >
-          <span
-            >WB:&nbsp;&nbsp;{{ (common.hasChangesSinceBuild ||
-            !common.FPGAResources.nextpnr) ? '- / -' :
-            (common.FPGAResources.nextpnr.WB.used+' /
-            '+common.FPGAResources.nextpnr.WB.total+'
-            ('+common.FPGAResources.nextpnr.WB.percentage+'%)') }}</span
-          >
-          <span
-            >MaxFreq.:&nbsp;&nbsp;{{ (common.hasChangesSinceBuild ||
-            !common.FPGAResources.nextpnr) ? '-' :
-            (common.FPGAResources.nextpnr.MF.value+'MHz') }}</span
-          >
-        </div>
+        <span
+          >RAM:&nbsp;&nbsp;{{ (common.hasChangesSinceBuild ||
+          !common.FPGAResources.nextpnr) ? '- / -' :
+          (common.FPGAResources.nextpnr.RAM.used+' /
+          '+common.FPGAResources.nextpnr.RAM.total+'
+          ('+common.FPGAResources.nextpnr.RAM.percentage+'%)') }}</span
+        >
+        <span
+          >IO:&nbsp;&nbsp;{{ (common.hasChangesSinceBuild ||
+          !common.FPGAResources.nextpnr) ? '- / -' :
+          (common.FPGAResources.nextpnr.IO.used+' /
+          '+common.FPGAResources.nextpnr.IO.total+'
+          ('+common.FPGAResources.nextpnr.IO.percentage+'%)') }}</span
+        >
+        <span
+          >GB:&nbsp;&nbsp;{{ (common.hasChangesSinceBuild ||
+          !common.FPGAResources.nextpnr) ? '- / -' :
+          (common.FPGAResources.nextpnr.GB.used+' /
+          '+common.FPGAResources.nextpnr.GB.total+'
+          ('+common.FPGAResources.nextpnr.GB.percentage+'%)') }}</span
+        >
+        <span
+          >PLL:&nbsp;&nbsp;{{ (common.hasChangesSinceBuild ||
+          !common.FPGAResources.nextpnr) ? '- / -' :
+          (common.FPGAResources.nextpnr.PLL.used+' /
+          '+common.FPGAResources.nextpnr.PLL.total+'
+          ('+common.FPGAResources.nextpnr.PLL.percentage+'%)') }}</span
+        >
+        <span
+          >WB:&nbsp;&nbsp;{{ (common.hasChangesSinceBuild ||
+          !common.FPGAResources.nextpnr) ? '- / -' :
+          (common.FPGAResources.nextpnr.WB.used+' /
+          '+common.FPGAResources.nextpnr.WB.total+'
+          ('+common.FPGAResources.nextpnr.WB.percentage+'%)') }}</span
+        >
+        <span
+          >MaxFreq.:&nbsp;&nbsp;{{ (common.hasChangesSinceBuild ||
+          !common.FPGAResources.nextpnr) ? '-' :
+          (common.FPGAResources.nextpnr.MF.value+'MHz') }}</span
+        >
       </div>
     </div>
   </div>

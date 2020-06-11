@@ -33,6 +33,33 @@ angular
     const ZOOM_SENS = 0.3;
 
     this.breadcrumbs = [{name: '', type: ''}];
+
+    function _updateTitle() {
+      let title = 'Icestudio: ' + self.breadcrumbs[0].name;
+      if (self.breadcrumbs.length > 1) {
+        for (const val of self.breadcrumbs.slice(1)) {
+          title += ' / ' + val.name;
+        }
+      }
+      document.title = title;
+    }
+
+    this.pushTitle = function (args) {
+      self.breadcrumbs.push(args);
+      _updateTitle();
+    };
+
+    this.popTitle = function () {
+      self.breadcrumbs.pop();
+      _updateTitle();
+    };
+
+    this.resetTitle = function (name) {
+      this.breadcrumbs = [{name: name, type: ''}];
+      _updateTitle();
+      utils.rootScopeSafeApply();
+    };
+
     this.addingDraggableBlock = false;
 
     this.getState = function () {
@@ -109,11 +136,6 @@ angular
       } else {
         this.resetView();
       }
-    };
-
-    this.resetBreadcrumbs = function (name) {
-      this.breadcrumbs = [{name: name, type: ''}];
-      utils.rootScopeSafeApply();
     };
 
     this.createPaper = function (element) {
@@ -462,10 +484,7 @@ angular
                 submodule: type,
                 submoduleId: blockId,
               });
-              self.breadcrumbs.push({
-                name: project.package.name || '#',
-                type: type,
-              });
+              self.pushTitle({name: project.package.name || '#', type: type});
               utils.rootScopeSafeApply();
             }, 100);
           }
@@ -853,7 +872,6 @@ angular
 
         angular.element('#menu').removeClass('is-disabled');
         angular.element('.paper').removeClass('looks-disabled');
-        angular.element('.board-container').removeClass('looks-disabled');
         angular.element('.banner').addClass('hidden');
 
         ael = document.getElementById('menu');
@@ -861,13 +879,6 @@ angular
           ael.classList.remove('is-disabled');
         }
         ael = document.getElementsByClassName('paper');
-        if (typeof ael !== 'undefined' && ael.length > 0) {
-          for (i = 0; i < ael.length; i++) {
-            ael[i].classList.remove('looks-disabled');
-          }
-        }
-
-        ael = document.getElementsByClassName('board-container');
         if (typeof ael !== 'undefined' && ael.length > 0) {
           for (i = 0; i < ael.length; i++) {
             ael[i].classList.remove('looks-disabled');
@@ -893,7 +904,6 @@ angular
       } else {
         angular.element('#menu').addClass('is-disabled');
         angular.element('.paper').addClass('looks-disabled');
-        angular.element('.board-container').addClass('looks-disabled');
         angular.element('.banner').removeClass('hidden');
         angular.element('.banner-submodule').removeClass('hidden');
 
@@ -911,13 +921,6 @@ angular
           }
         }
 
-        ael = document.getElementsByClassName('board-container');
-
-        if (typeof ael !== 'undefined' && ael.length > 0) {
-          for (i = 0; i < ael.length; i++) {
-            ael[i].classList.add('looks-disabled');
-          }
-        }
         ael = document.getElementsByClassName('banner');
 
         if (typeof ael !== 'undefined' && ael.length > 0) {

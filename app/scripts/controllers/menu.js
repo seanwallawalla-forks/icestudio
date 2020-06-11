@@ -827,10 +827,6 @@ angular
       }
     };
 
-    $scope.toggleFPGAResources = function () {
-      profile.set('showFPGAResources', !profile.get('showFPGAResources'));
-    };
-
     $scope.showCollectionData = function () {
       var collection = common.selectedCollection;
       var readme = collection.content.readme;

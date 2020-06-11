@@ -25,31 +25,10 @@ angular
 
     // Breadcrumbs
 
-    $scope.breadcrumbsNavitate = function (selectedItem) {
-      var item;
-      if (common.isEditingSubmodule) {
-        alertify.warning(
-          gettextCatalog.getString(
-            'To navigate through design, you need to close "edit mode".'
-          )
-        );
-      } else {
-        if (!$scope.isNavigating) {
-          $scope.isNavigating = true;
-
-          do {
-            graph.breadcrumbs.pop();
-            item = graph.breadcrumbs.slice(-1)[0];
-          } while (selectedItem !== item);
-          loadSelectedGraph();
-        }
-      }
-    };
-
     $scope.breadcrumbsBack = function () {
       if (!$scope.isNavigating) {
         $scope.isNavigating = true;
-        graph.breadcrumbs.pop();
+        graph.popTitle();
         loadSelectedGraph();
       }
     };

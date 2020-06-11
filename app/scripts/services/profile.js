@@ -12,7 +12,6 @@ angular
       language: '',
       uiTheme: 'light',
       remoteHostname: '',
-      showFPGAResources: false,
       pythonEnv:{'python':'','pip':''}
     };
 
@@ -34,7 +33,6 @@ angular
             externalCollections: data.externalCollections || '',
             externalPlugins: data.externalPlugins || '',
             remoteHostname: data.remoteHostname || '',
-            showFPGAResources: data.showFPGAResources || false,
             pythonEnv: data.pythonEnv || {'python':'','pip':''}
           };
 

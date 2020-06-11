@@ -101,9 +101,7 @@ angular
               var hostname = profile.get('remoteHostname');
               var command = commands[0];
               if (command === 'build' || command === 'upload') {
-                if (profile.get('showFPGAResources')) {
-                  commands = commands.concat('--verbose-pnr');
-                }
+                commands = commands.concat('--verbose-pnr');
               }
               console.log('APIO', commands);
               if (hostname) {
