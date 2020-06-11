@@ -12,7 +12,6 @@ angular
       language: '',
       uiTheme: 'light',
       remoteHostname: '',
-      showFPGAResources: false,
     };
 
     if (common.DARWIN) {
@@ -33,7 +32,6 @@ angular
             externalCollections: data.externalCollections || '',
             externalPlugins: data.externalPlugins || '',
             remoteHostname: data.remoteHostname || '',
-            showFPGAResources: data.showFPGAResources || false,
           };
           //-- Custom Theme support
           if (self.data.uiTheme !== 'light') {

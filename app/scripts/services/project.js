@@ -41,11 +41,7 @@ angular
     }
 
     this.get = function (key) {
-      if (key in project) {
-        return project[key];
-      } else {
-        return project;
-      }
+      return key in project ? project[key] : project;
     };
 
     this.set = function (key, obj) {
@@ -674,7 +670,7 @@ angular
     this.updateTitle = function (name) {
       if (name) {
         this.name = name;
-        graph.resetBreadcrumbs(name);
+        graph.resetTitle(name);
       }
       var title = (this.changed ? '*' : '') + this.name + ' ─ Icestudio';
       utils.updateWindowTitle(title);
@@ -737,7 +733,7 @@ angular
     this.clear = function () {
       project = _default();
       graph.clearAll();
-      graph.resetBreadcrumbs();
+      graph.resetTitle();
       graph.resetCommandStack();
     };
   });

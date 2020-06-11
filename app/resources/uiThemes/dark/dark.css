@@ -46,26 +46,6 @@
   background: #999 !important;
 }
 
-.breadcrumbs-container {
-  padding-left: 5px;
-}
-
-.breadcrumb {
-  background: #222;
-}
-
-.breadcrumb > .active {
-  color: #333;
-}
-
-.breadcrumb span {
-  color: white;
-}
-
-.breadcrumb a {
-  color: skyblue;
-}
-
 .info {
   color: white;
   background: #444;
