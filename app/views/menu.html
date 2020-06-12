@@ -609,13 +609,16 @@
             is-open="status.board"
           >
             <a href uib-dropdown-toggle
-              >{{ common.selectedBoard.info.label }} <span class="caret"></span
+              ><i class="fa fa-microchip" aria-hidden="true"></i>
+              <span class="caret"></span
             ></a>
             <ul uib-dropdown-menu>
-              <li><a href ng-click="showPCF()">{{ 'PCF' }}</a></li>
               <li ng-class="pinoutAvailable() ? '' : 'is-disabled'">
-                <a href ng-click="showPinout()">{{ 'Pinout' }}</a>
+                <a href ng-click="showPinout()"
+                  ><i>{{ common.selectedBoard.info.label }}</i></a
+                >
               </li>
+              <li><a href ng-click="showPCF()">{{ 'PCF' }}</a></li>
               <li>
                 <a href ng-click="showDatasheet()"
                   >{{ 'Datasheet' | translate }}</a
