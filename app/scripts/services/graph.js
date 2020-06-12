@@ -35,7 +35,9 @@ angular
     this.breadcrumbs = [{name: '', type: ''}];
 
     function _updateTitle() {
-      let title = 'Icestudio: ' + self.breadcrumbs[0].name;
+      let title =
+        'Icestudio: ' +
+        (self.breadcrumbs[0] ? self.breadcrumbs[0].name : 'undefined');
       if (self.breadcrumbs.length > 1) {
         for (const val of self.breadcrumbs.slice(1)) {
           title += ' / ' + val.name;
@@ -415,85 +417,79 @@ angular
         }
       });
 
-      /*paper.on('debug:test',function(args){
-
-                console.log('DEBUG->TEST');
-            });*/
-
       paper.on('cell:pointerclick', function (cellView, evt, x, y) {
         //M+
-
-        if (!checkInsideViewBox(cellView, x, y)) {
-          // Out of the view box
+        if (
+          !checkInsideViewBox(cellView, x, y) ||
+          !shiftPressed ||
+          !paper.options.enabled ||
+          cellView.model.isLink()
+        ) {
           return;
         }
-        if (shiftPressed) {
-          // If Shift is pressed process the click (no Shift+dblClick allowed)
-          if (paper.options.enabled) {
-            if (!cellView.model.isLink()) {
-              // Disable current focus
-              document.activeElement.blur();
-              if (utils.hasLeftButton(evt)) {
-                // Add cell to selection
-                selection.add(cellView.model);
-                selectionView.createSelectionBox(cellView.model);
-              }
-            }
-          }
+        // If Shift is pressed process the click (no Shift+dblClick allowed)
+        // Disable current focus
+        document.activeElement.blur();
+        if (utils.hasLeftButton(evt)) {
+          selection.add(cellView.model);
+          selectionView.createSelectionBox(cellView.model);
         }
       });
 
       paper.on('cell:pointerdblclick', function (cellView, evt, x, y) {
-        if (x && y && !checkInsideViewBox(cellView, x, y)) {
-          // Out of the view box
+        if (!checkInsideViewBox(cellView, x, y)) {
           return;
         }
         selectionView.cancelSelection();
-        if (!shiftPressed) {
-          // Allow dblClick if Shift is not pressed
-          var type = cellView.model.get('blockType');
-          var blockId = cellView.model.get('id');
+        if (shiftPressed) {
+          return;
+        }
 
-          if (type.indexOf('basic.') !== -1) {
-            // Edit basic blocks
-            if (paper.options.enabled) {
-              blocks.editBasic(type, cellView, addCell);
-            }
-          } else if (common.allDependencies[type]) {
-            if (
-              typeof common.isEditingSubmodule !== 'undefined' &&
-              common.isEditingSubmodule === true
-            ) {
-              alertify.warning(
-                gettextCatalog.getString(
-                  'To enter on "edit mode" of deeper block, you need to finish current "edit mode", lock the keylock to do it.'
-                )
-              );
-              return;
-            }
+        // Allow dblClick if Shift is not pressed
+        var type = cellView.model.get('blockType');
+        var blockId = cellView.model.get('id');
 
-            // Navigate inside generic blocks
-            z.index = 1;
-            var project = common.allDependencies[type];
-            var breadcrumbsLength = self.breadcrumbs.length;
-
-            $('body').addClass('waiting');
-            setTimeout(function () {
-              $rootScope.navigateProject(
-                breadcrumbsLength === 1,
-                project,
-                type,
-                blockId,
-                undefined
-              );
-              self.pushTitle({name: project.package.name || '#', type: type});
-              utils.rootScopeSafeApply();
-            }, 100);
+        if (type.indexOf('basic.') !== -1) {
+          // Edit basic blocks
+          if (paper.options.enabled) {
+            blocks.editBasic(type, cellView, addCell);
           }
+        } else if (common.allDependencies[type]) {
+          if (
+            common.isEditingSubmodule !== undefined &&
+            common.isEditingSubmodule === true
+          ) {
+            alertify.warning(
+              gettextCatalog.getString(
+                'To enter on "edit mode" of deeper block, you need to finish current "edit mode", lock the keylock to do it.'
+              )
+            );
+            return;
+          }
+          // Navigate inside generic blocks
+          z.index = 1;
+          var project = common.allDependencies[type];
+          var breadcrumbsLength = self.breadcrumbs.length;
+
+          $('body').addClass('waiting');
+          setTimeout(function () {
+            $rootScope.navigateProject(
+              breadcrumbsLength === 1,
+              project,
+              type,
+              blockId,
+              true
+            );
+            self.pushTitle({name: project.package.name || '#', type: type});
+            utils.rootScopeSafeApply();
+          }, 100);
         }
       });
 
       function checkInsideViewBox(view, x, y) {
+        if (!x || !y) {
+          return false;
+        }
         var $box = $(view.$box[0]);
         var position = $box.position();
         var rbox = g.rect(
@@ -1449,20 +1445,15 @@ angular
       }
 
       // Wires
-      var test = false;
       var todelete = [];
-
       for (var i = 0; i < _graph.wires.length; i++) {
-        test = wireExists(_graph.wires[i], _graph.blocks, 'source');
-        if (test) {
-          test = wireExists(_graph.wires[i], _graph.blocks, 'target');
-          if (test === true) {
-          } else {
-            todelete.push(i);
-          }
-        } else {
-          todelete.push(i);
+        if (
+          wireExists(_graph.wires[i], _graph.blocks, 'source') &&
+          wireExists(_graph.wires[i], _graph.blocks, 'target')
+        ) {
+          continue;
         }
+        todelete.push(i);
       }
       var tempw = [];
       for (var z = 0; z < _graph.wires.length; z++) {
@@ -1692,16 +1683,11 @@ angular
             cellView.$box.find('.code-content').removeClass('highlight-error');
             $('.sticker-error', cellView.$box).remove();
             cellView.clearAnnotations();
-          } else if (cell.get('type') === 'ice.Generic') {
+          } else if (
+            cell.get('type') === 'ice.Generic' ||
+            cell.get('type') === 'ice.Constant'
+          ) {
             cellView = paper.findViewByModel(cell);
-
-            $('.sticker-error', cellView.$box).remove();
-            cellView.$box
-              .remove('.sticker-error')
-              .removeClass('highlight-error');
-          } else if (cell.get('type') === 'ice.Constant') {
-            cellView = paper.findViewByModel(cell);
-
             $('.sticker-error', cellView.$box).remove();
             cellView.$box
               .remove('.sticker-error')
@@ -1731,14 +1717,13 @@ angular
         if (codeError.blockId === blockId) {
           cellView = paper.findViewByModel(cell);
           if (codeError.type === 'error') {
+            $('.sticker-error', cellView.$box).remove();
             if (cell.get('type') === 'ice.Code') {
-              $('.sticker-error', cellView.$box).remove();
               cellView.$box
                 .find('.code-content')
                 .addClass('highlight-error')
                 .append('<div class="sticker-error error-code-editor"></div>');
             } else {
-              $('.sticker-error', cellView.$box).remove();
               cellView.$box
                 .addClass('highlight-error')
                 .append('<div class="sticker-error"></div>');
