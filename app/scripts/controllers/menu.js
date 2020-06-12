@@ -756,13 +756,22 @@ angular
       );
     };
 
+    $scope.pinoutAvailable = function () {
+      if (common.selectedBoard) {
+        return nodeFs.existsSync(
+          nodePath.join(
+            'resources',
+            'boards',
+            common.selectedBoard.name,
+            'pinout.svg'
+          )
+        );
+      }
+      return false;
+    };
     $scope.showPinout = function () {
       var board = common.selectedBoard;
-      if (
-        nodeFs.existsSync(
-          nodePath.join('resources', 'boards', board.name, 'pinout.svg')
-        )
-      ) {
+      if (this.pinoutAvailable()) {
         gui.Window.open(
           'resources/viewers/svg/pinout.html?board=' + board.name,
           {

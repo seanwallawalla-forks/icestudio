@@ -539,7 +539,9 @@
             ></a>
             <ul uib-dropdown-menu>
               <li><a href ng-click="showPCF()">{{ 'PCF' }}</a></li>
-              <li><a href ng-click="showPinout()">{{ 'Pinout' }}</a></li>
+              <li ng-class="pinoutAvailable() ? '' : 'is-disabled'">
+                <a href ng-click="showPinout()">{{ 'Pinout' }}</a>
+              </li>
               <li>
                 <a href ng-click="showDatasheet()"
                   >{{ 'Datasheet' | translate }}</a
