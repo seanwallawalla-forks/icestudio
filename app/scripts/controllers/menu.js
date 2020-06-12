@@ -827,54 +827,56 @@ angular
       }
     };
 
+    function _openWindow(url, title) {
+      console.log(url);
+      return gui.Window.open(url, {
+        title: title,
+        focus: true,
+        // toolbar: false,
+        resizable: true,
+        width: 700,
+        height: 400,
+        min_width: 300,
+        min_height: 300,
+        icon: 'resources/images/icestudio-logo.png',
+      });
+    }
+
     $scope.showCollectionData = function () {
       var collection = common.selectedCollection;
+      const cname = collection.name ? collection.name : 'Default';
       var readme = collection.content.readme;
-      if (readme) {
-        gui.Window.open(
-          'resources/viewers/markdown/readme.html?readme=' + readme,
-          {
-            title:
-              (collection.name ? collection.name : 'Default') +
-              ' Collection - Data',
-            focus: true,
-            // toolbar: false,
-            resizable: true,
-            width: 700,
-            height: 700,
-            min_width: 300,
-            min_height: 300,
-            icon: 'resources/images/icestudio-logo.png',
-          }
-        );
-      } else {
+      if (!readme) {
         alertify.error(
           gettextCatalog.getString(
-            'Collection {{collection}} info not defined',
-            {
-              collection: utils.bold(collection.name),
-            }
+            'Info of collection &lt;{{collection}}&gt; is undefined',
+            {collection: cname}
           ),
           5
         );
+        return;
       }
+      if (!nodeFs.existsSync(readme)) {
+        alertify.error(
+          gettextCatalog.getString(
+            'README of collection &lt;{{collection}}&gt; does not exist',
+            {collection: cname}
+          ),
+          5
+        );
+        return;
+      }
+      _openWindow(
+        'resources/viewers/markdown/readme.html?readme=' + escape(readme),
+        (cname ? cname : 'Default') + ' Collection - Data'
+      );
     };
 
     $scope.showCommandOutput = function () {
-      winCommandOutput = gui.Window.open(
+      winCommandOutput = _openWindow(
         'resources/viewers/plain/output.html?content=' +
           encodeURIComponent(common.commandOutput),
-        {
-          title: gettextCatalog.getString('Command output'),
-          focus: true,
-          // toolbar: false,
-          resizable: true,
-          width: 700,
-          height: 400,
-          min_width: 300,
-          min_height: 300,
-          icon: 'resources/images/icestudio-logo.png',
-        }
+        gettextCatalog.getString('Command output')
       );
     };
 
