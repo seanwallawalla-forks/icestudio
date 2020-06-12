@@ -171,7 +171,6 @@ angular
       }
 
       // Plugins
-
       $scope.plugins = ICEpm.plugins;
     }, 500);
 
@@ -325,31 +324,32 @@ angular
       });
     };
 
-    $scope.exportVerilog = function () {
-      exportFromCompiler('verilog', 'Verilog', '.v');
-    };
-
-    $scope.exportPCF = function () {
-      exportFromCompiler('pcf', 'PCF', '.pcf');
-    };
-
-    $scope.exportTestbench = function () {
-      exportFromCompiler('testbench', 'Testbench', '.v');
-    };
-
-    $scope.exportGTKwave = function () {
-      exportFromCompiler('gtkwave', 'GTKWave', '.gtkw');
-    };
-
-    $scope.exportBLIF = function () {
-      exportFromBuilder('blif', 'BLIF', '.blif');
-    };
-
-    $scope.exportASC = function () {
-      exportFromBuilder('asc', 'ASC', '.asc');
-    };
-    $scope.exportBitstream = function () {
-      exportFromBuilder('bin', 'Bitstream', '.bin');
+    $scope.export = function (etype) {
+      switch (etype) {
+        case 'v':
+          exportFromCompiler('verilog', 'Verilog', '.v');
+          break;
+        case 'pcf':
+          exportFromCompiler('pcf', 'PCF', '.pcf');
+          break;
+        case 'tb':
+          exportFromCompiler('testbench', 'Testbench', '.v');
+          break;
+        case 'gtkw':
+          exportFromCompiler('gtkwave', 'GTKWave', '.gtkw');
+          break;
+        case 'blif':
+          exportFromBuilder('blif', 'BLIF', '.blif');
+          break;
+        case 'asc':
+          exportFromBuilder('asc', 'ASC', '.asc');
+          break;
+        case 'bin':
+          exportFromBuilder('bin', 'Bitstream', '.bin');
+          break;
+        default:
+          console.error(`Unknown export type ${etype}!`);
+      }
     };
 
     function exportFromCompiler(id, name, ext) {
