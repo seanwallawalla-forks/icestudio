@@ -144,3 +144,25 @@
 .alertify .ajs-dialog {
   max-width: 500px;
 }
+
+.footer {
+  display: flex;
+  cursor: default;
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  min-height: 47px;
+  border-top: 1px solid #d5dadd;
+  z-index: 1501;
+}
+
+.footer div {
+  display: flex;
+  align-items: center;
+  padding: 0 15px;
+  color: #777;
+}
+
+.fpga-resources span {
+  margin-right: 20px;
+}

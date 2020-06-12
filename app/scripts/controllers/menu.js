@@ -22,10 +22,13 @@ angular
   ) {
     'use strict';
 
+    $scope.common = common;
     $scope.profile = profile;
     $scope.project = project;
     $scope.tools = tools;
-    $scope.common = common;
+    $scope.toolchain = tools.toolchain;
+    $scope.workingdir = '';
+    $scope.snapshotdir = '';
 
     // Convert the list of boards into a format suitable for 'menutree' directive
     function _getBoardsMenu(boards) {
@@ -52,11 +55,6 @@ angular
     }
 
     $scope.common.boardMenu = _getBoardsMenu(common.boards);
-
-    $scope.toolchain = tools.toolchain;
-
-    $scope.workingdir = '';
-    $scope.snapshotdir = '';
 
     $scope.languages = [
       ['ca_ES', 'Catalan'],
@@ -231,10 +229,7 @@ angular
     };
 
     $scope.saveProject = function () {
-      if (
-        typeof common.isEditingSubmodule !== 'undefined' &&
-        common.isEditingSubmodule === true
-      ) {
+      if (common.isEditingSubmodule) {
         alertify.alert(
           gettextCatalog.getString('Save submodule'),
           gettextCatalog.getString(
@@ -270,10 +265,7 @@ angular
     };
 
     $scope.saveProjectAs = function (localCallback) {
-      if (
-        typeof common.isEditingSubmodule !== 'undefined' &&
-        common.isEditingSubmodule === true
-      ) {
+      if (common.isEditingSubmodule) {
         alertify.confirm(
           gettextCatalog.getString('Export submodule'),
           gettextCatalog.getString(
@@ -991,10 +983,7 @@ angular
     };
 
     $scope.buildCode = function () {
-      if (
-        typeof common.isEditingSubmodule !== 'undefined' &&
-        common.isEditingSubmodule === true
-      ) {
+      if (common.isEditingSubmodule) {
         alertify.alert(
           gettextCatalog.getString('Build'),
           gettextCatalog.getString(
@@ -1019,10 +1008,7 @@ angular
     };
 
     $scope.uploadCode = function () {
-      if (
-        typeof common.isEditingSubmodule !== 'undefined' &&
-        common.isEditingSubmodule === true
-      ) {
+      if (common.isEditingSubmodule) {
         alertify.alert(
           gettextCatalog.getString('Upload'),
           gettextCatalog.getString(
@@ -1235,7 +1221,7 @@ angular
       if (graph.isEnabled()) {
         removeSelected();
       } else {
-        $rootScope.$broadcast('breadcrumbsBack');
+        $rootScope.breadcrumbsBack();
       }
     });
 
