@@ -52,6 +52,7 @@ angular
     this.popTitle = function () {
       self.breadcrumbs.pop();
       _updateTitle();
+      return self.breadcrumbs.slice(-1)[0];
     };
 
     this.resetTitle = function (name) {
@@ -478,12 +479,13 @@ angular
 
             $('body').addClass('waiting');
             setTimeout(function () {
-              $rootScope.$broadcast('navigateProject', {
-                update: breadcrumbsLength === 1,
-                project: project,
-                submodule: type,
-                submoduleId: blockId,
-              });
+              $rootScope.navigateProject(
+                breadcrumbsLength === 1,
+                project,
+                type,
+                blockId,
+                undefined
+              );
               self.pushTitle({name: project.package.name || '#', type: type});
               utils.rootScopeSafeApply();
             }, 100);
@@ -869,11 +871,9 @@ angular
       if (value) {
         /* In the new javascript context of nwjs, angular can't change classes over the dom in this way,
                 for this we need to update directly , but for the moment we maintain angular too to maintain model synced */
-
         angular.element('#menu').removeClass('is-disabled');
         angular.element('.paper').removeClass('looks-disabled');
         angular.element('.banner').addClass('hidden');
-
         ael = document.getElementById('menu');
         if (typeof ael !== 'undefined') {
           ael.classList.remove('is-disabled');
@@ -884,55 +884,17 @@ angular
             ael[i].classList.remove('looks-disabled');
           }
         }
-
-        ael = document.getElementsByClassName('banner');
-
-        if (typeof ael !== 'undefined' && ael.length > 0) {
-          for (i = 0; i < ael.length; i++) {
-            ael[i].classList.add('hidden');
-          }
-        }
-        if (!common.isEditingSubmodule) {
-          angular.element('.banner-submodule').addClass('hidden');
-          ael = document.getElementsByClassName('banner-submodule');
-          if (typeof ael !== 'undefined' && ael.length > 0) {
-            for (i = 0; i < ael.length; i++) {
-              ael[i].classList.add('hidden');
-            }
-          }
-        }
       } else {
         angular.element('#menu').addClass('is-disabled');
         angular.element('.paper').addClass('looks-disabled');
-        angular.element('.banner').removeClass('hidden');
-        angular.element('.banner-submodule').removeClass('hidden');
-
         ael = document.getElementById('menu');
-
         if (typeof ael !== 'undefined') {
           ael.classList.add('is-disabled');
         }
-
         ael = document.getElementsByClassName('paper');
-
         if (typeof ael !== 'undefined' && ael.length > 0) {
           for (i = 0; i < ael.length; i++) {
             ael[i].classList.add('looks-disabled');
-          }
-        }
-
-        ael = document.getElementsByClassName('banner');
-
-        if (typeof ael !== 'undefined' && ael.length > 0) {
-          for (i = 0; i < ael.length; i++) {
-            ael[i].classList.remove('hidden');
-          }
-        }
-        ael = document.getElementsByClassName('banner-submodule');
-
-        if (typeof ael !== 'undefined' && ael.length > 0) {
-          for (i = 0; i < ael.length; i++) {
-            ael[i].classList.remove('hidden');
           }
         }
       }
@@ -1071,7 +1033,7 @@ angular
       return newBoard;
     };
     this.setBlockInfo = function (values, newValues, blockId) {
-      if (typeof common.allDependencies === 'undefined') {
+      if (common.allDependencies === undefined) {
         return false;
       }
 

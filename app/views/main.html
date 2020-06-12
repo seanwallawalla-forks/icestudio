@@ -22,27 +22,98 @@
 
   <!-- Design -->
   <div ng-controller="DesignCtrl">
-    <div class="banner hidden">
-      <div class="info">
-        &nbsp;{{ information.name }}&nbsp;{{ information.version ? '-&nbsp;v' +
-        information.version + '&nbsp;' : '' }}
-      </div>
-      <div class="read-only">&nbsp;{{ 'Read only' | translate }}&nbsp;</div>
-      <a class="back-button" ng-click="breadcrumbsBack()"
-        >&nbsp;&lt;&nbsp;{{ 'back' | translate }}&nbsp;</a
-      >
-    </div>
-
-    <div class="banner-submodule hidden">
-      <a class="edit-button" ng-click="editModeToggle($event)"
-        ><img
-          src="resources/images/lock.png"
-          data-lock="resources/images/lock.png"
-          data-unlock="resources/images/unlock.png"
-      /></a>
-    </div>
-
     <div class="paper"></div>
+
+    <div
+      ng-show="!topModule"
+      style="position: absolute; bottom: 5px; left: 5px; z-index: 1750;"
+      class="dropup"
+    >
+      <div
+        class="btn-group"
+        uib-dropdown
+        ng-show="graph.breadcrumbs.length > 2"
+      >
+        <button
+          type="button"
+          class="btn btn-sm btn-info"
+          ng-click="breadcrumbsJump(graph.breadcrumbs[0])"
+          ng-disabled="common.isEditingSubmodule"
+        >
+          <i class="fa fa-home"></i>
+        </button>
+        <button
+          id="split-button"
+          type="button"
+          class="btn btn-sm btn-info"
+          ng-click="breadcrumbsBack()"
+          ng-disabled="common.isEditingSubmodule"
+        >
+          <i class="fa fa-step-backward" aria-hidden="true"></i> {{ 'Back' |
+          translate }}
+        </button>
+        <button type="button" class="btn btn-sm btn-info" uib-dropdown-toggle>
+          <span class="caret"></span>
+          <span class="sr-only"
+            ><i class="fa fa-step-backward" aria-hidden="true"></i> {{ 'Back' |
+            translate }}</span
+          >
+        </button>
+        <ul
+          class="dropdown-menu"
+          uib-dropdown-menu
+          role="menu"
+          aria-labelledby="split-button"
+        >
+          <li
+            role="menuitem"
+            ng-repeat="item in graph.breadcrumbs.slice(0, -1)"
+            ng-class="common.isEditingSubmodule?'is-disabled':''"
+          >
+            <a href ng-click="breadcrumbsJump(item)">{{item.name}}</a>
+          </li>
+        </ul>
+      </div>
+      <div
+        class="btn-group"
+        role="group"
+        ng-show="graph.breadcrumbs.length <= 2"
+      >
+        <button
+          type="button"
+          class="btn btn-sm btn-info"
+          ng-click="breadcrumbsBack()"
+          ng-disabled="common.isEditingSubmodule"
+        >
+          <i class="fa fa-step-backward" aria-hidden="true"></i> {{ 'Back' |
+          translate }}
+        </button>
+      </div>
+      <div class="btn-group" role="group">
+        <button
+          type="button"
+          class="btn btn-sm btn-primary"
+          style="pointer-events: none;"
+        >
+          {{ information.version ? 'v' + information.version : 'unversioned' }}
+        </button>
+      </div>
+      <div class="btn-group" role="group">
+        <button
+          type="button"
+          class="btn btn-sm"
+          ng-click="editModeToggle()"
+          ng-class="'btn-' + (common.isEditingSubmodule?'warning':'danger')"
+        >
+          <i
+            class="fa"
+            ng-class="'fa-' + (common.isEditingSubmodule?'unlock':'lock')"
+            aria-hidden="true"
+          ></i>
+          {{ (common.isEditingSubmodule? 'Lock' : 'Read only') | translate }}
+        </button>
+      </div>
+    </div>
 
     <div class="footer ice-bar" ng-show="common.selectedBoard && topModule">
       <div class="fpga-resources">
