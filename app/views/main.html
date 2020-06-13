@@ -40,7 +40,7 @@
           ng-click="breadcrumbsJump(graph.breadcrumbs[0])"
           ng-disabled="common.isEditingSubmodule"
         >
-          <i class="fa fa-home"></i>
+          <i class="fa fa-fw fa-home"></i>
         </button>
         <button
           id="split-button"
@@ -49,13 +49,13 @@
           ng-click="breadcrumbsBack()"
           ng-disabled="common.isEditingSubmodule"
         >
-          <i class="fa fa-step-backward" aria-hidden="true"></i> {{ 'Back' |
+          <i class="fa fa-fw fa-level-up" aria-hidden="true"></i> {{ 'Up' |
           translate }}
         </button>
         <button type="button" class="btn btn-sm btn-info" uib-dropdown-toggle>
           <span class="caret"></span>
           <span class="sr-only"
-            ><i class="fa fa-step-backward" aria-hidden="true"></i> {{ 'Back' |
+            ><i class="fa fa-fw fa-level-up" aria-hidden="true"></i> {{ 'Up' |
             translate }}</span
           >
         </button>
@@ -85,7 +85,7 @@
           ng-click="breadcrumbsBack()"
           ng-disabled="common.isEditingSubmodule"
         >
-          <i class="fa fa-step-backward" aria-hidden="true"></i> {{ 'Back' |
+          <i class="fa fa-fw fa-level-up" aria-hidden="true"></i> {{ 'Up' |
           translate }}
         </button>
       </div>
@@ -106,7 +106,7 @@
           ng-class="'btn-' + (common.isEditingSubmodule?'warning':'danger')"
         >
           <i
-            class="fa"
+            class="fa fa-fw"
             ng-class="'fa-' + (common.isEditingSubmodule?'unlock':'lock')"
             aria-hidden="true"
           ></i>
