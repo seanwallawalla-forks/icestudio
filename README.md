@@ -40,6 +40,8 @@ yarn install
 yarn start
 ```
 
+> NOTE: use `yarn run check` for checking the style of sources and `yarn prettify` for fixing them. CI will fail if _non-pretty_ sources are pushed.
+
 > NOTE: for adding blocks or examples, you can contribute to [icestudio-blocks](https://github.com/FPGAwars/icestudio-blocks), [icestudio-examples](https://github.com/FPGAwars/icestudio-examples) or [collection-default](https://github.com/FPGAwars/collection-default).
 
 ## Build the docs
@@ -70,6 +72,22 @@ yarn dist
 - GNU/Linux: (linux32,linux64).zip, (linux32,linux64).AppImage
 - Windows: (win32,win64).zip
 - Mac OS: osx64.zip, osx64.dmg
+
+## References
+
+- App and GUI:
+  - [AngularJS](https://angularjs.org/)
+  - [UI Bootstrap](https://angular-ui.github.io/bootstrap)
+  - [Bootstrap](https://getbootstrap.com/docs/3.3)
+  - [Font Awesome](https://fontawesome.com/v4.7.0)
+  - [Marked.js](https://marked.js.org/#/README.md#README.md)
+  - [AlertifyJS](https://alertifyjs.com/)
+- Dekstop framework (backend, to be replaced with [electron](https://www.electronjs.org/) or with a Python/golang CLI-LIB-API).
+  - [NW.js](https://nwjs.io/)
+- Build system (packager to be replaced with [webpack](https://webpack.js.org/), [ncc](https://github.com/vercel/ncc), [pika](https://www.pika.dev)...)
+  - [grunt](https://gruntjs.com/)
+  - [bower](https://bower.io/)
+  - [Prettier](https://prettier.io)
 
 ## Apio configuration
 
