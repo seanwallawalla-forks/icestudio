@@ -82,8 +82,11 @@ angular
     var resultAlert = null;
     var winCommandOutput = null;
 
-    var buildUndoStack = [];
-    var changedUndoStack = [];
+    var undoStack = {
+      builds: [],
+      changes: [],
+    };
+
     var currentUndoStack = [];
 
     // Window events
@@ -94,18 +97,15 @@ angular
     win.on('resize', function () {
       graph.fitContent();
     });
+
     // Darwin fix for shortcuts
     if (process.platform === 'darwin') {
-      var mb = new gui.Menu({
-        type: 'menubar',
-      });
+      var mb = new gui.Menu({type: 'menubar'});
       mb.createMacBuiltin('Icestudio');
       win.menu = mb;
     }
 
-    // New window, get the focus
     win.focus();
-    // Load app arguments
 
     setTimeout(function () {
       // Parse GET url parmeters for window instance arguments
@@ -1145,22 +1145,22 @@ angular
     $(document).on('stackChanged', function (evt, undoStack) {
       currentUndoStack = undoStack;
       var undoStackString = JSON.stringify(undoStack);
-      project.changed = JSON.stringify(changedUndoStack) !== undoStackString;
+      project.changed = JSON.stringify(undoStack.changes) !== undoStackString;
       project.updateTitle();
       zeroProject = false;
       common.hasChangesSinceBuild =
-        JSON.stringify(buildUndoStack) !== undoStackString;
+        JSON.stringify(undoStack.builds) !== undoStackString;
       utils.rootScopeSafeApply();
     });
 
     function resetChangedStack() {
-      changedUndoStack = currentUndoStack;
+      undoStack.changes = currentUndoStack;
       project.changed = false;
       project.updateTitle();
     }
 
     function resetBuildStack() {
-      buildUndoStack = currentUndoStack;
+      undoStack.builds = currentUndoStack;
       common.hasChangesSinceBuild = false;
       utils.rootScopeSafeApply();
     }
