@@ -920,7 +920,9 @@ angular
       }
     });
 
-    $scope.selectBoard = function (name) {
+    $scope.selectBoard = _selectBoard;
+
+    function _selectBoard(name) {
       let board = undefined;
       for (const val of common.boards) {
         if (val.name === name) {
@@ -933,12 +935,16 @@ angular
         if (!graph.isEmpty()) {
           alertify.confirm(
             gettextCatalog.getString(
-              'The current FPGA I/O configuration will be lost. Do you want to change to {{name}} board?',
+              'Do you want to change to {{name}} board?',
               {name: utils.bold(board.info.label)}
+            ),
+            gettextCatalog.getString(
+              'The current FPGA I/O configuration will be lost.'
             ),
             function () {
               _boardSelected();
-            }
+            },
+            function () {}
           );
         } else {
           _boardSelected();
@@ -955,7 +961,7 @@ angular
           })
         );
       }
-    };
+    }
 
     //-- Tools
 

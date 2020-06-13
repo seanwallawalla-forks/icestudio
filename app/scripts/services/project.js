@@ -51,6 +51,8 @@ angular
     };
 
     this.open = function (filepath, emptyPath) {
+      console.debug('[srv.project.open] filepath:', filepath);
+      console.debug('[srv.project.open] emptyPath:', emptyPath);
       var self = this;
       this.path = emptyPath ? '' : filepath;
       this.filepath = filepath;
@@ -76,7 +78,15 @@ angular
         return;
       }
       project = _safeLoad(data, name);
-      if (project.design.board !== common.selectedBoard.name) {
+      console.debug(
+        '[srv.project.load] common.selectedBoard',
+        common.selectedBoard
+      );
+      // FIXME: when opening an example in a new window, sometimes (frequently) common.selectedBoard is 'null' here
+      if (
+        common.selectedBoard &&
+        project.design.board !== common.selectedBoard.name
+      ) {
         var projectBoard = boards.boardLabel(project.design.board);
         alertify
           .confirm(
@@ -451,86 +461,92 @@ angular
       graph.setCells(cells);
     }
 
-    this.addBlockFile = function (filepath, notification) {
+    function _addBlockFile(self, orig, name, data, notify) {
+      function _importBlock() {
+        self.addBlock(block);
+        if (notify) {
+          alertify.success(
+            gettextCatalog.getString('Block {{name}} imported', {
+              name: utils.bold(block.package.name),
+            })
+          );
+        }
+      }
+
+      var block = _safeLoad(data, name);
+      if (!block) {
+        return;
+      } // FIXME: should produce a meaningful error
+
+      // 1. Parse and find included files
+      var code = compiler.generate('verilog', block)[0].content;
+      var internalFiles = compiler.generate('list', block).map(function (res) {
+        return res.name;
+      });
+      var files = _.difference(utils.findIncludedFiles(code), internalFiles);
+
+      function _importBlockWithFiles() {
+        copyIncludedFiles(files, orig, utils.dirname(self.path), function (
+          success
+        ) {
+          if (success) {
+            _importBlock();
+          } // FIXME: should notify if something went wrong, instead of failing silently...
+        });
+      }
+
+      if (!files.length) {
+        _importBlock();
+        return;
+      }
+      if (self.path) {
+        _importBlockWithFiles();
+        return;
+      }
+
+      alertify
+        .confirm(
+          gettextCatalog.getString(
+            'This import operation requires a project path'
+          ),
+          gettextCatalog.getString(
+            'You need to save the current project. Do you want to continue?'
+          ),
+          function () {
+            // FIXME: is '$emit" the best mechanism to do this?
+            $rootScope.$emit('saveProjectAs', function () {
+              setTimeout(function () {
+                _importBlockWithFiles();
+              }, 500);
+            });
+          },
+          function () {}
+        )
+        .setting({labels: {ok: gettextCatalog.getString('Save')}});
+    }
+
+    this.addBlockFile = function (filepath, notify) {
       var self = this;
       utils
         .readFile(filepath)
         .then(function (data) {
           if (!checkVersion(data.version)) {
             return;
-          }
-          var name = utils.basename(filepath);
-
-          var block = _safeLoad(data, name);
-          if (block) {
-            var origPath = utils.dirname(filepath);
-            var destPath = utils.dirname(self.path);
-            // 1. Parse and find included files
-            var code = compiler.generate('verilog', block)[0].content;
-            var listFiles = compiler.generate('list', block);
-            var internalFiles = listFiles.map(function (res) {
-              return res.name;
-            });
-            var files = utils.findIncludedFiles(code);
-            files = _.difference(files, internalFiles);
-            // Are there included files?
-            if (files.length > 0) {
-              // 2. Check project's directory
-              if (self.path) {
-                // 3. Copy the included files
-                copyIncludedFiles(files, origPath, destPath, function (
-                  success
-                ) {
-                  if (success) {
-                    // 4. Success: import block
-                    doImportBlock();
-                  }
-                });
-              } else {
-                alertify.confirm(
-                  gettextCatalog.getString(
-                    'This import operation requires a project path. You need to save the current project. Do you want to continue?'
-                  ),
-                  function () {
-                    $rootScope.$emit('saveProjectAs', function () {
-                      setTimeout(function () {
-                        // 3. Copy the included files
-                        copyIncludedFiles(files, origPath, destPath, function (
-                          success
-                        ) {
-                          if (success) {
-                            // 4. Success: import block
-                            doImportBlock();
-                          }
-                        });
-                      }, 500);
-                    });
-                  }
-                );
-              }
-            } else {
-              // No included files to copy
-              // 4. Import block
-              doImportBlock();
-            }
-          }
-
-          function doImportBlock() {
-            self.addBlock(block);
-            if (notification) {
-              alertify.success(
-                gettextCatalog.getString('Block {{name}} imported', {
-                  name: utils.bold(block.package.name),
-                })
-              );
-            }
-          }
+          } // FIXME: should produce a meaningful error
+          _addBlockFile(
+            self,
+            utils.dirname(filepath),
+            utils.basename(filepath),
+            data,
+            notify
+          );
         })
-        .catch(function () {
+        .catch(function (e) {
+          console.log(e);
           alertify.error(
             gettextCatalog.getString('Invalid project format'),
             30
-          );
+          ); // FIXME: other reasons might produce an error
         });
     };
 
@@ -541,30 +557,28 @@ angular
         function (filename, next) {
           setTimeout(function () {
             if (origPath !== destPath) {
+              function _ok() {
+                if (!(success && doCopySync(origPath, destPath, filename))) {
+                  return next();
+                } // break
+                next();
+              }
               if (nodeFs.existsSync(nodePath.join(destPath, filename))) {
                 alertify.confirm(
                   gettextCatalog.getString(
-                    'File {{file}} already exists in the project path. Do you want to replace it?',
+                    'File {{file}} already exists in the project path',
                     {file: utils.bold(filename)}
                   ),
+                  gettextCatalog.getString('Do you want to replace it?'),
                   function () {
-                    success =
-                      success && doCopySync(origPath, destPath, filename);
-                    if (!success) {
-                      return next(); // break
-                    }
-                    next();
+                    _ok();
                   },
                   function () {
                     next();
                   }
                 );
               } else {
-                success = success && doCopySync(origPath, destPath, filename);
-                if (!success) {
-                  return next(); // break
-                }
-                next();
+                _ok();
               }
             } else {
               return next(); // break
