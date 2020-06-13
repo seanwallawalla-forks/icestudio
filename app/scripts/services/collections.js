@@ -9,7 +9,7 @@ angular
   ) {
     'use strict';
 
-    const DEFAULT = '';
+    const DEFAULT = 'Basic';
     const MAX_LEVEL_SEARCH = 20;
 
     this.loadAllCollections = function () {
@@ -19,7 +19,7 @@ angular
     };
 
     this.loadDefaultCollection = function () {
-      common.defaultCollection = getCollection(
+      common.defaultCollection = _newCollection(
         DEFAULT,
         common.DEFAULT_COLLECTION_DIR,
         utils.getFilesRecursive(common.DEFAULT_COLLECTION_DIR, MAX_LEVEL_SEARCH)
@@ -27,27 +27,24 @@ angular
     };
 
     this.loadInternalCollections = function () {
-      var internalCollections = utils.findCollections(
-        common.INTERNAL_COLLECTIONS_DIR
+      common.internalCollections = loadCollections(
+        utils.findCollections(common.INTERNAL_COLLECTIONS_DIR)
       );
-      common.internalCollections = loadCollections(internalCollections);
     };
 
     this.loadExternalCollections = function () {
-      var externalCollectionsPath = profile.get('externalCollections');
-      if (externalCollectionsPath !== common.INTERNAL_COLLECTIONS_DIR) {
-        var externalCollections = utils.findCollections(
-          externalCollectionsPath
-        );
-        common.externalCollections = loadCollections(externalCollections);
+      var edir = profile.get('externalCollections');
+      if (edir === common.INTERNAL_COLLECTIONS_DIR) {
+        return;
       }
+      common.externalCollections = loadCollections(utils.findCollections(edir));
     };
 
     function loadCollections(paths) {
       var collections = [];
       paths.forEach(function (path) {
         collections.push(
-          getCollection(
+          _newCollection(
             nodePath.basename(path),
             path,
             utils.getFilesRecursive(path, MAX_LEVEL_SEARCH)
@@ -57,8 +54,8 @@ angular
       return collections;
     }
 
-    function getCollection(name, path, children) {
-      var collection = {
+    function _newEmptyCollection(name, path) {
+      return {
         name: name,
         path: path,
         content: {
@@ -68,79 +65,66 @@ angular
           readme: '',
         },
       };
-      for (var i in children) {
-        var child = children[i];
+    }
+
+    function _newCollection(name, path, children) {
+      var collection = _newEmptyCollection(name, path);
+      console.debug('[collections._newCollection] collection:', collection);
+      for (var child of children) {
+        console.debug(
+          '[collections._newCollection] child:',
+          child.name,
+          !child.children
+        );
+        if (!child.children) {
+          if (child.name === 'README') {
+            collection.content.readme = child.path;
+          }
+          continue;
+        }
         switch (child.name) {
           case 'blocks':
-            if (child.children) {
-              collection.content.blocks = child.children;
-            }
+            collection.content.blocks = child.children;
             break;
           case 'examples':
-            if (child.children) {
-              collection.content.examples = child.children;
-            }
+            collection.content.examples = child.children;
             break;
           case 'package':
-            if (!child.children) {
-              try {
-                collection.content.package = require(child.path);
-              } catch (e) {}
-            }
-            break;
-          case 'README':
-            if (!child.children) {
-              collection.content.readme = child.path;
-            }
+            try {
+              collection.content.package = require(child.path);
+            } catch (e) {}
             break;
         }
       }
       return collection;
     }
 
-    this.selectCollection = function (path) {
-      var selectedCollection = null;
-      var collections = common.internalCollections.concat(
-        common.externalCollections
-      );
-      for (var i in collections) {
-        if (collections[i].path === path) {
-          selectedCollection = collections[i];
-          break;
-        }
-      }
-      if (selectedCollection === null) {
-        // Collection not found: select default collection
-        selectedCollection = common.defaultCollection;
-      }
-      common.selectedCollection = selectedCollection;
-      return selectedCollection.path;
-    };
-
     this.sort = function () {
-      sortCollections([common.defaultCollection]);
-      sortCollections(common.internalCollections);
-      sortCollections(common.externalCollection);
-    };
-
-    function sortCollections(collections) {
-      for (var i in collections) {
-        var collection = collections[i];
-        if (collection.content) {
+      function sortCollections(collections) {
+        if (!collections) {
+          return;
+        } // FIXME: should no fail silently
+        function sortContent(items) {
+          if (!items) {
+            return;
+          } // FIXME: should no fail silently
+          items.sort(byNameAlphaNum);
+          for (var i in items) {
+            sortContent(items[i].children);
+          }
+        }
+        for (var collection of collections) {
+          if (!collection.content) {
+            continue;
+          }
           sortContent(collection.content.blocks);
           sortContent(collection.content.examples);
         }
       }
-    }
-
-    function sortContent(items) {
-      if (items) {
-        items.sort(byNameAlphaNum);
-        for (var i in items) {
-          sortContent(items[i].children);
-        }
-      }
-    }
+      sortCollections([common.defaultCollection]);
+      sortCollections(common.internalCollections);
+      sortCollections(common.externalCollection);
+    };
 
     function byNameAlphaNum(a, b) {
       a = gettextCatalog.getString(a.name);

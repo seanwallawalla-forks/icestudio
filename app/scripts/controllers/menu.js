@@ -3,6 +3,7 @@
 angular
   .module('icestudio')
   .controller('MenuCtrl', function (
+    $log,
     $rootScope,
     $scope,
     $timeout,
@@ -29,6 +30,13 @@ angular
     $scope.toolchain = tools.toolchain;
     $scope.workingdir = '';
     $scope.snapshotdir = '';
+
+    $scope.openProjectDialog = _openProjectDialog;
+    $scope.openProject = _openProject;
+    $scope.saveProject = _saveProject;
+    $scope.saveProjectAs = _saveProjectAs;
+    $scope.newProject = utils.newWindow;
+    $scope.quit = _exit;
 
     // Convert the list of boards into a format suitable for 'menutree' directive
     function _getBoardsMenu(boards) {
@@ -74,7 +82,7 @@ angular
     ];
 
     $scope.themes = [
-      ['dark', 'Dark (default)'],
+      ['dark', 'Dark'],
       ['light', 'Light'],
     ];
 
@@ -92,7 +100,7 @@ angular
     // Window events
     var win = gui.Window.get();
     win.on('close', function () {
-      exit();
+      _exit();
     });
     win.on('resize', function () {
       graph.fitContent();
@@ -107,128 +115,138 @@ angular
 
     win.focus();
 
-    setTimeout(function () {
-      // Parse GET url parmeters for window instance arguments
-      // all arguments will be embeded in icestudio_argv param
-      // that is a JSON string url encoded
+    // FIXME: all the args parsing below does NOT belong in the "menu controller"!
 
-      // https://developer.mozilla.org/es/docs/Web/JavaScript/Referencia/Objetos_globales/unescape
-      // unescape is deprecated javascript function, should use decodeURI instead
+    // Parse GET url parmeters for window instance arguments all arguments will be embeded in icestudio_argv param (stringified JSON)
+    // https://developer.mozilla.org/es/docs/Web/JavaScript/Referencia/Objetos_globales/unescape
+    // unescape is deprecated javascript function, should use decodeURI instead
 
-      var queryStr =
-        window.location.search.indexOf('?icestudio_argv=') === 0
-          ? '?icestudio_argv=' +
-            atob(
-              decodeURI(window.location.search.replace('?icestudio_argv=', ''))
-            ) +
-            '&'
-          : decodeURI(window.location.search) + '&';
-      var regex = new RegExp('.*?[&\\?]icestudio_argv=(.*?)&.*');
-      var val = queryStr.replace(regex, '$1');
+    const loc = window.location.search;
+    var queryStr =
+      (loc.indexOf('?icestudio_argv=')
+        ? decodeURI(loc)
+        : '?icestudio_argv=' +
+          atob(decodeURI(loc.replace('?icestudio_argv=', '')))) + '&';
 
-      var params = val === queryStr ? false : val;
+    console.debug('[cnt.menu] window.location.search:', window.location.search);
+    console.debug('[cnt.menu] queryStr:', queryStr);
+
+    var argv = window.opener.opener ? [] : gui.App.argv;
+
+    var val = queryStr.replace(/.*?[&\\?]icestudio_argv=(.*?)&.*/, '$1');
+    if (val !== queryStr) {
       // If there are url params, compatibilize it with shell call
-      if (typeof gui.App.argv === 'undefined') {
-        gui.App.argv = [];
-      }
-
-      var prop;
-      if (params !== false) {
-        params = JSON.parse(decodeURI(params));
-        for (prop in params) {
-          gui.App.argv.push(params[prop]);
+      var params = JSON.parse(decodeURI(val));
+      console.debug('[cnt.menu] params:', params);
+      if (params) {
+        for (var idx in params) {
+          argv.push(params[idx]);
         }
       }
-      var argv = gui.App.argv;
+    }
 
-      if (window.opener.opener !== null) {
-        argv = [];
-      }
+    $log.debug('[cnt.menu] argv:', argv);
 
-      if (params !== false) {
-        for (prop in params) {
-          argv.push(params[prop]);
-        }
-      }
-      var local = false;
-      for (var i in argv) {
-        var arg = argv[i];
-        processArg(arg);
-        local = arg === 'local' || local;
-      }
-
-      var editable =
-        !project.path.startsWith(common.DEFAULT_COLLECTION_DIR) &&
-        !project.path.startsWith(common.INTERNAL_COLLECTIONS_DIR) &&
-        project.path.startsWith(common.selectedCollection.path);
-
-      if (editable || !local) {
-        updateWorkingdir(project.path);
-      } else {
-        project.path = '';
-      }
-
-      // Plugins
-      $scope.plugins = ICEpm.plugins;
-    }, 500);
-
-    function processArg(arg) {
+    var local = false;
+    for (var arg of argv) {
+      console.log(arg);
       if (nodeFs.existsSync(arg)) {
-        // Open filepath
-        var filepath = arg;
-        project.open(filepath);
+        project.open(arg);
       } else {
-        // Move window
-        var data = arg.split('x');
-        var offset = {
-          x: parseInt(data[0]),
-          y: parseInt(data[1]),
-        };
-        win.moveTo(offset.x, offset.y);
+        switch (arg) {
+          case 'local':
+            local = true;
+            break;
+          default:
+            console.log('DEFAULT', arg);
+            // Move window
+            var data = arg.split('x');
+            win.moveTo(parseInt(data[0], 10), parseInt(data[1], 10));
+        }
       }
+    }
+
+    if (_isEditable(project.path) || !local) {
+      updateWorkingdir(project.path);
+    } else {
+      project.path = '';
+    }
+
+    // Plugins
+    $scope.plugins = ICEpm.plugins;
+
+    function _isEditable(fpath) {
+      const cond = [_isInDefault(fpath, false), _isInInternal(fpath, false)];
+      const editable = !cond[0] && !cond[1];
+      console.debug('[cnt.menu._isEditable] fpath:', fpath);
+      console.debug(
+        '[cnt.menu._isEditable] _isInDefault:',
+        common.DEFAULT_COLLECTION_DIR,
+        cond[0]
+      );
+      console.debug(
+        '[cnt.menu._isEditable] _isInInternal:',
+        common.INTERNAL_COLLECTIONS_DIR,
+        cond[1]
+      );
+      console.debug('[cnt.menu._isEditable] editable?', editable);
+      return editable;
+    }
+
+    function _isInCollection(fpath, name, cpath) {
+      return name
+        ? fpath.startsWith(nodePath.join(cpath, name))
+        : fpath.startsWith(cpath);
+    }
+
+    function _isInDefault(fpath, name) {
+      return _isInCollection(fpath, name, common.DEFAULT_COLLECTION_DIR);
+    }
+
+    function _isInInternal(fpath, name) {
+      return _isInCollection(fpath, name, common.INTERNAL_COLLECTIONS_DIR);
+    }
+
+    function _isInExternal(fpath) {
+      return _isInCollection(fpath, name, profile.get('externalCollections'));
     }
 
     //-- File
 
-    $scope.newProject = function () {
-      utils.newWindow();
-    };
+    shortcuts.method('newProject', utils.newWindow);
+    shortcuts.method('openProject', _openProjectDialog);
+    shortcuts.method('saveProject', _saveProject);
+    shortcuts.method('saveProjectAs', _saveProjectAs);
+    shortcuts.method('quit', $scope.quit);
 
-    $scope.openProjectDialog = function () {
+    function _openProjectDialog() {
       utils.openDialog('#input-open-project', '.ice', function (filepath) {
+        // This is the first action, open the project in the same window
         if (zeroProject) {
-          // If this is the first action, open
-          // the projec in the same window
           updateWorkingdir(filepath);
           project.open(filepath);
-        } else if (project.changed || !equalWorkingFilepath(filepath)) {
-          // If this is not the first action, and
-          // the file path is different, open
-          // the project in a new window
-          utils.newWindow(filepath);
+          return;
         }
+        // If the file path is different, open the project in a new window
+        if (project.changed || !equalWorkingFilepath(filepath)) {
+          utils.newWindow(filepath);
+          return;
+        }
+        // FIXME: should not fail silently, but produce a meaningful warning
       });
-    };
+    }
 
-    $scope.openProject = function (filepath) {
+    function _openProject(filepath) {
       if (zeroProject) {
-        // If this is the first action, open
-        // the project in the same window
-        var editable =
-          !filepath.startsWith(common.DEFAULT_COLLECTION_DIR) &&
-          !filepath.startsWith(common.INTERNAL_COLLECTIONS_DIR) &&
-          filepath.startsWith(common.selectedCollection.path);
-        updateWorkingdir(editable ? filepath : '');
+        // This is the first action, open the project in the same window
+        updateWorkingdir(_isEditable(filepath) ? filepath : '');
         project.open(filepath, true);
-      } else {
-        // If this is not the first action, and
-        // the file path is different, open
-        // the project in a new window
-        utils.newWindow(filepath, true);
+        return;
       }
-    };
+      utils.newWindow(filepath, true);
+    }
 
-    $scope.saveProject = function () {
+    function _saveProject() {
       if (common.isEditingSubmodule) {
         alertify.alert(
           gettextCatalog.getString('Save submodule'),
@@ -237,7 +255,6 @@ angular
           ),
           function () {}
         );
-
         return;
       }
       var filepath = project.path;
@@ -247,11 +264,11 @@ angular
         });
         resetChangedStack();
       } else {
-        $scope.saveProjectAs();
+        _saveProjectAs();
       }
-    };
+    }
 
-    $scope.doSaveProjectAs = function (localCallback) {
+    function _saveProjectAsDialog(localCallback) {
       utils.saveDialog('#input-save-project', '.ice', function (filepath) {
         updateWorkingdir(filepath);
         project.save(filepath, function () {
@@ -262,9 +279,9 @@ angular
           localCallback();
         }
       });
-    };
+    }
 
-    $scope.saveProjectAs = function (localCallback) {
+    function _saveProjectAs(localCallback) {
       if (common.isEditingSubmodule) {
         alertify.confirm(
           gettextCatalog.getString('Export submodule'),
@@ -272,39 +289,23 @@ angular
             'You are editing a submodule, if you save it, you save only the submodule (in this situation "save as" works like "export module"), Do you like to continue?'
           ),
           function () {
-            $scope.doSaveProjectAs(localCallback);
+            _saveProjectAsDialog(localCallback);
           },
           function () {}
         );
       } else {
-        $scope.doSaveProjectAs(localCallback);
-      }
-    };
-
-    function reloadCollectionsIfRequired(filepath) {
-      var selected = common.selectedCollection.name;
-      if (filepath.startsWith(common.INTERNAL_COLLECTIONS_DIR)) {
-        collections.loadInternalCollections();
-      }
-      if (filepath.startsWith(profile.get('externalCollections'))) {
-        collections.loadExternalCollections();
-      }
-      if (
-        (selected &&
-          filepath.startsWith(
-            nodePath.join(common.INTERNAL_COLLECTIONS_DIR, selected)
-          )) ||
-        filepath.startsWith(
-          nodePath.join(profile.get('externalCollections'), selected)
-        )
-      ) {
-        collections.selectCollection(common.selectedCollection.path);
+        _saveProjectAsDialog(localCallback);
       }
     }
 
-    $rootScope.$on('saveProjectAs', function (event, callback) {
-      $scope.saveProjectAs(callback);
-    });
+    function reloadCollectionsIfRequired(filepath) {
+      if (_isInInternal(filepath, false)) {
+        collections.loadInternalCollections();
+      }
+      if (_isInExternal(filepath, false)) {
+        collections.loadExternalCollections();
+      }
+    }
 
     $scope.addAsBlock = function () {
       var notification = true;
@@ -408,18 +409,14 @@ angular
       return $scope.workingdir + project.name + '.ice' === filepath;
     }
 
-    $scope.quit = function () {
-      exit();
-    };
-
-    function exit() {
-      function _exit() {
+    function _exit() {
+      function __exit() {
         //win.hide();
         win.close(true);
       }
 
       if (!project.changed) {
-        _exit();
+        __exit();
         return;
       }
       alertify
@@ -429,7 +426,7 @@ angular
             'Your changes will be lost if you don’t save them'
           ),
           function () {
-            _exit();
+            __exit();
           },
           function () {}
         )
@@ -443,21 +440,28 @@ angular
 
     //-- Edit
 
-    $scope.undoGraph = function () {
+    $scope.undoGraph = () => {
       graph.undo();
     };
-
-    $scope.redoGraph = function () {
+    $scope.redoGraph = () => {
       graph.redo();
     };
-
-    $scope.cutSelected = function () {
+    $scope.cutSelected = () => {
       graph.cutSelected();
     };
-
-    $scope.copySelected = function () {
+    $scope.copySelected = () => {
       graph.copySelected();
     };
+
+    shortcuts.method('undoGraph', $scope.undo);
+    shortcuts.method('redoGraph', $scope.redoGraph);
+    shortcuts.method('redoGraph2', $scope.redoGraph);
+    shortcuts.method('cutSelected', $scope.cutSelected);
+    shortcuts.method('copySelected', $scope.copySelected);
+    shortcuts.method('pasteAndCloneSelected', $scope.pasteAndCloneSelected);
+    shortcuts.method('pasteSelected', $scope.pasteSelected);
+    shortcuts.method('selectAll', $scope.selectAll);
+    shortcuts.method('fitContent', $scope.fitContent);
 
     var paste = true;
 
@@ -517,14 +521,7 @@ angular
             ) {
               profile.set('externalCollections', newExternalCollections);
               collections.loadExternalCollections();
-              collections.selectCollection(); // default
               utils.rootScopeSafeApply();
-              if (
-                common.selectedCollection.path.startsWith(
-                  newExternalCollections
-                )
-              ) {
-              }
               alertify.success(
                 gettextCatalog.getString('External collections updated')
               );
@@ -708,7 +705,7 @@ angular
             graph.loadDesign(project.get('design'), {
               disabled: false,
             });
-            //alertify.success(gettextCatalog.getString('Language {{name}} selected',  { name: utils.bold(language) }));
+            //alertify.success(gettextCatalog.getString("Language {{name}} selected",  { name: utils.bold(language) }));
           }
         );
         // Rearrange the collections content
@@ -846,10 +843,11 @@ angular
       });
     }
 
-    $scope.showCollectionData = function () {
-      var collection = common.selectedCollection;
-      const cname = collection.name ? collection.name : 'Default';
+    $scope.showCollectionData = function (collection) {
+      const cname = collection.name;
+      console.debug('[menu.showCollectionData] cname:', cname);
       var readme = collection.content.readme;
+      console.debug('[menu.showCollectionData] content:', collection.content);
       if (!readme) {
         alertify.error(
           gettextCatalog.getString(
@@ -872,7 +870,7 @@ angular
       }
       _openWindow(
         'resources/viewers/markdown/readme.html?readme=' + escape(readme),
-        (cname ? cname : 'Default') + ' Collection - Data'
+        'Collection: ' + cname
       );
     };
 
@@ -896,28 +894,6 @@ angular
       }
     });
 
-    $scope.selectCollection = function (collection) {
-      if (common.selectedCollection.path !== collection.path) {
-        var name = collection.name;
-        profile.set(
-          'collection',
-          collections.selectCollection(collection.path)
-        );
-        alertify.success(
-          gettextCatalog.getString('Collection {{name}} selected', {
-            name: utils.bold(name ? name : 'Default'),
-          })
-        );
-      }
-    };
-
-    function updateSelectedCollection() {
-      profile.set(
-        'collection',
-        collections.selectCollection(profile.get('collection'))
-      );
-    }
-
     //-- Boards
 
     $(document).on('boardChanged', function (evt, board) {
@@ -939,27 +915,33 @@ angular
 
       if (common.selectedBoard.name !== name) {
         if (!graph.isEmpty()) {
-          alertify.confirm(
-            gettextCatalog.getString(
-              'Do you want to change to {{name}} board?',
-              {name: utils.bold(board.info.label)}
-            ),
-            gettextCatalog.getString(
-              'The current FPGA I/O configuration will be lost.'
-            ),
-            function () {
-              _boardSelected();
-            },
-            function () {}
-          );
+          alertify
+            .confirm(
+              gettextCatalog.getString(
+                'Do you want to change to {{name}} board?',
+                {name: utils.bold(board.info.label)}
+              ),
+              gettextCatalog.getString(
+                'The current FPGA I/O configuration will be lost.'
+              ),
+              function () {
+                _boardSelected();
+              },
+              function () {}
+            )
+            .setting({
+              labels: {
+                ok: gettextCatalog.getString('Ok'),
+                cancel: gettextCatalog.getString('Cancel'),
+              },
+            });
         } else {
           _boardSelected();
         }
       }
 
       function _boardSelected() {
-        var reset = true;
-        var newBoard = graph.selectBoard(board, reset);
+        var newBoard = graph.selectBoard(board, true);
         profile.set('board', newBoard.name);
         alertify.success(
           gettextCatalog.getString('Board {{name}} selected', {
@@ -1058,7 +1040,6 @@ angular
 
     $scope.reloadCollections = function () {
       collections.loadAllCollections();
-      collections.selectCollection(common.selectedCollection.path);
     };
 
     $scope.removeCollection = function (collection) {
@@ -1071,7 +1052,6 @@ angular
         ),
         function () {
           tools.removeCollection(collection);
-          updateSelectedCollection();
           utils.rootScopeSafeApply();
         }
       );
@@ -1085,7 +1065,6 @@ angular
           ),
           function () {
             tools.removeAllCollections();
-            updateSelectedCollection();
             utils.rootScopeSafeApply();
           }
         );
@@ -1184,48 +1163,6 @@ angular
         promptShown = false;
       },
     });
-
-    // Configure all shortcuts
-
-    // -- File
-    shortcuts.method('newProject', $scope.newProject);
-    shortcuts.method('openProject', $scope.openProjectDialog);
-    shortcuts.method('saveProject', $scope.saveProject);
-    shortcuts.method('saveProjectAs', $scope.saveProjectAs);
-    shortcuts.method('quit', $scope.quit);
-
-    // -- Edit
-    shortcuts.method('undoGraph', $scope.undoGraph);
-    shortcuts.method('redoGraph', $scope.redoGraph);
-    shortcuts.method('redoGraph2', $scope.redoGraph);
-    shortcuts.method('cutSelected', $scope.cutSelected);
-    shortcuts.method('copySelected', $scope.copySelected);
-    shortcuts.method('pasteAndCloneSelected', $scope.pasteAndCloneSelected);
-    shortcuts.method('pasteSelected', $scope.pasteSelected);
-    shortcuts.method('selectAll', $scope.selectAll);
-    shortcuts.method('fitContent', $scope.fitContent);
-
-    // -- Tools
-    shortcuts.method('verifyCode', $scope.verifyCode);
-    shortcuts.method('buildCode', $scope.buildCode);
-    shortcuts.method('uploadCode', $scope.uploadCode);
-
-    // -- Misc
-    shortcuts.method('stepUp', graph.stepUp);
-    shortcuts.method('stepDown', graph.stepDown);
-    shortcuts.method('stepLeft', graph.stepLeft);
-    shortcuts.method('stepRight', graph.stepRight);
-
-    shortcuts.method('removeSelected', removeSelected);
-    shortcuts.method('back', function () {
-      if (graph.isEnabled()) {
-        removeSelected();
-      } else {
-        $rootScope.breadcrumbsBack();
-      }
-    });
-
-    shortcuts.method('takeSnapshot', takeSnapshot);
 
     $(document).on('keydown', function (event) {
       var opt = {
@@ -1327,4 +1264,28 @@ angular
         event.preventDefault();
       }
     });
+
+    // -- Tools
+
+    shortcuts.method('verifyCode', $scope.verifyCode);
+    shortcuts.method('buildCode', $scope.buildCode);
+    shortcuts.method('uploadCode', $scope.uploadCode);
+
+    // -- Misc
+
+    shortcuts.method('stepUp', graph.stepUp);
+    shortcuts.method('stepDown', graph.stepDown);
+    shortcuts.method('stepLeft', graph.stepLeft);
+    shortcuts.method('stepRight', graph.stepRight);
+
+    shortcuts.method('removeSelected', removeSelected);
+    shortcuts.method('back', function () {
+      if (graph.isEnabled()) {
+        removeSelected();
+      } else {
+        $rootScope.breadcrumbsBack();
+      }
+    });
+
+    shortcuts.method('takeSnapshot', takeSnapshot);
   });

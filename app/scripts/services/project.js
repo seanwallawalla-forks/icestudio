@@ -513,12 +513,8 @@ angular
             'You need to save the current project. Do you want to continue?'
           ),
           function () {
-            // FIXME: is '$emit" the best mechanism to do this?
-            $rootScope.$emit('saveProjectAs', function () {
-              setTimeout(function () {
-                _importBlockWithFiles();
-              }, 500);
-            });
+            $rootScope.saveProjectAs();
+            _importBlockWithFiles();
           },
           function () {}
         )

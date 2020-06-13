@@ -24,7 +24,6 @@ angular
     this.defaultCollection = null;
     this.internalCollections = [];
     this.externalCollections = [];
-    this.selectedCollection = null;
 
     // FPGA resources
     this.FPGAResources = {
@@ -152,6 +151,7 @@ angular
       }
       return _dir;
     }
+
     this.setBuildDir = function (buildpath) {
       let fserror=false;
       if (!nodeFs.existsSync(buildpath)) {

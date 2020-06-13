@@ -65,11 +65,6 @@ angular
         $('html').attr('lang', profile.get('language'));
         // Rearrange collections
         collections.sort();
-        // Initialize selected collection
-        profile.set(
-          'collection',
-          collections.selectCollection(profile.get('collection'))
-        );
         // Initialize title
         project.updateTitle(gettextCatalog.getString('Untitled'));
         $('body').removeClass('waiting');
