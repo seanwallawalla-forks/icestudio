@@ -266,7 +266,7 @@ module.exports = function (grunt) {
 
     // Execute nw application
     exec: {
-      nw: 'nw app' + (WIN32 ? '' : ' 2>/dev/null'),
+      nw: 'nw app 0x0' + (WIN32 ? '' : ' 2>/dev/null'),
       stopNW:
         (WIN32
           ? 'taskkill /F /IM nw.exe >NUL 2>&1'
