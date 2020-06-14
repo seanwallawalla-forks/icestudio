@@ -1,0 +1,11 @@
+.vscode
+app/docs
+app/resources/collection
+app/resources/fonts
+app/resources/plugins/serial-term/js/xterm
+app/resources/plugins/serial-term/css/tailwind.css
+bower_components
+cache
+dist
+docs/_build
+node_modules
