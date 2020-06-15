@@ -77,6 +77,16 @@ module.exports = function (grunt) {
     },
   };
 
+  gruntCfg.toolchain = {
+    options: {
+      apioMin: '<%=pkg.apio.min%>',
+      apioMax: '<%=pkg.apio.max%>',
+      buildDir: 'dist/',
+      extraPackages: '<%=pkg.apio.extras%>',
+      platforms: platforms,
+    },
+  };
+
   var pkg = grunt.file.readJSON('app/package.json');
 
   require('load-grunt-tasks')(grunt, options);
@@ -88,7 +98,7 @@ module.exports = function (grunt) {
   grunt.initConfig({
     pkg: pkg,
     copy: gruntCfg.copy, // Copy dist files
-
+    toolchain: gruntCfg.toolchain, // Create standalone toolchains for each platform
     // Automatically inject Bower components into the app
     wiredep: {
       task: {
@@ -146,17 +156,6 @@ module.exports = function (grunt) {
         platforms: platforms,
       },
       src: ['dist/tmp/**'],
-    },
-
-    // Create standalone toolchains for each platform
-    toolchain: {
-      options: {
-        apioMin: '<%=pkg.apio.min%>',
-        apioMax: '<%=pkg.apio.max%>',
-        buildDir: 'dist/',
-        extraPackages: '<%=pkg.apio.extras%>',
-        platforms: platforms,
-      },
     },
 
     // ONLY MAC: generate a DMG package
