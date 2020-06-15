@@ -471,7 +471,7 @@
                       'Manage toolchain' | translate }}</a
                     >
                     <ul uib-dropdown-menu>
-                      <li ng-class="toolchain.disabled ? 'disabled' : ''">
+                      <li ng-class="toolchain.disabled ? 'is-disabled' : ''">
                         <a
                           href
                           ng-hide="toolchain.installed"
@@ -486,7 +486,7 @@
                         >
                       </li>
                       <li
-                        ng-class="(toolchain.disabled || !toolchain.installed) ? 'disabled' : ''"
+                        ng-class="(toolchain.disabled || !toolchain.installed) ? 'is-disabled' : ''"
                       >
                         <a
                           href
@@ -495,7 +495,7 @@
                         >
                       </li>
                       <li
-                        ng-class="(toolchain.disabled || !toolchain.installed) ? 'disabled' : ''"
+                        ng-class="(toolchain.disabled || !toolchain.installed) ? 'is-disabled' : ''"
                       >
                         <a
                           href
@@ -689,7 +689,10 @@
               <span class="caret"></span
             ></a>
             <ul uib-dropdown-menu>
-              <li ng-class="pinoutAvailable() ? '' : 'is-disabled'">
+              <li
+                ng-class="pinoutAvailable() ? '' : 'is-disabled'"
+                style="text-align: center;"
+              >
                 <a href ng-click="showPinout()"
                   ><i>{{ common.selectedBoard.info.label }}</i></a
                 >
