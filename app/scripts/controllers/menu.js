@@ -1139,33 +1139,12 @@ angular
       utils.rootScopeSafeApply();
     }
 
-    // Detect prompt
-
-    var promptShown = false;
-    alertify.prompt().set({
-      onshow: function () {
-        promptShown = true;
-      },
-      onclose: function () {
-        promptShown = false;
-      },
-    });
-    alertify.confirm().set({
-      onshow: function () {
-        promptShown = true;
-      },
-      onclose: function () {
-        promptShown = false;
-      },
-    });
-
     $(document).on('keydown', function (event) {
-      var opt = {
-        prompt: promptShown,
-        disabled: !graph.isEnabled(),
-      };
       event.stopImmediatePropagation();
-      var ret = shortcuts.execute(event, opt);
+      var ret = shortcuts.execute(event, {
+        prompt: false,
+        disabled: !graph.isEnabled(),
+      });
       if (ret.preventDefault) {
         event.preventDefault();
       }
@@ -1197,9 +1176,8 @@ angular
     }
 
     // Show/Hide menu management
+
     var menu;
-    var timerOpen;
-    var timerClose;
 
     // mousedown event
     var mousedown = false;
@@ -1210,46 +1188,31 @@ angular
     $(document).on('mousedown', '.paper', function () {
       mousedown = true;
       // Close current menu
-      if (
-        typeof $scope.status !== 'undefined' &&
-        typeof $scope.status[menu] !== 'undefined'
-      ) {
+      if ($scope.status && $scope.status[menu]) {
         $scope.status[menu] = false;
       }
       utils.rootScopeSafeApply();
     });
 
-    // Show menu with delay
     $scope.showMenu = function (newMenu) {
-      cancelTimeouts();
       if (
         !mousedown &&
         !graph.addingDraggableBlock &&
         !$scope.status[newMenu]
       ) {
-        timerOpen = $timeout(function () {
-          $scope.fixMenu(newMenu);
-        }, 300);
+        _fixMenu(newMenu);
       }
     };
 
-    // Hide menu with delay
     $scope.hideMenu = function () {
-      cancelTimeouts();
-      timerClose = $timeout(function () {
-        $scope.status[menu] = false;
-      }, 250);
+      $scope.status[menu] = false;
     };
 
-    // Fix menu
-    $scope.fixMenu = function (newMenu) {
+    $scope.fixMenu = _fixMenu;
+
+    function _fixMenu(newMenu) {
       menu = newMenu;
       $scope.status[menu] = true;
-    };
-
-    function cancelTimeouts() {
-      $timeout.cancel(timerOpen);
-      $timeout.cancel(timerClose);
     }
 
     // Disable click in submenus
