@@ -101,6 +101,22 @@ module.exports = function (grunt) {
     src: ['dist/tmp/**'],
   };
 
+  gruntCfg.watch = {
+    scripts: {
+      files: [
+        'app/resources/**/*.*',
+        'app/scripts/**/*.*',
+        'app/styles/**/*.*',
+        'app/views/**/*.*',
+      ],
+      tasks: ['wiredep', 'exec:stopNW', 'exec:nw'],
+      options: {
+        atBegin: true,
+        interrupt: true,
+      },
+    },
+  };
+
   var pkg = grunt.file.readJSON('app/package.json');
 
   require('load-grunt-tasks')(grunt, options);
@@ -114,6 +130,7 @@ module.exports = function (grunt) {
     copy: gruntCfg.copy, // Copy dist files
     toolchain: gruntCfg.toolchain, // Create standalone toolchains for each platform
     nwjs: gruntCfg.nwjs, // Execute nw-build packaging
+    watch: gruntCfg.watch, // Watch files for changes and runs tasks based on the changed files
 
     // Automatically inject Bower components into the app
     wiredep: {
@@ -297,23 +314,6 @@ module.exports = function (grunt) {
             dest: '<%=pkg.name%>-<%=pkg.version%>-osx64',
           },
         ],
-      },
-    },
-
-    // Watch files for changes and runs tasks based on the changed files
-    watch: {
-      scripts: {
-        files: [
-          'app/resources/**/*.*',
-          'app/scripts/**/*.*',
-          'app/styles/**/*.*',
-          'app/views/**/*.*',
-        ],
-        tasks: ['wiredep', 'exec:stopNW', 'exec:nw'],
-        options: {
-          atBegin: true,
-          interrupt: true,
-        },
       },
     },
 
