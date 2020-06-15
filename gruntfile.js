@@ -3,6 +3,17 @@
 module.exports = function (grunt) {
   'use strict';
 
+  const appFiles = [
+    'index.html',
+    'package.json',
+    'fonts/**/*.*',
+    'node_modules/**/*.*',
+    'resources/**/*.*',
+    'scripts/**/*.*',
+    'styles/**/*.*',
+    'views/**/*.*',
+  ];
+
   const WIN32 = process.platform === 'win32';
   const DARWIN = process.platform === 'darwin';
 
@@ -35,20 +46,6 @@ module.exports = function (grunt) {
         ];
       }
   }
-
-  function all(dir) {
-    return dir + '/**/*.*';
-  }
-  var appFiles = [
-    'index.html',
-    'package.json',
-    all('fonts'),
-    all('node_modules'),
-    all('resources'),
-    all('scripts'),
-    all('styles'),
-    all('views'),
-  ];
 
   var gruntCfg = {};
 
