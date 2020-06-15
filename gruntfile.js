@@ -82,9 +82,7 @@ module.exports = function (grunt) {
     // additional tasks can operate on them
     useminPrepare: {
       html: 'app/index.html',
-      options: {
-        dest: 'dist/tmp',
-      },
+      options: {dest: 'dist/tmp'},
     },
 
     // Copy dist files
@@ -115,25 +113,15 @@ module.exports = function (grunt) {
 
     // JSON minification plugin without concatination
     'json-minify': {
-      json: {
-        files: 'dist/tmp/resources/**/*.json',
-      },
-      ice: {
-        files: 'dist/tmp/resources/**/*.ice',
-      },
+      json: {files: 'dist/tmp/resources/**/*.json'},
+      ice: {files: 'dist/tmp/resources/**/*.ice'},
     },
 
     // Uglify configuration options:
-    uglify: {
-      options: {
-        mangle: false,
-      },
-    },
+    uglify: {options: {mangle: false}},
 
     // Rewrite based on filerev and the useminPrepare configuration
-    usemin: {
-      html: ['dist/tmp/index.html'],
-    },
+    usemin: {html: ['dist/tmp/index.html']},
 
     // Execute nw-build packaging
     nwjs: {
@@ -237,9 +225,7 @@ module.exports = function (grunt) {
     // Compress packages usin zip
     compress: {
       linux32: {
-        options: {
-          archive: 'dist/<%=pkg.name%>-<%=pkg.version%>-linux32.zip',
-        },
+        options: {archive: 'dist/<%=pkg.name%>-<%=pkg.version%>-linux32.zip'},
         files: [
           {
             expand: true,
@@ -250,9 +236,7 @@ module.exports = function (grunt) {
         ],
       },
       linux64: {
-        options: {
-          archive: 'dist/<%=pkg.name%>-<%=pkg.version%>-linux64.zip',
-        },
+        options: {archive: 'dist/<%=pkg.name%>-<%=pkg.version%>-linux64.zip'},
         files: [
           {
             expand: true,
@@ -263,9 +247,7 @@ module.exports = function (grunt) {
         ],
       },
       win32: {
-        options: {
-          archive: 'dist/<%=pkg.name%>-<%=pkg.version%>-win32.zip',
-        },
+        options: {archive: 'dist/<%=pkg.name%>-<%=pkg.version%>-win32.zip'},
         files: [
           {
             expand: true,
@@ -276,9 +258,7 @@ module.exports = function (grunt) {
         ],
       },
       win64: {
-        options: {
-          archive: 'dist/<%=pkg.name%>-<%=pkg.version%>-win64.zip',
-        },
+        options: {archive: 'dist/<%=pkg.name%>-<%=pkg.version%>-win64.zip'},
         files: [
           {
             expand: true,
@@ -289,9 +269,7 @@ module.exports = function (grunt) {
         ],
       },
       osx32: {
-        options: {
-          archive: 'dist/<%=pkg.name%>-<%=pkg.version%>-osx32.zip',
-        },
+        options: {archive: 'dist/<%=pkg.name%>-<%=pkg.version%>-osx32.zip'},
         files: [
           {
             expand: true,
@@ -302,9 +280,7 @@ module.exports = function (grunt) {
         ],
       },
       osx64: {
-        options: {
-          archive: 'dist/<%=pkg.name%>-<%=pkg.version%>-osx64.zip',
-        },
+        options: {archive: 'dist/<%=pkg.name%>-<%=pkg.version%>-osx64.zip'},
         files: [
           {
             expand: true,
@@ -401,9 +377,7 @@ module.exports = function (grunt) {
     // Compile PO files into JSON
     nggettext_compile: {
       all: {
-        options: {
-          format: 'json',
-        },
+        options: {format: 'json'},
         files: [
           {
             expand: true,
