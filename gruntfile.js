@@ -87,6 +87,20 @@ module.exports = function (grunt) {
     },
   };
 
+  gruntCfg.nwjs = {
+    options: {
+      version: '0.35.5',
+      flavor: 'sdk', // 'normal' (stable) | 'sdk' (development)
+      zip: false,
+      buildDir: 'dist/',
+      winIco: 'docs/resources/images/logo/icestudio-logo.ico',
+      macIcns: 'docs/resources/images/logo/nw.icns',
+      macPlist: {CFBundleIconFile: 'app'},
+      platforms: platforms,
+    },
+    src: ['dist/tmp/**'],
+  };
+
   var pkg = grunt.file.readJSON('app/package.json');
 
   require('load-grunt-tasks')(grunt, options);
@@ -99,6 +113,8 @@ module.exports = function (grunt) {
     pkg: pkg,
     copy: gruntCfg.copy, // Copy dist files
     toolchain: gruntCfg.toolchain, // Create standalone toolchains for each platform
+    nwjs: gruntCfg.nwjs, // Execute nw-build packaging
+
     // Automatically inject Bower components into the app
     wiredep: {
       task: {
@@ -141,22 +157,6 @@ module.exports = function (grunt) {
 
     // Rewrite based on filerev and the useminPrepare configuration
     usemin: {html: ['dist/tmp/index.html']},
-
-    // Execute nw-build packaging
-    nwjs: {
-      options: {
-        version: '0.35.5',
-        //  flavor: 'normal', // For stable branch
-        flavor: 'sdk', // For development branch
-        zip: false,
-        buildDir: 'dist/',
-        winIco: 'docs/resources/images/logo/icestudio-logo.ico',
-        macIcns: 'docs/resources/images/logo/nw.icns',
-        macPlist: {CFBundleIconFile: 'app'},
-        platforms: platforms,
-      },
-      src: ['dist/tmp/**'],
-    },
 
     // ONLY MAC: generate a DMG package
     appdmg: {
