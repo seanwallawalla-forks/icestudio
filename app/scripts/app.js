@@ -21,7 +21,6 @@ angular
   .run(function (
     profile,
     project,
-    common,
     tools,
     utils,
     boards,
