@@ -153,7 +153,6 @@
   position: absolute;
   bottom: 0;
   width: 100%;
-  min-height: 47px;
   border-top: 1px solid #d5dadd;
 }
 
@@ -165,5 +164,5 @@
 }
 
 .fpga-resources span {
-  margin-right: 20px;
+  padding: 5px 10px;
 }
