@@ -49,6 +49,34 @@ module.exports = function (grunt) {
     all('styles'),
     all('views'),
   ];
+
+  var gruntCfg = {};
+
+  gruntCfg.copy = {
+    dist: {
+      files: [
+        {
+          expand: true,
+          cwd: 'app',
+          dest: 'dist/tmp',
+          src: [
+            'index.html',
+            'package.json',
+            'resources/**',
+            'node_modules/**',
+            'views/*.html',
+          ],
+        },
+        {
+          expand: true,
+          cwd: 'app/bower_components/bootstrap/fonts',
+          dest: 'dist/tmp/fonts',
+          src: '*.*',
+        },
+      ],
+    },
+  };
+
   var pkg = grunt.file.readJSON('app/package.json');
 
   require('load-grunt-tasks')(grunt, options);
@@ -59,6 +87,7 @@ module.exports = function (grunt) {
   // Project configuration
   grunt.initConfig({
     pkg: pkg,
+    copy: gruntCfg.copy, // Copy dist files
 
     // Automatically inject Bower components into the app
     wiredep: {
@@ -89,32 +118,6 @@ module.exports = function (grunt) {
     useminPrepare: {
       html: 'app/index.html',
       options: {dest: 'dist/tmp'},
-    },
-
-    // Copy dist files
-    copy: {
-      dist: {
-        files: [
-          {
-            expand: true,
-            cwd: 'app',
-            dest: 'dist/tmp',
-            src: [
-              'index.html',
-              'package.json',
-              'resources/**',
-              'node_modules/**',
-              'views/*.html',
-            ],
-          },
-          {
-            expand: true,
-            cwd: 'app/bower_components/bootstrap/fonts',
-            dest: 'dist/tmp/fonts',
-            src: '*.*',
-          },
-        ],
-      },
     },
 
     // JSON minification plugin without concatination
