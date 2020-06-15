@@ -398,10 +398,6 @@ module.exports = function (grunt) {
     },
   });
 
-  // Default tasks.
-  grunt.registerTask('default', function () {
-    console.log('Icestudio');
-  });
   grunt.registerTask('getcollection', [
     'clean:collection',
     'wget:collection',
