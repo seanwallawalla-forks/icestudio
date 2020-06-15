@@ -7,9 +7,7 @@
   "license": "GPL-2.0",
   "main": "index.html",
   "chromium-args": "--enable-experimental-web-platform-features",
-  "development": {
-    "mode": false
-  },
+  "development": false,
   "window": {
     "width": 1024,
     "height": 700,

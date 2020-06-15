@@ -2,7 +2,13 @@
 
 angular
   .module('icestudio')
-  .controller('MainCtrl', function (gettextCatalog, common, tools, utils) {
+  .controller('MainCtrl', function (
+    _package,
+    gettextCatalog,
+    common,
+    gui,
+    utils
+  ) {
     'use strict';
 
     alertify.defaults.movable = false;
@@ -19,9 +25,9 @@ angular
       }
     }, 100);
 
-    /* If in package.json appears development:{mode:true}*/
-    /* activate development tools */
-    tools.ifDevelopmentMode();
+    if (_package.development) {
+      gui.Window.get().showDevTools();
+    }
 
     $(document).delegate(
       '.action-open-url-external-browser',
@@ -33,8 +39,7 @@ angular
       }
     );
 
-    /* Plugin menu*/
-    if (ICEpm !== undefined) {
+    if (ICEpm) {
       ICEpm.setPluginDir(common.DEFAULT_PLUGIN_DIR, function () {});
     }
 

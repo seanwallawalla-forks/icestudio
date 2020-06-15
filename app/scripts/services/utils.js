@@ -1400,9 +1400,6 @@ angular
       );
     };
 
-    this.openDevToolsUI = function () {
-      gui.Window.get().showDevTools();
-    };
     this.openUrlExternalBrowser = function (url) {
       gui.Shell.openExternal(url);
       //require('nw.gui').Shell.openExternal( url);

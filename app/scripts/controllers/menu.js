@@ -1073,11 +1073,6 @@ angular
       }
     };
 
-    $scope.showChromeDevTools = function () {
-      //win.showDevTools();
-      utils.openDevToolsUI();
-    };
-
     //-- Help
 
     $scope.openUrl = function (url, $event) {
