@@ -98,6 +98,26 @@ module.exports = function (grunt) {
     src: ['dist/tmp/**'],
   };
 
+  gruntCfg.appdmg = {
+    options: {
+      basepath: '.',
+      title: 'Icestudio Installer',
+      icon: 'docs/resources/images/logo/icestudio-logo.icns',
+      background: 'docs/resources/images/installation/installer-background.png',
+      window: {size: {width: 512, height: 385}},
+      contents: [
+        {x: 345, y: 250, type: 'link', path: '/Applications'},
+        {
+          x: 170,
+          y: 250,
+          type: 'file',
+          path: 'dist/icestudio/osx64/icestudio.app',
+        },
+      ],
+    },
+    target: {dest: 'dist/<%=pkg.name%>-<%=pkg.version%>-osx64.dmg'},
+  };
+
   gruntCfg.watch = {
     scripts: {
       files: [
@@ -148,6 +168,7 @@ module.exports = function (grunt) {
     nwjs: gruntCfg.nwjs, // Execute nw-build packaging
     watch: gruntCfg.watch, // Watch files for changes and runs tasks based on the changed files
     wget: gruntCfg.wget, // Wget: Python installer and Default collection
+    appdmg: gruntCfg.appdmg, // ONLY MAC: generate a DMG package
 
     // Automatically inject Bower components into the app
     wiredep: {
@@ -191,40 +212,6 @@ module.exports = function (grunt) {
 
     // Rewrite based on filerev and the useminPrepare configuration
     usemin: {html: ['dist/tmp/index.html']},
-
-    // ONLY MAC: generate a DMG package
-    appdmg: {
-      options: {
-        basepath: '.',
-        title: 'Icestudio Installer',
-        icon: 'docs/resources/images/logo/icestudio-logo.icns',
-        background:
-          'docs/resources/images/installation/installer-background.png',
-        window: {
-          size: {
-            width: 512,
-            height: 385,
-          },
-        },
-        contents: [
-          {
-            x: 345,
-            y: 250,
-            type: 'link',
-            path: '/Applications',
-          },
-          {
-            x: 170,
-            y: 250,
-            type: 'file',
-            path: 'dist/icestudio/osx64/icestudio.app',
-          },
-        ],
-      },
-      target: {
-        dest: 'dist/<%=pkg.name%>-<%=pkg.version%>-osx64.dmg',
-      },
-    },
 
     // ONLY LINUX: generate AppImage packages
     appimage: {
