@@ -117,6 +117,25 @@ module.exports = function (grunt) {
     },
   };
 
+  gruntCfg.wget = {
+    python32: {
+      options: {overwrite: false},
+      src: 'https://www.python.org/ftp/python/3.8.2/python-3.8.2.exe',
+      dest: 'cache/python/python-3.8.2.exe',
+    },
+    python64: {
+      options: {overwrite: false},
+      src: 'https://www.python.org/ftp/python/3.8.2/python-3.8.2-amd64.exe',
+      dest: 'cache/python/python-3.8.2-amd64.exe',
+    },
+    collection: {
+      options: {overwrite: false},
+      src:
+        'https://github.com/FPGAwars/collection-default/archive/v<%=pkg.collection%>.zip',
+      dest: 'cache/collection/collection-default-v<%=pkg.collection%>.zip',
+    },
+  };
+
   var pkg = grunt.file.readJSON('app/package.json');
 
   require('load-grunt-tasks')(grunt, options);
@@ -131,6 +150,7 @@ module.exports = function (grunt) {
     toolchain: gruntCfg.toolchain, // Create standalone toolchains for each platform
     nwjs: gruntCfg.nwjs, // Execute nw-build packaging
     watch: gruntCfg.watch, // Watch files for changes and runs tasks based on the changed files
+    wget: gruntCfg.wget, // Wget: Python installer and Default collection
 
     // Automatically inject Bower components into the app
     wiredep: {
@@ -314,32 +334,6 @@ module.exports = function (grunt) {
             dest: '<%=pkg.name%>-<%=pkg.version%>-osx64',
           },
         ],
-      },
-    },
-
-    // Wget: Python installer and Default collection
-    wget: {
-      python32: {
-        options: {
-          overwrite: false,
-        },
-        src: 'https://www.python.org/ftp/python/3.8.2/python-3.8.2.exe',
-        dest: 'cache/python/python-3.8.2.exe',
-      },
-      python64: {
-        options: {
-          overwrite: false,
-        },
-        src: 'https://www.python.org/ftp/python/3.8.2/python-3.8.2-amd64.exe',
-        dest: 'cache/python/python-3.8.2-amd64.exe',
-      },
-      collection: {
-        options: {
-          overwrite: false,
-        },
-        src:
-          'https://github.com/FPGAwars/collection-default/archive/v<%=pkg.collection%>.zip',
-        dest: 'cache/collection/collection-default-v<%=pkg.collection%>.zip',
       },
     },
 
