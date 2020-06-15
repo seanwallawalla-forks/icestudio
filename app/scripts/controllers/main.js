@@ -16,14 +16,12 @@ angular
     alertify.defaults.transition = 'fade';
     alertify.defaults.notifier.delay = 3;
 
-    setTimeout(function () {
-      for (const item of ['alert', 'prompt', 'confirm']) {
-        alertify.set(item, 'labels', {
-          ok: gettextCatalog.getString('OK'),
-          cancel: gettextCatalog.getString('Cancel'),
-        });
-      }
-    }, 100);
+    for (const item of ['alert', 'prompt', 'confirm']) {
+      alertify.set(item, 'labels', {
+        ok: gettextCatalog.getString('OK'),
+        cancel: gettextCatalog.getString('Cancel'),
+      });
+    }
 
     if (_package.development) {
       gui.Window.get().showDevTools();
