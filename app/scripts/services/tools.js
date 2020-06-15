@@ -1635,14 +1635,4 @@ angular
         }
       );
     };
-
-    this.ifDevelopmentMode = function () {
-      if (
-        typeof _package.development !== 'undefined' &&
-        typeof _package.development.mode !== 'undefined' &&
-        _package.development.mode === true
-      ) {
-        utils.openDevToolsUI();
-      }
-    };
   });
