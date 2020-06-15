@@ -10,11 +10,32 @@
 .navbar {
   border-bottom: 1px solid #d5dadd;
   margin-bottom: 0;
-  z-index: 1502;
+  min-height: unset;
 }
 
 .navbar-right {
   margin-right: 0;
+}
+
+.nav > li > a {
+  padding: 5px 10px;
+}
+
+.dropdown-menu {
+  border-radius: 0;
+  padding: 0;
+}
+
+.navbar-default .navbar-nav > li > a {
+  color: #333;
+}
+
+.dropdown-menu .divider {
+  margin: 2px 0;
+}
+
+.dropdown-menu > li > a {
+  padding: 3px 10px;
 }
 
 .shortcut {
@@ -23,7 +44,8 @@
   color: #999;
 }
 
-.dropdown-submenu {
+.dropdown-submenu,
+.dropdown-submenu-right {
   position: relative;
 }
 
@@ -31,8 +53,21 @@
   display: block;
   top: 0;
   left: 100%;
-  margin-top: -6px;
-  margin-left: 0;
+  padding: 0;
+  margin-top: -1px;
+  -webkit-border-radius: 0;
+  -moz-border-radius: 0;
+  border-radius: 0;
+  visibility: hidden;
+  transition-delay: 0.3s;
+}
+
+.dropdown-submenu-right > .dropdown-menu {
+  display: block;
+  top: 0;
+  right: 100%;
+  padding: 0;
+  margin-top: -1px;
   -webkit-border-radius: 0;
   -moz-border-radius: 0;
   border-radius: 0;
@@ -43,6 +78,11 @@
 }
 
 .dropdown-submenu:hover > .dropdown-menu {
+  visibility: visible;
+  transition-delay: 0.3s;
+}
+
+.dropdown-submenu-right:hover > .dropdown-menu {
   visibility: visible;
   transition-delay: 0.3s;
 }
@@ -58,41 +98,6 @@
   border-width: 5px 0 5px 5px;
   border-left-color: #ccc;
   margin-top: 5px;
-  margin-right: -10px;
-}
-
-.dropdown-submenu.pull-left {
-  float: none;
-}
-
-.dropdown-submenu.pull-left > .dropdown-menu {
-  left: -100%;
-  margin-left: 10px;
-  -webkit-border-radius: 6px 0 6px 6px;
-  -moz-border-radius: 6px 0 6px 6px;
-  border-radius: 6px 0 6px 6px;
-}
-
-.dropdown-submenu-right {
-  position: relative;
-}
-
-.dropdown-submenu-right > .dropdown-menu {
-  display: block;
-  top: 0;
-  right: 100%;
-  margin-top: -6px;
-  margin-left: -1px;
-  -webkit-border-radius: 0;
-  -moz-border-radius: 0;
-  border-radius: 0;
-  visibility: hidden;
-  transition-delay: 0.3s;
-}
-
-.dropdown-submenu-right:hover > .dropdown-menu {
-  visibility: visible;
-  transition-delay: 0.3s;
 }
 
 .dropdown-submenu-right > a:after {
@@ -106,11 +111,7 @@
   border-width: 5px 5px 5px 0;
   border-right-color: #ccc;
   margin-top: 5px;
-  margin-right: 10px;
-}
-
-.navbar-default .navbar-nav > li > a {
-  color: #333;
+  margin-right: 8px;
 }
 
 .marker {
@@ -118,7 +119,8 @@
   width: 8px;
   height: 8px;
   margin-top: 6px;
-  margin-right: 12px;
+  margin-left: -2px;
+  margin-right: 7px;
   border-radius: 1px;
 }
 .marker-yellow {
@@ -153,7 +155,6 @@
   width: 100%;
   min-height: 47px;
   border-top: 1px solid #d5dadd;
-  z-index: 1501;
 }
 
 .footer div {
