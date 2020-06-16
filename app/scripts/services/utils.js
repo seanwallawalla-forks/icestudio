@@ -248,19 +248,14 @@ angular
     };
 
     this.isOnline = function (callback, error) {
-      nodeOnline(
-        {
-          timeout: 5000,
-        },
-        function (err, online) {
-          if (online) {
-            callback();
-          } else {
-            error();
-            callback(true);
-          }
+      nodeOnline({timeout: 5000}, function (err, online) {
+        if (online) {
+          callback();
+          return;
         }
-      );
+        error();
+        callback(true);
+      });
     };
 
     this.installOnlinePythonPackages = function (callback) {
@@ -559,9 +554,7 @@ angular
         }
       }
       if (callback) {
-        setTimeout(function () {
-          callback();
-        }, 50);
+        callback();
       }
       // Return the best language
       return bestLang;
@@ -682,21 +675,19 @@ angular
         }
       );
       // Restore input values
-      setTimeout(function () {
-        $('#form0').select();
-        for (var i in specs) {
-          var spec = specs[i];
-          switch (spec.type) {
-            case 'text':
-            case 'combobox':
-              $('#form' + i).val(spec.value);
-              break;
-            case 'checkbox':
-              $('#form' + i).prop('checked', spec.value);
-              break;
-          }
+      $('#form0').select();
+      for (var i in specs) {
+        var spec = specs[i];
+        switch (spec.type) {
+          case 'text':
+          case 'combobox':
+            $('#form' + i).val(spec.value);
+            break;
+          case 'checkbox':
+            $('#form' + i).prop('checked', spec.value);
+            break;
         }
-      }, 50);
+      }
     };
 
     this.projectinfoprompt = function (values, callback) {
@@ -896,14 +887,12 @@ angular
     };
 
     this.copySync = function (orig, dest) {
-      var ret = true;
+      if (!nodeFs.existsSync(orig)) {
+        return false;
+      }
       try {
-        if (nodeFs.existsSync(orig)) {
-          nodeFse.copySync(orig, dest);
-        } else {
-          // Error: file does not exist
-          ret = false;
-        }
+        nodeFse.copySync(orig, dest);
+        return true;
       } catch (e) {
         alertify.error(
           gettextCatalog.getString('Error: {{error}}', {
@@ -911,9 +900,8 @@ angular
           }),
           30
         );
-        ret = false;
       }
-      return ret;
+      return false;
     };
 
     this.findIncludedFiles = function (code) {
