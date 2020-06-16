@@ -8,9 +8,16 @@
 }
 
 .navbar {
-  border-bottom: 1px solid #d5dadd;
+  border: 0;
   margin-bottom: 0;
   min-height: unset;
+  background-color: transparent !important;
+}
+
+.navbar-left,
+.navbar-right {
+  border: 1px solid #d5dadd;
+  background: #f8f8f8;
 }
 
 .navbar-right {

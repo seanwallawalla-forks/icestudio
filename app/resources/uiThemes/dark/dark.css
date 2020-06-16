@@ -2,20 +2,19 @@
   background: #222;
 }
 
-.ice-bar {
-  color: white;
-  background: #444;
-  border-bottom: 1px solid #666;
-}
-
 .footer {
   color: white;
-  background: #444;
-  border-top: 1px solid #666;
 }
 
 .dropdown a {
   color: white !important;
+}
+
+.footer,
+.navbar-left,
+.navbar-right {
+  background: #444;
+  border: 1px solid #666;
 }
 
 .navbar-nav > .open > a {
