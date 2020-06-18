@@ -13,6 +13,10 @@ angular
   ) {
     'use strict';
 
+    const _tcStr = function (str, args) {
+      return gettextCatalog.getString(str, args);
+    };
+
     this.enable = function () {
       switch (common.selectedBoard.info.interface) {
         case 'FTDI':
@@ -108,7 +112,7 @@ angular
           reloadRules()
         ),
         function () {
-          alertify.success(gettextCatalog.getString('Drivers enabled'));
+          alertify.success(_tcStr('Drivers enabled'));
         }
       );
     }
@@ -120,7 +124,7 @@ angular
           'rm -f /etc/udev/rules.d/80-fpga-ftdi.rules',
         ].concat(reloadRules()),
         function () {
-          alertify.warning(gettextCatalog.getString('Drivers disabled'));
+          alertify.warning(_tcStr('Drivers disabled'));
         }
       );
     }
@@ -144,7 +148,7 @@ angular
           "echo '" + rules + "' > /etc/udev/rules.d/80-fpga-serial.rules",
         ].concat(reloadRules()),
         function () {
-          alertify.success(gettextCatalog.getString('Drivers enabled'));
+          alertify.success(_tcStr('Drivers enabled'));
         }
       );
     }
@@ -153,7 +157,7 @@ angular
       configureLinuxDrivers(
         ['rm -f /etc/udev/rules.d/80-fpga-serial.rules'].concat(reloadRules()),
         function () {
-          alertify.warning(gettextCatalog.getString('Drivers disabled'));
+          alertify.warning(_tcStr('Drivers disabled'));
         }
       );
     }
@@ -179,9 +183,7 @@ angular
           }
           setTimeout(function () {
             alertify.message(
-              gettextCatalog.getString(
-                '<b>Unplug</b> and <b>reconnect</b> the board'
-              ),
+              _tcStr('<b>Unplug</b> and <b>reconnect</b> the board'),
               5
             );
           }, 1000);
@@ -236,12 +238,12 @@ angular
             stderr.indexOf('brew: No such file or directory') !== -1
           ) {
             alertify.warning(
-              gettextCatalog.getString('{{app}} is required.', {
+              _tcStr('{{app}} is required.', {
                 app: '<b>Homebrew</b>',
               }) +
                 '<br>' +
                 '<u>' +
-                gettextCatalog.getString('Click here to install it') +
+                _tcStr('Click here to install it') +
                 '</u>',
               30
             ).callback = function (isClicked) {
@@ -250,10 +252,7 @@ angular
               }
             };
           } else if (stderr.indexOf('Error: Failed to download') !== -1) {
-            alertify.error(
-              gettextCatalog.getString('Internet connection required'),
-              30
-            );
+            alertify.error(_tcStr('Internet connection required'), 30);
           } else {
             alertify.error(stderr, 30);
           }
@@ -261,7 +260,7 @@ angular
           if (profileSetting) {
             profile.set(profileSetting, true);
           }
-          alertify.success(gettextCatalog.getString('Drivers enabled'));
+          alertify.success(_tcStr('Drivers enabled'));
         }
         utils.endBlockingTask();
       });
@@ -278,7 +277,7 @@ angular
       if (profileSetting) {
         profile.set(profileSetting, false);
       }
-      alertify.warning(gettextCatalog.getString('Drivers disabled'));
+      alertify.warning(_tcStr('Drivers disabled'));
     }
 
     function brewInstall(brewPackage) {
@@ -347,19 +346,16 @@ angular
 
     function enableWindowsDriversFTDI() {
       var message =
-        gettextCatalog.getString(
+        _tcStr(
           '<h4>FTDI driver installation instructions</h4><ol><li>Connect the FPGA board to the USB and wait until Windows finishes the default installation of the driver</li><li>When the OK button is clicked, the FTDI driver installer will be launched in a new window</li><li>In the installer, replace the <b>(Interface 0)</b> driver of the board by <b>libusbK</b></li><li>Unplug and reconnect the board</li></ol>'
-        ) +
-        gettextCatalog.getString(
-          'It is recommended to use <b>USB 2.0</b> ports'
-        );
+        ) + _tcStr('It is recommended to use <b>USB 2.0</b> ports');
       alertify.confirm(message, function () {
         enableWindowsDrivers('ftdi');
       });
     }
 
     function disableWindowsDriversFTDI() {
-      var message = gettextCatalog.getString(
+      var message = _tcStr(
         '<h4>FTDI driver uninstallation instructions</h4><ol><li>Find the FPGA USB Device</li><li>Select the board interface and uninstall the driver</li></ol>'
       );
       alertify.confirm(message, function () {
@@ -368,7 +364,7 @@ angular
     }
 
     function enableWindowsDriversSerial() {
-      var message = gettextCatalog.getString(
+      var message = _tcStr(
         '<h4>Serial driver installation instructions</h4><ol><li>Connect the FPGA board to the USB and wait until Windows finishes the default installation of the driver</li><li>When the OK button is clicked, the Serial driver installer will be launched in a new window</li><li>In the installer, follow the steps to install the driver</li><li>Unplug and reconnect the board</li></ol>'
       );
       alertify.confirm(message, function () {
@@ -377,7 +373,7 @@ angular
     }
 
     function disableWindowsDriversSerial() {
-      var message = gettextCatalog.getString(
+      var message = _tcStr(
         '<h4>Serial driver uninstallation instructions</h4><ol><li>Find the FPGA USB Device</li><li>Select the board interface and uninstall the driver</li></ol>'
       );
       alertify.confirm(message, function () {
@@ -395,9 +391,9 @@ angular
           utils.endBlockingTask();
           if (stderr) {
             alertify.error(
-              gettextCatalog.getString('Toolchain not installed') +
+              _tcStr('Toolchain not installed') +
                 '.<br>' +
-                gettextCatalog.getString('Click here to install it'),
+                _tcStr('Click here to install it'),
               30
             ).callback = function (isClicked) {
               if (isClicked) {
@@ -406,9 +402,7 @@ angular
             };
           } else if (!error) {
             alertify.message(
-              gettextCatalog.getString(
-                '<b>Unplug</b> and <b>reconnect</b> the board'
-              ),
+              _tcStr('<b>Unplug</b> and <b>reconnect</b> the board'),
               5
             );
           }
@@ -425,9 +419,9 @@ angular
           utils.endBlockingTask();
           if (stderr) {
             alertify.error(
-              gettextCatalog.getString('Toolchain not installed') +
+              _tcStr('Toolchain not installed') +
                 '.<br>' +
-                gettextCatalog.getString('Click here to install it'),
+                _tcStr('Click here to install it'),
               30
             ).callback = function (isClicked) {
               if (isClicked) {

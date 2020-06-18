@@ -15,6 +15,10 @@ angular
   ) {
     'use strict';
 
+    const _tcStr = function (str, args) {
+      return gettextCatalog.getString(str, args);
+    };
+
     this.name = ''; // Used in File dialogs
     this.path = ''; // Used in Save / Save as
     this.filepath = ''; // Used to find external resources (.v, .vh, .list)
@@ -62,10 +66,7 @@ angular
           self.load(utils.basename(filepath), data);
         })
         .catch(function () {
-          alertify.error(
-            gettextCatalog.getString('Invalid project format'),
-            30
-          );
+          alertify.error(_tcStr('Invalid project format'), 30);
         });
     };
 
@@ -87,11 +88,10 @@ angular
         var projectBoard = boards.boardLabel(project.design.board);
         alertify
           .confirm(
-            gettextCatalog.getString(
-              'This project is designed for &lt;{{name}}&gt;',
-              {name: projectBoard}
-            ),
-            gettextCatalog.getString(
+            _tcStr('This project is designed for &lt;{{name}}&gt;', {
+              name: projectBoard,
+            }),
+            _tcStr(
               'You can load it as it is or convert it for the &lt;{{name}}&gt; board.',
               {name: common.selectedBoard.info.label}
             ),
@@ -108,8 +108,8 @@ angular
           )
           .setting({
             labels: {
-              ok: gettextCatalog.getString('Load'),
-              cancel: gettextCatalog.getString('Convert'),
+              ok: _tcStr('Load'),
+              cancel: _tcStr('Convert'),
             },
           });
       } else {
@@ -135,7 +135,7 @@ angular
           graph.resetCommandStack();
           graph.fitContent();
           alertify.success(
-            gettextCatalog.getString('Project {{name}} loaded', {
+            _tcStr('Project {{name}} loaded', {
               name: utils.bold(name),
             })
           );
@@ -146,7 +146,7 @@ angular
           self.updateTitle(name);
         } else {
           alertify.error(
-            gettextCatalog.getString('Wrong project format: {{name}}', {
+            _tcStr('Wrong project format: {{name}}', {
               name: utils.bold(name),
             }),
             30
@@ -175,15 +175,13 @@ angular
     function checkVersion(version) {
       if (version > common.VERSION) {
         var errorAlert = alertify.error(
-          gettextCatalog.getString('Unsupported project format {{version}}', {
+          _tcStr('Unsupported project format {{version}}', {
             version: version,
           }),
           30
         );
         alertify.message(
-          gettextCatalog.getString(
-            'Click here to <b>download a newer version</b> of Icestudio'
-          ),
+          _tcStr('Click here to <b>download a newer version</b> of Icestudio'),
           30
         ).callback = function (isClicked) {
           if (isClicked) {
@@ -417,7 +415,7 @@ angular
               callback();
             }
             alertify.success(
-              gettextCatalog.getString('Project {{name}} saved', {
+              _tcStr('Project {{name}} saved', {
                 name: utils.bold(name),
               })
             );
@@ -459,7 +457,7 @@ angular
         self.addBlock(block);
         if (notify) {
           alertify.success(
-            gettextCatalog.getString('Block {{name}} imported', {
+            _tcStr('Block {{name}} imported', {
               name: utils.bold(block.package.name),
             })
           );
@@ -499,10 +497,8 @@ angular
 
       alertify
         .confirm(
-          gettextCatalog.getString(
-            'This import operation requires a project path'
-          ),
-          gettextCatalog.getString(
+          _tcStr('This import operation requires a project path'),
+          _tcStr(
             'You need to save the current project. Do you want to continue?'
           ),
           function () {
@@ -511,7 +507,7 @@ angular
           },
           function () {}
         )
-        .setting({labels: {ok: gettextCatalog.getString('Save')}});
+        .setting({labels: {ok: _tcStr('Save')}});
     }
 
     this.addBlockFile = function (filepath, notify) {
@@ -532,10 +528,7 @@ angular
         })
         .catch(function (e) {
           console.log(e);
-          alertify.error(
-            gettextCatalog.getString('Invalid project format'),
-            30
-          ); // FIXME: other reasons might produce an error
+          alertify.error(_tcStr('Invalid project format'), 30); // FIXME: other reasons might produce an error
         });
     };
 
@@ -554,11 +547,10 @@ angular
               }
               if (nodeFs.existsSync(nodePath.join(destPath, filename))) {
                 alertify.confirm(
-                  gettextCatalog.getString(
-                    'File {{file}} already exists in the project path',
-                    {file: utils.bold(filename)}
-                  ),
-                  gettextCatalog.getString('Do you want to replace it?'),
+                  _tcStr('File {{file}} already exists in the project path', {
+                    file: utils.bold(filename),
+                  }),
+                  _tcStr('Do you want to replace it?'),
                   function () {
                     _ok();
                   },
@@ -586,14 +578,14 @@ angular
       var success = utils.copySync(orig, dest);
       if (success) {
         alertify.message(
-          gettextCatalog.getString('File {{file}} imported', {
+          _tcStr('File {{file}} imported', {
             file: utils.bold(filename),
           }),
           5
         );
       } else {
         alertify.error(
-          gettextCatalog.getString('Original file {{file}} does not exist', {
+          _tcStr('Original file {{file}} does not exist', {
             file: utils.bold(filename),
           }),
           30
