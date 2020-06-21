@@ -1335,12 +1335,12 @@ angular
       return 'v' + id.substring(0, 6);
     };
 
-    this.beginBlockingTask = function () {
+    this.startWait = function () {
       angular.element('#menu').addClass('is-disabled');
       $('body').addClass('waiting');
     };
 
-    this.endBlockingTask = function () {
+    this.endWait = function () {
       angular.element('#menu').removeClass('is-disabled');
       $('body').removeClass('waiting');
     };
