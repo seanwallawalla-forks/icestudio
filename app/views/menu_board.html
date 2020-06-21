@@ -159,6 +159,23 @@
           </div>
         </div>
       </div>
+
+      <table
+        class="table table-hover text-left"
+        style="width: unset; display: inline-table;"
+      >
+        <tr ng-repeat="pin in common.selectedBoard.info.pinout">
+          <td>
+            <i
+              class="fa fa-fw"
+              ng-class="'fa-chevron-' + (pin.type==='output'?'right':'left')"
+              aria-hidden="true"
+            ></i>
+            {{ pin.name }}
+          </td>
+          <td>{{ pin.value }}</td>
+        </tr>
+      </table>
     </div>
   </div>
 </div>
