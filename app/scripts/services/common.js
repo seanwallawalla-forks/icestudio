@@ -16,6 +16,7 @@ angular.module('icestudio').service('common', function (nodePath, nodeTmp) {
   // Selected board
   this.boards = [];
   this.selectedBoard = null;
+  this.selectedDevice = null;
   this.pinoutInputHTML = '';
   this.pinoutOutputHTML = '';
 
