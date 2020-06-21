@@ -34,20 +34,13 @@ angular
     utils.loadProfile(profile, function () {
       collections.loadAllCollections();
       utils.loadLanguage(profile, function () {
-        if (profile.get('board') === '') {
-          utils.selectBoardPrompt(function (selectedBoard) {
-            utils.selectBoard(selectedBoard);
-            profile.set('board', common.selectedBoard.name);
-            tools.checkToolchain();
-          });
-        } else {
-          utils.selectBoard(profile.get('board'));
-          profile.set('board', common.selectedBoard.name);
-          tools.checkToolchain();
-        }
-        collections.sort();
+        utils.selectBoard(profile.get('board'));
+        profile.set('board', common.selectedBoard.name);
+        tools.checkToolchain();
+        //collections.sort();
         project.updateTitle(gettextCatalog.getString('Untitled'));
-        utils.endWait();
+        // TODO: replace this fake loading timeout with a centered logo/banner
+        setTimeout(utils.endWait, 500);
       });
     });
   })
