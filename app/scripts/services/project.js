@@ -3,7 +3,6 @@ angular
   .service('project', function (
     $rootScope,
     alerts,
-    boards,
     common,
     compiler,
     gettextCatalog,
@@ -86,7 +85,7 @@ angular
         common.selectedBoard &&
         project.design.board !== common.selectedBoard.name
       ) {
-        var projectBoard = boards.boardLabel(project.design.board);
+        var projectBoard = common.boardLabel(project.design.board);
         alerts.confirm({
           icon: 'microchip',
           title: _tcStr('This project is designed for &lt;{{name}}&gt;', {
@@ -139,7 +138,7 @@ angular
           common.hasChangesSinceBuild = true;
         });
         if (ret) {
-          boards.selectBoard(project.design.board);
+          utils.selectBoard(project.design.board);
           profile.set('board', common.selectedBoard.name);
           self.updateTitle(name);
         } else {
