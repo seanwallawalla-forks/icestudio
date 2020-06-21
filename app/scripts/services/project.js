@@ -1,6 +1,7 @@
 angular
   .module('icestudio')
   .service('project', function (
+    $log,
     $rootScope,
     alerts,
     common,
@@ -55,8 +56,8 @@ angular
     };
 
     this.open = function (filepath, emptyPath) {
-      console.debug('[srv.project.open] filepath:', filepath);
-      console.debug('[srv.project.open] emptyPath:', emptyPath);
+      $log.debug('[srv.project.open] filepath:', filepath);
+      $log.debug('[srv.project.open] emptyPath:', emptyPath);
       var self = this;
       this.path = emptyPath ? '' : filepath;
       this.filepath = filepath;
@@ -65,7 +66,8 @@ angular
         .then(function (data) {
           self.load(utils.basename(filepath), data);
         })
-        .catch(function () {
+        .catch(function (e) {
+          $log.error(e);
           alertify.error(_tcStr('Invalid project format'), 30);
         });
     };
@@ -76,7 +78,7 @@ angular
         return;
       }
       project = _safeLoad(data, name);
-      console.debug(
+      $log.debug(
         '[srv.project.load] common.selectedBoard',
         common.selectedBoard
       );
@@ -417,8 +419,8 @@ angular
               })
             );
           })
-          .catch(function (error) {
-            alertify.error(error, 30);
+          .catch(function (e) {
+            alertify.error(e, 30);
           });
       }
     };
@@ -525,7 +527,7 @@ angular
           );
         })
         .catch(function (e) {
-          console.log(e);
+          $log.error(e);
           alertify.error(_tcStr('Invalid project format'), 30); // FIXME: other reasons might produce an error
         });
     };
