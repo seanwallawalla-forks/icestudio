@@ -227,11 +227,6 @@
   min-height: 85px !important;
 }
 
-.alertify.ajs-frameless:not(.ajs-resizable)
-  .ajs-dialog.board-window.is-dropdown-open {
-  min-height: 285px !important;
-}
-
 .alertify.ajs-maximized .ajs-dialog.board-window {
   width: unset !important;
 }

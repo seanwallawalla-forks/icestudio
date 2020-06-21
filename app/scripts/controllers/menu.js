@@ -551,8 +551,6 @@ angular
 
     //-- Board options
 
-    var boardDialog = undefined;
-
     // Create a new dialog based on 'alert';
     // so that 'Board options' window is not affected by other alerts
     // See https://alertifyjs.com/factory.html
@@ -566,8 +564,7 @@ angular
             },
             build: function () {
               this.setHeader($('#boardoptshead')[0]);
-              boardDialog = this.elements.dialog;
-              boardDialog.classList.add('board-window');
+              this.elements.dialog.classList.add('board-window');
             },
           };
         },
@@ -594,17 +591,9 @@ angular
         movable: true,
         moveBounded: true,
         maximizable: true,
-        resizable: false,
+        resizable: true,
       });
     }
-
-    $scope.toggleBoardWindowSize = function (open) {
-      if (open) {
-        boardDialog.classList.add('is-dropdown-open');
-      } else {
-        boardDialog.classList.remove('is-dropdown-open');
-      }
-    };
 
     $scope.showPCF = function () {
       gui.Window.open(
