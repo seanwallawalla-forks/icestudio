@@ -25,7 +25,9 @@ angular
     this.filepath = ''; // Used to find external resources (.v, .vh, .list)
     this.changed = false;
     this.backup = false;
-    var project = _default();
+    this.boards = [];
+
+    var __project = _default();
 
     function _default() {
       return {
@@ -46,12 +48,12 @@ angular
     }
 
     this.get = function (key) {
-      return key in project ? project[key] : project;
+      return key in __project ? __project[key] : __project;
     };
 
     this.set = function (key, obj) {
-      if (key in project) {
-        project[key] = obj;
+      if (key in __project) {
+        __project[key] = obj;
       }
     };
 
@@ -77,7 +79,7 @@ angular
       if (!checkVersion(data.version)) {
         return;
       }
-      project = _safeLoad(data, name);
+      __project = _safeLoad(data, name);
       $log.debug(
         '[srv.project.load] common.selectedBoard',
         common.selectedBoard
@@ -85,9 +87,9 @@ angular
       // FIXME: when opening an example in a new window, sometimes (frequently) common.selectedBoard is 'null' here
       if (
         common.selectedBoard &&
-        project.design.board !== common.selectedBoard.name
+        __project.design.board !== common.selectedBoard.name
       ) {
-        var projectBoard = common.boardLabel(project.design.board);
+        var projectBoard = common.boardLabel(__project.design.board);
         alerts.confirm({
           icon: 'microchip',
           title: _tcStr('This project is designed for &lt;{{name}}&gt;', {
@@ -98,7 +100,7 @@ angular
             {name: common.selectedBoard.info.label}
           ),
           onok: () => {
-            project.design.board = common.selectedBoard.name;
+            __project.design.board = common.selectedBoard.name;
             _load(
               true,
               boardMigration(projectBoard, common.selectedBoard.name)
@@ -115,7 +117,7 @@ angular
       }
 
       function _load(reset, originalBoard) {
-        common.allDependencies = project.dependencies;
+        common.allDependencies = __project.dependencies;
         var opt = {reset: reset || false, disabled: false};
         if (originalBoard !== undefined && originalBoard !== false) {
           for (var i = 0; i < common.boards.length; i++) {
@@ -123,13 +125,13 @@ angular
               opt.originalPinout = common.boards[i].info['pinout'];
             }
             if (
-              String(common.boards[i].name) === String(project.design.board)
+              String(common.boards[i].name) === String(__project.design.board)
             ) {
               opt.designPinout = common.boards[i].info['pinout'];
             }
           }
         }
-        var ret = graph.loadDesign(project.design, opt, function () {
+        var ret = graph.loadDesign(__project.design, opt, function () {
           graph.resetCommandStack();
           graph.fitContent();
           alertify.success(
@@ -140,7 +142,7 @@ angular
           common.hasChangesSinceBuild = true;
         });
         if (ret) {
-          utils.selectBoard(project.design.board);
+          utils.selectBoard(__project.design.board);
           profile.set('board', common.selectedBoard.name);
           self.updateTitle(name);
         } else {
@@ -197,39 +199,38 @@ angular
 
     function _safeLoad(data, name) {
       // Backwards compatibility
-      var project = {};
+      var prj = {};
       switch (data.version) {
         case common.VERSION:
         case '1.1':
-          project = data;
+          prj = data;
           break;
         case '1.0':
-          project = convert10To12(data);
+          prj = convert10To12(data);
           break;
         default:
-          project = convertTo10(data, name);
-          project = convert10To12(project);
+          prj = convert10To12(convertTo10(data, name));
           break;
       }
-      project.version = common.VERSION;
-      return project;
+      prj.version = common.VERSION;
+      return prj;
     }
 
     function convert10To12(data) {
-      var project = _default();
-      project.package = data.package;
-      project.design.board = data.design.board;
-      project.design.graph = data.design.graph;
+      var prj = _default();
+      prj.package = data.package;
+      prj.design.board = data.design.board;
+      prj.design.graph = data.design.graph;
 
       var depsInfo = findSubDependencies10(data.design.deps);
-      replaceType10(project, depsInfo);
+      replaceType10(prj, depsInfo);
       for (var d in depsInfo) {
         var dep = depsInfo[d];
         replaceType10(dep.content, depsInfo);
-        project.dependencies[dep.id] = dep.content;
+        prj.dependencies[dep.id] = dep.content;
       }
 
-      return project;
+      return prj;
     }
 
     function findSubDependencies10(deps) {
@@ -258,31 +259,16 @@ angular
       return depsInfo;
     }
 
-    function replaceType10(project, depsInfo) {
-      for (var i in project.design.graph.blocks) {
-        var type = project.design.graph.blocks[i].type;
+    function replaceType10(prj, depsInfo) {
+      for (var i in prj.design.graph.blocks) {
+        var type = prj.design.graph.blocks[i].type;
         if (type.indexOf('basic.') === -1) {
-          project.design.graph.blocks[i].type = depsInfo[type].id;
+          prj.design.graph.blocks[i].type = depsInfo[type].id;
         }
       }
     }
 
     function convertTo10(data, name) {
-      var project = {
-        version: '1.0',
-        package: {
-          name: name || '',
-          version: '',
-          description: name || '',
-          author: '',
-          image: '',
-        },
-        design: {
-          board: '',
-          graph: {},
-          deps: {},
-        },
-      };
       for (var b in data.graph.blocks) {
         var block = data.graph.blocks[b];
         switch (block.type) {
@@ -340,21 +326,34 @@ angular
             break;
         }
       }
-      project.design.board = data.board;
-      project.design.graph = data.graph;
+      var prj = {
+        version: '1.0',
+        package: {
+          name: name || '',
+          version: '',
+          description: name || '',
+          author: '',
+          image: '',
+        },
+        design: {
+          board: data.board,
+          graph: data.graph,
+          deps: {},
+        },
+      };
       // Safe load all dependencies recursively
       for (var key in data.deps) {
-        project.design.deps[key] = convertTo10(data.deps[key], key);
+        prj.design.deps[key] = convertTo10(data.deps[key], key);
       }
 
-      return project;
+      return prj;
     }
 
     this.save = function (filepath, callback) {
       var backupProject = false;
       var name = utils.basename(filepath);
       if (common.isEditingSubmodule) {
-        backupProject = utils.clone(project);
+        backupProject = utils.clone(__project);
       } else {
         this.updateTitle(name);
       }
@@ -368,8 +367,8 @@ angular
         var origPath = utils.dirname(this.filepath);
         var destPath = utils.dirname(filepath);
         // 1. Parse and find included files
-        var code = compiler.generate('verilog', project)[0].content;
-        var listFiles = compiler.generate('list', project);
+        var code = compiler.generate('verilog', __project)[0].content;
+        var listFiles = compiler.generate('list', __project);
         var internalFiles = listFiles.map(function (res) {
           return res.name;
         });
@@ -398,7 +397,7 @@ angular
         doSaveProject();
       }
       if (common.isEditingSubmodule) {
-        project = utils.clone(backupProject);
+        __project = utils.clone(backupProject);
         //        sortGraph();
         //        this.update();
       } else {
@@ -408,7 +407,7 @@ angular
 
       function doSaveProject() {
         utils
-          .saveFile(filepath, pruneProject(project))
+          .saveFile(filepath, pruneProject(__project))
           .then(function () {
             if (callback) {
               callback();
@@ -594,18 +593,18 @@ angular
       return success;
     }
 
-    function pruneProject(project) {
-      var _project = utils.clone(project);
+    function pruneProject(prj) {
+      var _prj = utils.clone(prj);
 
-      _prune(_project);
-      for (var d in _project.dependencies) {
-        _prune(_project.dependencies[d]);
+      _prune(_prj);
+      for (var d in _prj.dependencies) {
+        _prune(_prj.dependencies[d]);
       }
 
-      function _prune(_project) {
-        delete _project.design.state;
-        for (var i in _project.design.graph.blocks) {
-          var block = _project.design.graph.blocks[i];
+      function _prune(_prj) {
+        delete _prj.design.state;
+        for (var i in _prj.design.graph.blocks) {
+          var block = _prj.design.graph.blocks[i];
           switch (block.type) {
             case 'basic.input':
             case 'basic.output':
@@ -630,32 +629,32 @@ angular
         }
       }
 
-      return _project;
+      return _prj;
     }
 
     this.snapshot = function () {
-      this.backup = utils.clone(project);
+      this.backup = utils.clone(__project);
     };
 
     this.restoreSnapshot = function () {
-      project = utils.clone(this.backup);
+      __project = utils.clone(this.backup);
     };
 
     this.update = function (opt, callback) {
       var graphData = graph.toJSON();
       var p = utils.cellsToProject(graphData.cells, opt);
-      project.design.board = p.design.board;
-      project.design.graph = p.design.graph;
-      project.dependencies = p.dependencies;
+      __project.design.board = p.design.board;
+      __project.design.graph = p.design.graph;
+      __project.dependencies = p.dependencies;
       if (
         common.isEditingSubmodule &&
         common.submoduleId &&
         common.allDependencies[common.submoduleId]
       ) {
-        project.package = common.allDependencies[common.submoduleId].package;
+        __project.package = common.allDependencies[common.submoduleId].package;
       }
       var state = graph.getState();
-      project.design.state = {
+      __project.design.state = {
         pan: {
           x: parseFloat(state.pan.x.toFixed(4)),
           y: parseFloat(state.pan.y.toFixed(4)),
@@ -680,7 +679,7 @@ angular
     this.compile = function (target) {
       this.update();
       var opt = {boardRules: profile.get('boardRules')};
-      return compiler.generate(target, project, opt);
+      return compiler.generate(target, __project, opt);
     };
 
     this.addBasicBlock = function (type) {
@@ -732,7 +731,7 @@ angular
     };
 
     this.clear = function () {
-      project = _default();
+      __project = _default();
       graph.clearAll();
       graph.resetTitle();
       graph.resetCommandStack();
