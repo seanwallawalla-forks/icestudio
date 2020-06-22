@@ -9,31 +9,22 @@ var openurl = require('openurl');
 var emoji = require('node-emoji');
 
 const WIRE_WIDTH = 1.5;
-const DARWIN = Boolean(os.platform().indexOf('darwin') > -1);
 
-if (DARWIN) {
-  var aceFontSize = '12';
-} else {
-  var aceFontSize = '14';
-}
+var aceFontSize = Boolean(os.platform().indexOf('darwin') > -1) ? '12' : '14';
 
 // Model element
 
 joint.shapes.ice = {};
 joint.shapes.ice.Model = joint.shapes.basic.Generic.extend({
   markup: `<g class="rotatable">
-      <g class="scalable">
-        <rect class="body"/>
-      </g>
+      <g class="scalable"><rect class="body"/></g>
       <g class="leftPorts disable-port"/>
       <g class="rightPorts"/>
       <g class="topPorts disable-port"/>
       <g class="bottomPorts"/>
     </g>`,
   portMarkup: `<g class="port port<%= index %>">
-      <g class="port-default" id="port-default-<%= id %>-<%= port.id %>">
-         <path/><rect/>
-      </g>
+      <g class="port-default" id="port-default-<%= id %>-<%= port.id %>"><path/><rect/></g>
       <path class="port-wire" id="port-wire-<%= id %>-<%= port.id %>"/>
       <text class="port-label"/>
       <circle class="port-body"/>
@@ -137,10 +128,8 @@ joint.shapes.ice.Model = joint.shapes.basic.Generic.extend({
       var newAttrs = _.omit(this.get('attrs'), this._portSelectors);
       this.set('attrs', newAttrs, {silent: true});
     }
-
     var attrs = {};
     this._portSelectors = [];
-
     _.each(
       ['left', 'right'],
       function (type) {
@@ -166,7 +155,6 @@ joint.shapes.ice.Model = joint.shapes.basic.Generic.extend({
       },
       this
     );
-
     _.each(
       ['top', 'bottom'],
       function (type) {
@@ -192,7 +180,6 @@ joint.shapes.ice.Model = joint.shapes.basic.Generic.extend({
       },
       this
     );
-
     this.attr(attrs, {silent: true});
   },
 
@@ -202,29 +189,23 @@ joint.shapes.ice.Model = joint.shapes.basic.Generic.extend({
     var attrs = {};
     var gridsize = 8;
     var gridunits = length / gridsize;
-
     var portClass = 'port' + index;
     var portSelector = selector + '>.' + portClass;
     var portLabelSelector = portSelector + '>.port-label';
     var portWireSelector = portSelector + '>.port-wire';
     var portBodySelector = portSelector + '>.port-body';
     var portDefaultSelector = portSelector + '>.port-default';
-
     var portColor =
       typeof this.attributes.data.blockColor !== 'undefined'
         ? this.attributes.data.blockColor
         : 'lime';
-
     attrs[portSelector] = {
       ref: '.body',
     };
-
     attrs[portLabelSelector] = {
       text: port.label,
     };
-
     attrs[portWireSelector] = {};
-
     attrs[portBodySelector] = {
       port: {
         id: port.id,
@@ -232,19 +213,15 @@ joint.shapes.ice.Model = joint.shapes.basic.Generic.extend({
         fill: portColor,
       },
     };
-
     attrs[portDefaultSelector] = {
       display: port.default && port.default.apply ? 'inline' : 'none',
     };
-
     if (type === 'leftPorts' || type === 'topPorts') {
       attrs[portSelector]['pointer-events'] = 'none';
       attrs[portWireSelector]['pointer-events'] = 'none';
     }
-
     var offset = port.size && port.size > 1 ? 4 : 1;
     var position = Math.round(((index + 0.5) / total) * gridunits) / gridunits;
-
     switch (type) {
       case 'left':
         attrs[portSelector]['ref-x'] = -8;
@@ -285,7 +262,6 @@ joint.shapes.ice.Model = joint.shapes.basic.Generic.extend({
         attrs[portWireSelector]['d'] = 'M 0 0 L 0 -8';
         break;
     }
-
     return attrs;
   },
 });
@@ -298,21 +274,16 @@ joint.shapes.ice.ModelView = joint.dia.ElementView.extend({
 
     _.bindAll(this, 'updateBox');
     joint.dia.ElementView.prototype.initialize.apply(this, arguments);
-
     this.$box = $(joint.util.template(this.template)());
-
     this.model.on('change', this.updateBox, this);
     this.model.on('remove', this.removeBox, this);
-
     this.updateBox();
-
     this.listenTo(this.model, 'process:ports', this.update);
   },
 
   setupResizer: function () {
     'use strict';
 
-    // Resizer
     if (!this.model.get('disabled')) {
       this.resizing = false;
       this.resizer = this.$box.find('.resizer');
@@ -349,13 +320,10 @@ joint.shapes.ice.ModelView = joint.dia.ElementView.extend({
     'use strict';
 
     var self = event.data.self;
-
     if (self.resizerDisabled) {
       return;
     }
-
     self.model.graph.trigger('batch:start');
-
     self.resizing = true;
     self._clientX = event.clientX;
     self._clientY = event.clientY;
@@ -365,11 +333,9 @@ joint.shapes.ice.ModelView = joint.dia.ElementView.extend({
     'use strict';
 
     var self = event.data.self;
-
     if (!self.resizing || self.resizerDisabled) {
       return;
     }
-
     var type = self.model.get('type');
     var size = self.model.get('size');
     var state = self.model.get('state');
@@ -378,26 +344,19 @@ joint.shapes.ice.ModelView = joint.dia.ElementView.extend({
     if (type === 'ice.Code' || type === 'ice.Memory') {
       minSize = {width: 96, height: 64};
     }
-
     var clientCoords = snapToGrid({x: event.clientX, y: event.clientY});
     var oldClientCoords = snapToGrid({x: self._clientX, y: self._clientY});
-
     var dx = clientCoords.x - oldClientCoords.x;
     var dy = clientCoords.y - oldClientCoords.y;
-
     var width = Math.max(size.width + dx, minSize.width);
     var height = Math.max(size.height + dy, minSize.height);
-
     if (width > minSize.width) {
       self._clientX = event.clientX;
     }
-
     if (height > minSize.height) {
       self._clientY = event.clientY;
     }
-
     self.model.resize(width, height);
-
     function snapToGrid(coords) {
       return {
         x: Math.round(coords.x / state.zoom / gridstep) * gridstep,
@@ -410,11 +369,9 @@ joint.shapes.ice.ModelView = joint.dia.ElementView.extend({
     'use strict';
 
     var self = event.data.self;
-
     if (!self.resizing || self.resizerDisabled) {
       return;
     }
-
     self.resizing = false;
     self.model.graph.trigger('batch:stop');
   },
@@ -549,26 +506,25 @@ joint.shapes.ice.GenericView = joint.shapes.ice.ModelView.extend({
 
   enter: false,
 
-  mouseovercard: function (event /*, x, y*/) {
+  mouseovercard: (event) => {
     'use strict';
 
     if (event && event.which === 0) {
-      // Mouse button not pressed
-      this.showTooltip();
+      this.showTooltip(); // Mouse button not pressed
     }
   },
 
-  mouseoutcard: function (/*event, x, y*/) {
+  mouseoutcard: () => {
     'use strict';
 
     this.hideTooltip();
   },
 
-  mouseupcard: function (/*event, x, y*/) {
+  mouseupcard: () => {
     'use strict';
   },
 
-  mousedowncard: function (/*event, x, y*/) {
+  mousedowncard: () => {
     'use strict';
 
     this.hideTooltip();
@@ -605,12 +561,9 @@ joint.shapes.ice.GenericView = joint.shapes.ice.ModelView.extend({
     'use strict';
 
     joint.shapes.ice.ModelView.prototype.initialize.apply(this, arguments);
-
     this.tooltip = this.model.get('tooltip');
     this.tooltiptext = this.$box.find('.tooltiptext');
-
     this.tooltiptext.text(this.tooltip);
-
     if (this.tooltip.length > 13) {
       this.tooltiptext.addClass('tooltip-medium');
       this.tooltiptext.removeClass('tooltip-large');
@@ -621,11 +574,9 @@ joint.shapes.ice.GenericView = joint.shapes.ice.ModelView.extend({
       this.tooltiptext.removeClass('tooltip-medium');
       this.tooltiptext.removeClass('tooltip-large');
     }
-
     if (this.model.get('config')) {
       this.$box.find('.generic-content').addClass('config-block');
     }
-
     // Initialize content
     this.initializeContent();
   },
@@ -636,17 +587,11 @@ joint.shapes.ice.GenericView = joint.shapes.ice.ModelView.extend({
     var image = this.model.get('image');
     var label = this.model.get('label');
     var ports = this.model.get('leftPorts');
-
     var imageSelector = this.$box.find('img');
     var labelSelector = this.$box.find('label');
-
     if (image) {
-      // Render img
-      imageSelector.attr('src', 'data:image/svg+xml,' + image);
-
-      // Render SVG
-      //imageSelector.append(decodeURI(image));
-
+      imageSelector.attr('src', 'data:image/svg+xml,' + image); // Render img
+      //imageSelector.append(decodeURI(image)); // Render SVG
       imageSelector.removeClass('hidden');
       labelSelector.addClass('hidden');
     } else {
@@ -655,7 +600,6 @@ joint.shapes.ice.GenericView = joint.shapes.ice.ModelView.extend({
       labelSelector.removeClass('hidden');
       imageSelector.addClass('hidden');
     }
-
     // Render clocks
     this.$box.find('.clock').remove();
     var n = ports.length;
@@ -665,10 +609,10 @@ joint.shapes.ice.GenericView = joint.shapes.ice.ModelView.extend({
     for (var i in ports) {
       var port = ports[i];
       if (port.clock) {
-        var top =
+        contentSelector.append(`<div class="clock" style="top: ${
           Math.round(((parseInt(i) + 0.5) * height) / n / gridsize) * gridsize -
-          9;
-        contentSelector.append(`<div class="clock" style="top: ${top}px;">
+          9
+        }px;">
             <svg width="12" height="18"><path d="M-1 0 l10 8-10 8" fill="none" stroke="#555" stroke-width="1.2" stroke-linejoin="round"/>
           </div>`);
       }
@@ -678,65 +622,42 @@ joint.shapes.ice.GenericView = joint.shapes.ice.ModelView.extend({
     'use strict';
 
     var pendingTasks = [];
-    var i, port;
     var bbox = this.model.getBBox();
     var data = this.model.get('data');
     var state = this.model.get('state');
-    var rules = this.model.get('rules');
-    var leftPorts = this.model.get('leftPorts');
-    var rightPorts = this.model.get('rightPorts');
     var modelId = this.model.id;
-
     // Render ports width
     var width = WIRE_WIDTH * state.zoom;
     var pwires = this.$el[0].getElementsByClassName('port-wire');
-    for (i = 0; i < pwires.length; i++) {
+    for (var pwire of pwires) {
       pendingTasks.push({
-        e: pwires[i],
+        e: pwire,
         property: 'stroke-width',
         value: width + 'px',
       });
     }
     var nwidth = width * 3;
-    var tokId = 'port-wire-' + modelId + '-';
-    var dome;
-    for (i = 0; i < leftPorts.length; i++) {
-      port = leftPorts[i];
+    for (var port of this.model
+      .get('leftPorts')
+      .concat(this.model.get('rightPorts'))) {
       if (port.size > 1) {
-        dome = document.getElementById(tokId + port.id);
-
         pendingTasks.push({
-          e: dome,
+          e: document.getElementById(`port-wire-${modelId}-${port.id}`),
           property: 'stroke-width',
           value: nwidth + 'px',
         });
       }
     }
-
-    for (i = 0; i < rightPorts.length; i++) {
-      port = rightPorts[i];
-      if (port.size > 1) {
-        dome = document.getElementById(tokId + port.id);
-
-        pendingTasks.push({
-          e: dome,
-          property: 'stroke-width',
-          value: nwidth + 'px',
-        });
-      }
-    }
-
     // Render rules
-    var portDefault, paths, rects, j;
-
+    var portDefault;
     if (data && data.ports && data.ports.in) {
-      tokId = 'port-default-' + modelId + '-';
-      for (i = 0; i < data.ports.in.length; i++) {
-        port = data.ports.in[i];
-        portDefault = document.getElementById(tokId + port.name);
+      for (var port of data.ports.in) {
+        portDefault = document.getElementById(
+          `port-default-${modelId}-${port.name}`
+        );
         if (
           portDefault !== null &&
-          rules &&
+          this.model.get('rules') &&
           port.default &&
           port.default.apply
         ) {
@@ -745,20 +666,16 @@ joint.shapes.ice.GenericView = joint.shapes.ice.ModelView.extend({
             property: 'display',
             value: 'inline',
           });
-
-          paths = portDefault.querySelectorAll('path');
-          for (j = 0; j < paths.length; j++) {
+          for (var path of portDefault.querySelectorAll('path')) {
             pendingTasks.push({
-              e: paths[j],
+              e: path,
               property: 'stroke-width',
               value: width + 'px',
             });
           }
-
-          rects = portDefault.querySelectorAll('rect');
-          for (j = 0; j < rects.length; j++) {
+          for (var rect of portDefault.querySelectorAll('rect')) {
             pendingTasks.push({
-              e: rects[j],
+              e: rect,
               property: 'stroke-width',
               value: state.zoom + 'px',
             });
@@ -772,63 +689,60 @@ joint.shapes.ice.GenericView = joint.shapes.ice.ModelView.extend({
         }
       }
     }
-
-    var gcontent = this.$box[0].querySelectorAll('.generic-content');
-
-    for (i = 0; i < gcontent.length; i++) {
-      pendingTasks.push({
-        e: gcontent[i],
-        property: 'left',
-        value: Math.round((bbox.width / 2.0) * (state.zoom - 1)) + 'px',
-      });
-      pendingTasks.push({
-        e: gcontent[i],
-        property: 'top',
-        value: Math.round((bbox.height / 2.0) * (state.zoom - 1)) + 'px',
-      });
-      pendingTasks.push({
-        e: gcontent[i],
-        property: 'width',
-        value: Math.round(bbox.width) + 'px',
-      });
-      pendingTasks.push({
-        e: gcontent[i],
-        property: 'height',
-        value: Math.round(bbox.height) + 'px',
-      });
-      pendingTasks.push({
-        e: gcontent[i],
-        property: 'transform',
-        value: 'scale(' + state.zoom + ')',
-      });
+    for (var item of this.$box[0].querySelectorAll('.generic-content')) {
+      pendingTasks.push(
+        {
+          e: item,
+          property: 'left',
+          value: Math.round((bbox.width / 2.0) * (state.zoom - 1)) + 'px',
+        },
+        {
+          e: item,
+          property: 'top',
+          value: Math.round((bbox.height / 2.0) * (state.zoom - 1)) + 'px',
+        },
+        {
+          e: item,
+          property: 'width',
+          value: Math.round(bbox.width) + 'px',
+        },
+        {
+          e: item,
+          property: 'height',
+          value: Math.round(bbox.height) + 'px',
+        },
+        {
+          e: item,
+          property: 'transform',
+          value: 'scale(' + state.zoom + ')',
+        }
+      );
     }
-
-    pendingTasks.push({
-      e: this.$box[0],
-      property: 'left',
-      value: Math.round(bbox.x * state.zoom + state.pan.x) + 'px',
-    });
-    pendingTasks.push({
-      e: this.$box[0],
-      property: 'top',
-      value: Math.round(bbox.y * state.zoom + state.pan.y) + 'px',
-    });
-    pendingTasks.push({
-      e: this.$box[0],
-      property: 'width',
-      value: Math.round(bbox.width * state.zoom) + 'px',
-    });
-    pendingTasks.push({
-      e: this.$box[0],
-      property: 'height',
-      value: Math.round(bbox.height * state.zoom) + 'px',
-    });
-
-    i = pendingTasks.length;
-    for (i = 0; i < pendingTasks.length; i++) {
-      if (pendingTasks[i].e !== null) {
-        pendingTasks[i].e.style[pendingTasks[i].property] =
-          pendingTasks[i].value;
+    pendingTasks.push(
+      {
+        e: this.$box[0],
+        property: 'left',
+        value: Math.round(bbox.x * state.zoom + state.pan.x) + 'px',
+      },
+      {
+        e: this.$box[0],
+        property: 'top',
+        value: Math.round(bbox.y * state.zoom + state.pan.y) + 'px',
+      },
+      {
+        e: this.$box[0],
+        property: 'width',
+        value: Math.round(bbox.width * state.zoom) + 'px',
+      },
+      {
+        e: this.$box[0],
+        property: 'height',
+        value: Math.round(bbox.height * state.zoom) + 'px',
+      }
+    );
+    for (var task of pendingTasks) {
+      if (task.e !== null) {
+        task.e.style[task.property] = task.value;
       }
     }
     return pendingTasks;
@@ -865,23 +779,22 @@ joint.shapes.ice.Output = joint.shapes.ice.Model.extend({
 
 joint.shapes.ice.InputLabel = joint.shapes.ice.Model.extend({
   markup: `<g class="rotatable">
-             <g class="scalable">
-               <rect class="body" />
-             </g>
-             <g class="leftPorts disable-port"/>
-             <g class="rightPorts"/>
-             <g class="topPorts disable-port"/>
-             <g class="bottomPorts"/>
+      <g class="scalable">
+        <rect class="body" />
+      </g>
+      <g class="leftPorts disable-port"/>
+      <g class="rightPorts"/>
+      <g class="topPorts disable-port"/>
+      <g class="bottomPorts"/>
     </g>`,
   portMarkup: `<g class="port port<%= index %>">
-               <g class="port-default" id="port-default-<%= id %>-<%= port.id %>">
-               <path/><rect/>
-               </g>
-               <path class="port-wire" id="port-wire-<%= id %>-<%= port.id %>"/>
-                 <text class="port-label"/>
-                 <circle class="port-body"/>
-               </g>`,
-
+      <g class="port-default" id="port-default-<%= id %>-<%= port.id %>">
+        <path/><rect/>
+      </g>
+      <path class="port-wire" id="port-wire-<%= id %>-<%= port.id %>"/>
+      <text class="port-label"/>
+      <circle class="port-body"/>
+    </g>`,
   //<polygon  class="input-virtual-terminator" points="0 -5,0 34,20 16" style="fill:white;stroke:<%= port.fill %>;stroke-width:3" transform="translate(100 -15)"/>\
   defaults: joint.util.deepSupplement(
     {
@@ -897,22 +810,22 @@ joint.shapes.ice.InputLabel = joint.shapes.ice.Model.extend({
 
 joint.shapes.ice.OutputLabel = joint.shapes.ice.Model.extend({
   markup: `<g class="rotatable">
-             <g class="scalable">
-               <rect class="body"/>
-             </g>
-             <g class="leftPorts disable-port"/>
-             <g class="rightPorts"/>
-             <g class="topPorts disable-port"/>
-             <g class="bottomPorts"/>
+      <g class="scalable">
+        <rect class="body"/>
+      </g>
+      <g class="leftPorts disable-port"/>
+      <g class="rightPorts"/>
+      <g class="topPorts disable-port"/>
+      <g class="bottomPorts"/>
     </g>`,
   portMarkup: `<g class="port port<%= index %>">
-               <g class="port-default" id="port-default-<%= id %>-<%= port.id %>">
-               <path/><rect/>
-               </g>
-               <path class="port-wire" id="port-wire-<%= id %>-<%= port.id %>"/>
-                 <text class="port-label"/>
-                 <circle class="port-body"/>
-               </g>`,
+      <g class="port-default" id="port-default-<%= id %>-<%= port.id %>">
+      <path/><rect/>
+      </g>
+      <path class="port-wire" id="port-wire-<%= id %>-<%= port.id %>"/>
+      <text class="port-label"/>
+      <circle class="port-body"/>
+    </g>`,
 
   //<polygon points="1 0,15 15,0 30,30 30,30 0" style="fill:lime;stroke-width:1" transform="translate(-122 -15)"/>\
   defaults: joint.util.deepSupplement(
@@ -933,12 +846,9 @@ joint.shapes.ice.IOView = joint.shapes.ice.ModelView.extend({
 
     _.bindAll(this, 'updateBox');
     joint.dia.ElementView.prototype.initialize.apply(this, arguments);
-
     this.id = sha1(this.model.get('id')).toString().substring(0, 6);
-
     var data = this.model.get('data');
     var name = data.name + (data.range || '');
-
     this.$box = $(
       joint.util.template(`<div class="io-block">
         <div class="io-virtual-content">
@@ -949,7 +859,6 @@ joint.shapes.ice.IOView = joint.shapes.ice.ModelView.extend({
         </div>
       </div>`)()
     );
-
     this.virtualContentSelector = this.$box.find('.io-virtual-content');
     this.headerSelector = this.$box.find('.header');
     this.nativeDom = {
@@ -958,13 +867,10 @@ joint.shapes.ice.IOView = joint.shapes.ice.ModelView.extend({
         '.io-virtual-content'
       ),
     };
-
     this.model.on('change', this.updateBox, this);
     this.model.on('remove', this.removeBox, this);
-
     this.listenTo(this.model, 'process:ports', this.update);
     joint.dia.ElementView.prototype.initialize.apply(this, arguments);
-
     // Prevent paper from handling pointerdown.
     var self = this;
     var selector = this.$box.find('.select2');
@@ -985,11 +891,8 @@ joint.shapes.ice.IOView = joint.shapes.ice.ModelView.extend({
         }
       }
     });
-
     this.updateBox();
-
     this.updating = false;
-
     // Apply data
     if (!this.model.get('disabled')) {
       this.applyChoices();
@@ -1002,11 +905,11 @@ joint.shapes.ice.IOView = joint.shapes.ice.ModelView.extend({
   applyChoices: function () {
     'use strict';
 
-    var data = this.model.get('data');
-    if (data.pins) {
-      for (var i in data.pins) {
+    var pins = this.model.get('data').pins;
+    if (pins) {
+      for (var pin of pins) {
         this.$box
-          .find('#combo' + this.id + data.pins[i].index)
+          .find('#combo' + this.id + pin.index)
           .empty()
           .append(this.model.get('choices'));
       }
@@ -1019,12 +922,10 @@ joint.shapes.ice.IOView = joint.shapes.ice.ModelView.extend({
     this.updating = true;
     var data = this.model.get('data');
     for (var i in data.pins) {
-      var index = data.pins[i].index;
-      var value = data.pins[i].value;
-      var name = data.pins[i].name;
-      var comboId = '#combo' + this.id + index;
+      var pin = data.pins[i];
+      var comboId = '#combo' + this.id + pin.index;
       var comboSelector = this.$box.find(
-        comboId + ' option:contains(' + name + ')'
+        `${comboId} option:contains(${pin.name})`
       );
       if (comboSelector) {
         // Select by pin name
@@ -1032,7 +933,7 @@ joint.shapes.ice.IOView = joint.shapes.ice.ModelView.extend({
       } else {
         // If there was a pin rename use the pin value
         comboSelector = this.$box.find(comboId);
-        comboSelector.val(value).change();
+        comboSelector.val(pin.value).change();
       }
     }
     this.updating = false;
@@ -1043,15 +944,10 @@ joint.shapes.ice.IOView = joint.shapes.ice.ModelView.extend({
 
     var data = this.model.get('data');
     var name = data.name + (data.range || '');
-    var $label = this.$box.find('label');
-
-    $label.text(name || '');
-
-    // Virtual port (green)
-
+    this.$box.find('label').text(name || '');
     this.virtualContentSelector.removeClass('hidden');
-    if (typeof data.blockColor !== 'undefined') {
-      if (typeof data.oldBlockColor !== 'undefined') {
+    if (data.blockColor) {
+      if (data.oldBlockColor) {
         this.virtualContentSelector.removeClass('color-' + data.oldBlockColor);
       }
       this.virtualContentSelector.addClass('color-' + data.blockColor);
@@ -1114,44 +1010,24 @@ joint.shapes.ice.IOView = joint.shapes.ice.ModelView.extend({
     var data = this.model.get('data');
     var state = this.model.get('state');
     var rules = this.model.get('rules');
-    var leftPorts = this.model.get('leftPorts');
-    var rightPorts = this.model.get('rightPorts');
     var modelId = this.model.id;
-    var portDefault, tokId, dome;
-    var paths, rects;
+    var portDefault;
     var width = WIRE_WIDTH * state.zoom;
-
-    var pwires = this.$el[0].getElementsByClassName('port-wire');
-    for (i = 0; i < pwires.length; i++) {
+    for (var pwire of this.$el[0].getElementsByClassName('port-wire')) {
       pendingTasks.push({
-        e: pwires[i],
+        e: pwire,
         property: 'stroke-width',
         value: width + 'px',
       });
     }
     // Set buses
     var nwidth = width * 3;
-    tokId = 'port-wire-' + modelId + '-';
-    for (i = 0; i < leftPorts.length; i++) {
-      port = leftPorts[i];
+    for (var port of this.model
+      .get('leftPorts')
+      .concat(this.model.get('rightPorts'))) {
       if (port.size > 1) {
-        dome = document.getElementById(tokId + port.id);
-
         pendingTasks.push({
-          e: dome,
-          property: 'stroke-width',
-          value: nwidth + 'px',
-        });
-      }
-    }
-
-    for (i = 0; i < rightPorts.length; i++) {
-      port = rightPorts[i];
-      if (port.size > 1) {
-        dome = document.getElementById(tokId + port.id);
-
-        pendingTasks.push({
-          e: dome,
+          e: document.getElementById(`port-wire-${modelId}-${port.id}`),
           property: 'stroke-width',
           value: nwidth + 'px',
         });
@@ -1159,10 +1035,10 @@ joint.shapes.ice.IOView = joint.shapes.ice.ModelView.extend({
     }
     // Render rules
     if (data && data.ports && data.ports.in) {
-      tokId = 'port-default-' + modelId + '-';
-      for (i = 0; i < data.ports.in.length; i++) {
-        port = data.ports.in[i];
-        portDefault = document.getElementById(tokId + port.name);
+      for (var port of data.ports.in) {
+        portDefault = document.getElementById(
+          `port-default-${modelId}-${port.name}`
+        );
         if (
           portDefault !== null &&
           rules &&
@@ -1175,19 +1051,16 @@ joint.shapes.ice.IOView = joint.shapes.ice.ModelView.extend({
             value: 'inline',
           });
 
-          paths = portDefault.querySelectorAll('path');
-          for (j = 0; j < paths.length; j++) {
+          for (var path of portDefault.querySelectorAll('path')) {
             pendingTasks.push({
-              e: paths[j],
+              e: path,
               property: 'stroke-width',
               value: width + 'px',
             });
           }
-
-          rects = portDefault.querySelectorAll('rect');
-          for (j = 0; j < rects.length; j++) {
+          for (var rect of portDefault.querySelectorAll('rect')) {
             pendingTasks.push({
-              e: rects[j],
+              e: rect,
               property: 'stroke-width',
               value: state.zoom + 'px',
             });
@@ -1202,72 +1075,70 @@ joint.shapes.ice.IOView = joint.shapes.ice.ModelView.extend({
       }
     }
     var virtualtopOffset = 24;
-
     for (i = 0; i < this.nativeDom.virtualContentSelector.length; i++) {
-      pendingTasks.push({
-        e: this.nativeDom.virtualContentSelector[i],
-        property: 'left',
-        value: Math.round((bbox.width / 2.0) * (state.zoom - 1)) + 'px',
-      });
-      pendingTasks.push({
-        e: this.nativeDom.virtualContentSelector[i],
-        property: 'top',
-        value:
-          Math.round(
-            ((bbox.height - virtualtopOffset) / 2.0) * (state.zoom - 1) +
-              (virtualtopOffset / 2.0) * state.zoom
-          ) + 'px',
-      });
-      pendingTasks.push({
-        e: this.nativeDom.virtualContentSelector[i],
-        property: 'width',
-        value: Math.round(bbox.width) + 'px',
-      });
-      pendingTasks.push({
-        e: this.nativeDom.virtualContentSelector[i],
-        property: 'height',
-        value: Math.round(bbox.height - virtualtopOffset) + 'px',
-      });
-      pendingTasks.push({
-        e: this.nativeDom.virtualContentSelector[i],
-        property: 'transform',
-        value: 'scale(' + state.zoom + ')',
-      });
+      pendingTasks.push(
+        {
+          e: this.nativeDom.virtualContentSelector[i],
+          property: 'left',
+          value: Math.round((bbox.width / 2.0) * (state.zoom - 1)) + 'px',
+        },
+        {
+          e: this.nativeDom.virtualContentSelector[i],
+          property: 'top',
+          value:
+            Math.round(
+              ((bbox.height - virtualtopOffset) / 2.0) * (state.zoom - 1) +
+                (virtualtopOffset / 2.0) * state.zoom
+            ) + 'px',
+        },
+        {
+          e: this.nativeDom.virtualContentSelector[i],
+          property: 'width',
+          value: Math.round(bbox.width) + 'px',
+        },
+        {
+          e: this.nativeDom.virtualContentSelector[i],
+          property: 'height',
+          value: Math.round(bbox.height - virtualtopOffset) + 'px',
+        },
+        {
+          e: this.nativeDom.virtualContentSelector[i],
+          property: 'transform',
+          value: 'scale(' + state.zoom + ')',
+        }
+      );
     }
-
     if (data.name || data.range || data.clock) {
       this.headerSelector.removeClass('hidden');
     } else {
       this.headerSelector.addClass('hidden');
     }
-
     // Render block
-    pendingTasks.push({
-      e: this.nativeDom.box,
-      property: 'left',
-      value: Math.round(bbox.x * state.zoom + state.pan.x) + 'px',
-    });
-    pendingTasks.push({
-      e: this.nativeDom.box,
-      property: 'top',
-      value: Math.round(bbox.y * state.zoom + state.pan.y) + 'px',
-    });
-    pendingTasks.push({
-      e: this.nativeDom.box,
-      property: 'width',
-      value: Math.round(bbox.width * state.zoom) + 'px',
-    });
-    pendingTasks.push({
-      e: this.nativeDom.box,
-      property: 'height',
-      value: Math.round(bbox.height * state.zoom) + 'px',
-    });
-
-    i = pendingTasks.length;
-    for (i = 0; i < pendingTasks.length; i++) {
-      if (pendingTasks[i].e !== null) {
-        pendingTasks[i].e.style[pendingTasks[i].property] =
-          pendingTasks[i].value;
+    pendingTasks.push(
+      {
+        e: this.nativeDom.box,
+        property: 'left',
+        value: Math.round(bbox.x * state.zoom + state.pan.x) + 'px',
+      },
+      {
+        e: this.nativeDom.box,
+        property: 'top',
+        value: Math.round(bbox.y * state.zoom + state.pan.y) + 'px',
+      },
+      {
+        e: this.nativeDom.box,
+        property: 'width',
+        value: Math.round(bbox.width * state.zoom) + 'px',
+      },
+      {
+        e: this.nativeDom.box,
+        property: 'height',
+        value: Math.round(bbox.height * state.zoom) + 'px',
+      }
+    );
+    for (var task of pendingTasks) {
+      if (task.e) {
+        task.e.style[task.property] = task.value;
       }
     }
     return pendingTasks;
@@ -1276,10 +1147,9 @@ joint.shapes.ice.IOView = joint.shapes.ice.ModelView.extend({
   drawPendingTasks: function (tasks) {
     'use strict';
 
-    var i = tasks.length;
-    for (i = 0; i < tasks.length; i++) {
-      if (this.tasks[i].e !== null) {
-        tasks[i].e.style[tasks[i].property] = tasks[i].value;
+    for (var task of tasks) {
+      if (task.e) {
+        task.e.style[task.property] = task.value;
       }
     }
   },
@@ -1317,7 +1187,6 @@ joint.shapes.ice.ConstantView = joint.shapes.ice.ModelView.extend({
 
     _.bindAll(this, 'updateBox');
     joint.dia.ElementView.prototype.initialize.apply(this, arguments);
-
     this.$box = $(
       joint.util.template(`<div class="constant-block">
         <div class="constant-content">
@@ -1329,26 +1198,19 @@ joint.shapes.ice.ConstantView = joint.shapes.ice.ModelView.extend({
         </div>
       </div>`)()
     );
-
     this.inputSelector = this.$box.find('.constant-input');
     this.contentSelector = this.$box.find('.constant-content');
     this.headerSelector = this.$box.find('.header');
-
     this.model.on('change', this.updateBox, this);
     this.model.on('remove', this.removeBox, this);
-
     this.listenTo(this.model, 'process:ports', this.update);
     joint.dia.ElementView.prototype.initialize.apply(this, arguments);
-
     // Prevent paper from handling pointerdown.
     this.inputSelector.on('mousedown click', function (event) {
       event.stopPropagation();
     });
-
     this.updateBox();
-
     this.updating = false;
-
     var self = this;
     this.inputSelector.on('input', function (event) {
       if (!self.updating) {
@@ -1365,7 +1227,6 @@ joint.shapes.ice.ConstantView = joint.shapes.ice.ModelView.extend({
         event.preventDefault();
       }
     });
-
     // Apply data
     this.apply();
   },
@@ -1423,82 +1284,79 @@ joint.shapes.ice.ConstantView = joint.shapes.ice.ModelView.extend({
     var pendingTasks = [];
     // Set wire width
     var width = WIRE_WIDTH * state.zoom;
-    var pwires = this.$el[0].getElementsByClassName('port-wire');
-    var i;
-    for (i = 0; i < pwires.length; i++) {
+    for (var pwire of this.$el[0].getElementsByClassName('port-wire')) {
       pendingTasks.push({
-        e: pwires[i],
+        e: pwire,
         property: 'stroke-width',
         value: width + 'px',
       });
     }
     // Render content
     var topOffset = data.name || data.local ? 0 : 24;
-    var contentSel = this.$box[0].querySelectorAll('.constant-content');
-    for (i = 0; i < contentSel.length; i++) {
-      pendingTasks.push({
-        e: contentSel[i],
-        property: 'left',
-        value: Math.round((bbox.width / 2.0) * (state.zoom - 1)) + 'px',
-      });
-      pendingTasks.push({
-        e: contentSel[i],
-        property: 'top',
-        value:
-          Math.round(
-            ((bbox.height + topOffset) / 2.0) * (state.zoom - 1) + topOffset
-          ) + 'px',
-      });
-      pendingTasks.push({
-        e: contentSel[i],
-        property: 'width',
-        value: Math.round(bbox.width) + 'px',
-      });
-      pendingTasks.push({
-        e: contentSel[i],
-        property: 'height',
-        value: Math.round(bbox.height - topOffset) + 'px',
-      });
-      pendingTasks.push({
-        e: contentSel[i],
-        property: 'transform',
-        value: 'scale(' + state.zoom + ')',
-      });
+    for (var sel of this.$box[0].querySelectorAll('.constant-content')) {
+      pendingTasks.push(
+        {
+          e: sel,
+          property: 'left',
+          value: Math.round((bbox.width / 2.0) * (state.zoom - 1)) + 'px',
+        },
+        {
+          e: sel,
+          property: 'top',
+          value:
+            Math.round(
+              ((bbox.height + topOffset) / 2.0) * (state.zoom - 1) + topOffset
+            ) + 'px',
+        },
+        {
+          e: sel,
+          property: 'width',
+          value: Math.round(bbox.width) + 'px',
+        },
+        {
+          e: sel,
+          property: 'height',
+          value: Math.round(bbox.height - topOffset) + 'px',
+        },
+        {
+          e: sel,
+          property: 'transform',
+          value: 'scale(' + state.zoom + ')',
+        }
+      );
     }
     if (data.name || data.local) {
       this.headerSelector.removeClass('hidden');
     } else {
       this.headerSelector.addClass('hidden');
     }
-
     // Render block
-    pendingTasks.push({
-      e: this.$box[0],
-      property: 'left',
-      value: Math.round(bbox.x * state.zoom + state.pan.x) + 'px',
-    });
-    pendingTasks.push({
-      e: this.$box[0],
-      property: 'top',
-      value: Math.round(bbox.y * state.zoom + state.pan.y) + 'px',
-    });
-    pendingTasks.push({
-      e: this.$box[0],
-      property: 'width',
-      value: Math.round(bbox.width * state.zoom) + 'px',
-    });
-    pendingTasks.push({
-      e: this.$box[0],
-      property: 'height',
-      value: Math.round(bbox.height * state.zoom) + 'px',
-    });
-
-    i = pendingTasks.length;
+    pendingTasks.push(
+      {
+        e: this.$box[0],
+        property: 'left',
+        value: Math.round(bbox.x * state.zoom + state.pan.x) + 'px',
+      },
+      {
+        e: this.$box[0],
+        property: 'top',
+        value: Math.round(bbox.y * state.zoom + state.pan.y) + 'px',
+      },
+      {
+        e: this.$box[0],
+        property: 'width',
+        value: Math.round(bbox.width * state.zoom) + 'px',
+      },
+      {
+        e: this.$box[0],
+        property: 'height',
+        value: Math.round(bbox.height * state.zoom) + 'px',
+      }
+    );
     //  pendingTasks= pendingTasks.reverse();
-    for (i = 0; i < pendingTasks.length; i++) {
-      if (pendingTasks[i].e !== null) {
-        pendingTasks[i].e.style[pendingTasks[i].property] =
-          pendingTasks[i].value;
+    for (var task of pendingTasks) {
+      if (task.e) {
+        task.e.style[task.property] = task.value;
       }
     }
     return pendingTasks;
@@ -1526,7 +1384,6 @@ joint.shapes.ice.MemoryView = joint.shapes.ice.ModelView.extend({
 
     _.bindAll(this, 'updateBox');
     joint.dia.ElementView.prototype.initialize.apply(this, arguments);
-
     var id = sha1(this.model.get('id')).toString().substring(0, 6);
     var editorLabel = 'editor' + id;
     this.$box = $(
@@ -1553,31 +1410,24 @@ joint.shapes.ice.MemoryView = joint.shapes.ice.ModelView.extend({
         <div class="resizer"/></div>
       </div>`)()
     );
-
     this.editorSelector = this.$box.find('.memory-editor');
     this.contentSelector = this.$box.find('.memory-content');
     this.headerSelector = this.$box.find('.header');
-
     this.model.on('change', this.updateBox, this);
     this.model.on('remove', this.removeBox, this);
-
     this.listenTo(this.model, 'process:ports', this.update);
     joint.dia.ElementView.prototype.initialize.apply(this, arguments);
-
     // Prevent paper from handling pointerdown.
     this.editorSelector.on('mousedown click', function (event) {
       event.stopPropagation();
     });
-
     this.updateBox();
-
     this.updating = false;
     this.prevZoom = 0;
     this.deltas = [];
     this.counter = 0;
     this.timer = null;
     var undoGroupingInterval = 200;
-
     var self = this;
     this.editor = ace.edit(this.editorSelector[0]);
     this.updateScrollStatus(false);
@@ -1591,19 +1441,13 @@ joint.shapes.ice.MemoryView = joint.shapes.ice.ModelView.extend({
         if (Date.now() - self.counter < undoGroupingInterval) {
           clearTimeout(self.timer);
         }
-        // Update deltas
         self.deltas = self.deltas.concat([delta]);
-        // Launch timer
         self.timer = setTimeout(function () {
           var deltas = JSON.parse(JSON.stringify(self.deltas));
-          // Set deltas
           self.model.set('deltas', deltas);
-          // Reset deltas
           self.deltas = [];
-          // Set data.list
           self.model.attributes.data.list = self.editor.session.getValue();
         }, undoGroupingInterval);
-        // Reset counter
         self.counter = Date.now();
       }
     });
@@ -1612,7 +1456,6 @@ joint.shapes.ice.MemoryView = joint.shapes.ice.ModelView.extend({
       $(document).trigger('disableSelected');
       self.editor.setHighlightActiveLine(true);
       self.editor.setHighlightGutterLine(true);
-      // Show cursor
       self.editor.renderer.$cursorLayer.element.style.opacity = 1;
     });
     this.editor.on('blur', function () {
@@ -1623,7 +1466,6 @@ joint.shapes.ice.MemoryView = joint.shapes.ice.ModelView.extend({
       }
       self.editor.setHighlightActiveLine(false);
       self.editor.setHighlightGutterLine(false);
-      // Hide cursor
       self.editor.renderer.$cursorLayer.element.style.opacity = 0;
     });
     this.editor.on('paste', function (e) {
@@ -1644,10 +1486,7 @@ joint.shapes.ice.MemoryView = joint.shapes.ice.ModelView.extend({
         event.preventDefault();
       }
     });
-
     this.setupResizer();
-
-    // Apply data
     this.apply({ini: true});
   },
 
@@ -1684,13 +1523,10 @@ joint.shapes.ice.MemoryView = joint.shapes.ice.ModelView.extend({
     'use strict';
 
     this.updating = true;
-
     var dontselect = false;
     var data = this.model.get('data');
     var deltas = this.model.get('deltas');
-
     opt = opt || {};
-
     switch (opt.attribute) {
       case 'deltas':
         if (deltas) {
@@ -1731,7 +1567,6 @@ joint.shapes.ice.MemoryView = joint.shapes.ice.ModelView.extend({
     'use strict';
 
     this.updating = true;
-
     var self = this;
     var data = this.model.get('data');
     var radix = data.format || 16; // Handle bad data that could happen in a previous .ice file
@@ -1751,7 +1586,6 @@ joint.shapes.ice.MemoryView = joint.shapes.ice.ModelView.extend({
     };
     this.editor.renderer.setShowGutter(false);
     this.editor.renderer.setShowGutter(true);
-
     this.updating = false;
   },
 
@@ -1769,7 +1603,6 @@ joint.shapes.ice.MemoryView = joint.shapes.ice.ModelView.extend({
     var bbox = this.model.getBBox();
     var data = this.model.get('data');
     var state = this.model.get('state');
-
     // Set font size
     if (this.editor) {
       if (this.prevZoom !== state.zoom) {
@@ -1798,11 +1631,9 @@ joint.shapes.ice.MemoryView = joint.shapes.ice.ModelView.extend({
       }
       this.editor.resize();
     }
-
     // Set wire width
     var width = WIRE_WIDTH * state.zoom;
     this.$('.port-wire').css('stroke-width', width);
-
     // Render content
     var topOffset = data.name || data.local ? 0 : 24;
     this.contentSelector.css({
@@ -1820,7 +1651,6 @@ joint.shapes.ice.MemoryView = joint.shapes.ice.ModelView.extend({
     } else {
       this.headerSelector.addClass('hidden');
     }
-
     // Render block
     this.$box.css({
       left: bbox.x * state.zoom + state.pan.x,
@@ -1852,27 +1682,25 @@ joint.shapes.ice.CodeView = joint.shapes.ice.ModelView.extend({
 
     _.bindAll(this, 'updateBox');
     joint.dia.ElementView.prototype.initialize.apply(this, arguments);
-
     var id = sha1(this.model.get('id')).toString().substring(0, 6);
     var editorLabel = 'editor' + id;
     this.$box = $(
-      joint.util.template(`<div class="code-block">\
-        <div class="code-content"></div>\
-        <div class="code-editor" id="${editorLabel}"></div>\
-        <script>\
-          var ${editorLabel} = ace.edit("${editorLabel}");\
-          ${editorLabel}.setTheme("ace/theme/chrome");\
-          ${editorLabel}.setHighlightActiveLine(false);\
-          ${editorLabel}.setHighlightGutterLine(false);\
-          ${editorLabel}.setAutoScrollEditorIntoView(true);\
-          ${editorLabel}.renderer.setShowGutter(true);\
-          ${editorLabel}.renderer.$cursorLayer.element.style.opacity = 0;\
-          ${editorLabel}.session.setMode("ace/mode/verilog");\
-        </script>\
-        <div class="resizer"/></div>\
+      joint.util.template(`<div class="code-block">
+        <div class="code-content"></div>
+        <div class="code-editor" id="${editorLabel}"></div>
+        <script>
+          var ${editorLabel} = ace.edit("${editorLabel}");
+          ${editorLabel}.setTheme("ace/theme/chrome");
+          ${editorLabel}.setHighlightActiveLine(false);
+          ${editorLabel}.setHighlightGutterLine(false);
+          ${editorLabel}.setAutoScrollEditorIntoView(true);
+          ${editorLabel}.renderer.setShowGutter(true);
+          ${editorLabel}.renderer.$cursorLayer.element.style.opacity = 0;
+          ${editorLabel}.session.setMode("ace/mode/verilog");
+        </script>
+        <div class="resizer"/></div>
       </div>`)()
     );
-
     this.editorSelector = this.$box.find('.code-editor');
     this.contentSelector = this.$box.find('.code-content');
     this.nativeDom = {
@@ -1881,27 +1709,21 @@ joint.shapes.ice.CodeView = joint.shapes.ice.ModelView.extend({
       editorSelector: this.$box[0].querySelectorAll('.code-editor'),
       contentSelector: this.$box[0].querySelectorAll('.code-content'),
     };
-
     this.model.on('change', this.updateBox, this);
     this.model.on('remove', this.removeBox, this);
-
     this.listenTo(this.model, 'process:ports', this.update);
     joint.dia.ElementView.prototype.initialize.apply(this, arguments);
-
     // Prevent paper from handling pointerdown.
     this.editorSelector.on('mousedown click', function (event) {
       event.stopPropagation();
     });
-
     this.updateBox();
-
     this.updating = false;
     this.prevZoom = 0;
     this.deltas = [];
     this.counter = 0;
     this.timer = null;
     var undoGroupingInterval = 200;
-
     var self = this;
     this.editor = ace.edit(this.editorSelector[0]);
     this.updateScrollStatus(false);
@@ -1968,9 +1790,7 @@ joint.shapes.ice.CodeView = joint.shapes.ice.ModelView.extend({
         event.preventDefault();
       }
     });
-
     this.setupResizer();
-
     // Apply data
     this.apply({ini: true});
   },
@@ -1979,13 +1799,10 @@ joint.shapes.ice.CodeView = joint.shapes.ice.ModelView.extend({
     'use strict';
 
     this.updating = true;
-
     var dontselect = false;
     var data = this.model.get('data');
     var deltas = this.model.get('deltas');
-
     opt = opt || {};
-
     switch (opt.attribute) {
       case 'deltas':
         if (deltas) {
@@ -2078,13 +1895,11 @@ joint.shapes.ice.CodeView = joint.shapes.ice.ModelView.extend({
     'use strict';
 
     var pendingTasks = [];
-    var i, j, port, portDefault, tokId, paths, rects, dome, anotations;
+    var i, port, portDefault;
     var bbox = this.model.getBBox();
     var data = this.model.get('data');
     var state = this.model.get('state');
     var rules = this.model.get('rules');
-    var leftPorts = this.model.get('leftPorts');
-    var rightPorts = this.model.get('rightPorts');
     var modelId = this.model.id;
     var editorUpdated = false;
     // Set font size
@@ -2093,63 +1908,50 @@ joint.shapes.ice.CodeView = joint.shapes.ice.ModelView.extend({
         editorUpdated = true;
         this.prevZoom = state.zoom;
         // Scale editor
-        for (i = 0; i < this.nativeDom.editorSelector.length; i++) {
-          pendingTasks.push({
-            e: this.nativeDom.editorSelector[i],
-            property: 'margin',
-            value: 7 * state.zoom + 'px',
-          });
-          pendingTasks.push({
-            e: this.nativeDom.editorSelector[i],
-            property: 'border-radius',
-            value: 5 * state.zoom + 'px',
-          });
-          pendingTasks.push({
-            e: this.nativeDom.editorSelector[i],
-            property: 'border-width',
-            value: state.zoom + 0.5,
-          });
+        for (var item of this.nativeDom.editorSelector) {
+          pendingTasks.push(
+            {
+              e: item,
+              property: 'margin',
+              value: 7 * state.zoom + 'px',
+            },
+            {
+              e: item,
+              property: 'border-radius',
+              value: 5 * state.zoom + 'px',
+            },
+            {
+              e: item,
+              property: 'border-width',
+              value: state.zoom + 0.5,
+            }
+          );
         }
-
         // Scale annotations
         var annotationSize = Math.round(15 * state.zoom) + 'px';
-
-        anotations = this.$box[0].querySelectorAll('.ace_error');
-        for (i = 0; i < anotations.length; i++) {
-          pendingTasks.push({
-            e: anotations[i],
-            property: 'background-size',
-            value: annotationSize + ' ' + annotationSize,
-          });
+        for (var annotations of [
+          this.$box[0].querySelectorAll('.ace_error'),
+          this.$box[0].querySelectorAll('.ace_warning'),
+          this.$box[0].querySelectorAll('.ace_info'),
+        ]) {
+          for (var annotation of annotations) {
+            pendingTasks.push({
+              e: annotation,
+              property: 'background-size',
+              value: annotationSize + ' ' + annotationSize,
+            });
+          }
         }
-        anotations = this.$box[0].querySelectorAll('.ace_warning');
-        for (i = 0; i < anotations.length; i++) {
-          pendingTasks.push({
-            e: anotations[i],
-            property: 'background-size',
-            value: annotationSize + ' ' + annotationSize,
-          });
-        }
-
-        anotations = this.$box[0].querySelectorAll('.ace_info');
-        for (i = 0; i < anotations.length; i++) {
-          pendingTasks.push({
-            e: anotations[i],
-            property: 'background-size',
-            value: annotationSize + ' ' + annotationSize,
-          });
-        }
-
         // Scale padding
-        anotations = this.$box[0].querySelectorAll('.ace_text-layer');
-        for (i = 0; i < anotations.length; i++) {
+        for (var annotation of this.$box[0].querySelectorAll(
+          '.ace_text-layer'
+        )) {
           pendingTasks.push({
-            e: anotations[i],
+            e: annotation,
             property: 'padding',
             value: '0px ' + Math.round(4 * state.zoom) + 'px',
           });
         }
-
         //var rule = getCSSRule('.ace_folding-enabled > .ace_gutter-cell');
       }
       //    this.editor.resize();
@@ -2157,50 +1959,32 @@ joint.shapes.ice.CodeView = joint.shapes.ice.ModelView.extend({
 
     // Set ports width
     var width = WIRE_WIDTH * state.zoom;
-
-    var pwires = this.$el[0].getElementsByClassName('port-wire');
-    for (i = 0; i < pwires.length; i++) {
+    for (var pwire of this.$el[0].getElementsByClassName('port-wire')) {
       pendingTasks.push({
-        e: pwires[i],
+        e: pwire,
         property: 'stroke-width',
         value: width + 'px',
       });
     }
     // Set buses
     var nwidth = width * 3;
-    tokId = 'port-wire-' + modelId + '-';
-    for (i = 0; i < leftPorts.length; i++) {
-      port = leftPorts[i];
+    for (var port of this.model
+      .get('leftPorts')
+      .concat(this.model.get('rightPorts'))) {
       if (port.size > 1) {
-        dome = document.getElementById(tokId + port.id);
-
         pendingTasks.push({
-          e: dome,
+          e: document.getElementById(`port-wire-${modelId}-${port.id}`),
           property: 'stroke-width',
           value: nwidth + 'px',
         });
       }
     }
-
-    for (i = 0; i < rightPorts.length; i++) {
-      port = rightPorts[i];
-      if (port.size > 1) {
-        dome = document.getElementById(tokId + port.id);
-
-        pendingTasks.push({
-          e: dome,
-          property: 'stroke-width',
-          value: nwidth + 'px',
-        });
-      }
-    }
-
     // Render rules
     if (data && data.ports && data.ports.in) {
-      tokId = 'port-default-' + modelId + '-';
-      for (i = 0; i < data.ports.in.length; i++) {
-        port = data.ports.in[i];
-        portDefault = document.getElementById(tokId + port.name);
+      for (var port of data.ports.in) {
+        portDefault = document.getElementById(
+          `port-default-${modelId}-${port.name}`
+        );
         if (
           portDefault !== null &&
           rules &&
@@ -2212,19 +1996,16 @@ joint.shapes.ice.CodeView = joint.shapes.ice.ModelView.extend({
             property: 'display',
             value: 'inline',
           });
-
-          paths = portDefault.querySelectorAll('path');
-          for (j = 0; j < paths.length; j++) {
+          for (var path of portDefault.querySelectorAll('path')) {
             pendingTasks.push({
-              e: paths[j],
+              e: path,
               property: 'stroke-width',
               value: width + 'px',
             });
           }
-          rects = portDefault.querySelectorAll('rect');
-          for (j = 0; j < rects.length; j++) {
+          for (var rect of portDefault.querySelectorAll('rect')) {
             pendingTasks.push({
-              e: rects[j],
+              e: rect,
               property: 'stroke-width',
               value: state.zoom + 'px',
             });
@@ -2238,66 +2019,64 @@ joint.shapes.ice.CodeView = joint.shapes.ice.ModelView.extend({
         }
       }
     }
-
     // Render content
-    for (i = 0; i < this.nativeDom.contentSelector.length; i++) {
-      pendingTasks.push({
-        e: this.nativeDom.contentSelector[i],
-        property: 'left',
-        value: Math.round((bbox.width / 2.0) * (state.zoom - 1)) + 'px',
-      });
-      pendingTasks.push({
-        e: this.nativeDom.contentSelector[i],
-        property: 'top',
-        value: Math.round((bbox.height / 2.0) * (state.zoom - 1)) + 'px',
-      });
-      pendingTasks.push({
-        e: this.nativeDom.contentSelector[i],
-        property: 'width',
-        value: Math.round(bbox.width) + 'px',
-      });
-      pendingTasks.push({
-        e: this.nativeDom.contentSelector[i],
-        property: 'height',
-        value: Math.round(bbox.height) + 'px',
-      });
-      pendingTasks.push({
-        e: this.nativeDom.contentSelector[i],
-        property: 'transform',
-        value: 'scale(' + state.zoom + ')',
-      });
+    for (var item of this.nativeDom.contentSelector) {
+      pendingTasks.push(
+        {
+          e: item,
+          property: 'left',
+          value: Math.round((bbox.width / 2.0) * (state.zoom - 1)) + 'px',
+        },
+        {
+          e: item,
+          property: 'top',
+          value: Math.round((bbox.height / 2.0) * (state.zoom - 1)) + 'px',
+        },
+        {
+          e: item,
+          property: 'width',
+          value: Math.round(bbox.width) + 'px',
+        },
+        {
+          e: item,
+          property: 'height',
+          value: Math.round(bbox.height) + 'px',
+        },
+        {
+          e: item,
+          property: 'transform',
+          value: 'scale(' + state.zoom + ')',
+        }
+      );
     }
-
     // Render block
-    pendingTasks.push({
-      e: this.nativeDom.box,
-      property: 'left',
-      value: Math.round(bbox.x * state.zoom + state.pan.x) + 'px',
-    });
-    pendingTasks.push({
-      e: this.nativeDom.box,
-      property: 'top',
-      value: Math.round(bbox.y * state.zoom + state.pan.y) + 'px',
-    });
-    pendingTasks.push({
-      e: this.nativeDom.box,
-      property: 'width',
-      value: Math.round(bbox.width * state.zoom) + 'px',
-    });
-    pendingTasks.push({
-      e: this.nativeDom.box,
-      property: 'height',
-      value: Math.round(bbox.height * state.zoom) + 'px',
-    });
-
-    i = pendingTasks.length;
-    for (i = 0; i < pendingTasks.length; i++) {
-      if (pendingTasks[i].e !== null) {
-        pendingTasks[i].e.style[pendingTasks[i].property] =
-          pendingTasks[i].value;
+    pendingTasks.push(
+      {
+        e: this.nativeDom.box,
+        property: 'left',
+        value: Math.round(bbox.x * state.zoom + state.pan.x) + 'px',
+      },
+      {
+        e: this.nativeDom.box,
+        property: 'top',
+        value: Math.round(bbox.y * state.zoom + state.pan.y) + 'px',
+      },
+      {
+        e: this.nativeDom.box,
+        property: 'width',
+        value: Math.round(bbox.width * state.zoom) + 'px',
+      },
+      {
+        e: this.nativeDom.box,
+        property: 'height',
+        value: Math.round(bbox.height * state.zoom) + 'px',
+      }
+    );
+    for (var task of pendingTasks) {
+      if (task.e) {
+        task.e.style[task.property] = task.value;
       }
     }
-
     if (this.editor) {
       if (editorUpdated) {
         this.editor.setFontSize(Math.round(aceFontSize * state.zoom));
@@ -2305,7 +2084,6 @@ joint.shapes.ice.CodeView = joint.shapes.ice.ModelView.extend({
       }
       this.editor.resize();
     }
-
     return pendingTasks;
   },
 });
@@ -2331,7 +2109,6 @@ joint.shapes.ice.InfoView = joint.shapes.ice.ModelView.extend({
 
     _.bindAll(this, 'updateBox');
     joint.dia.ElementView.prototype.initialize.apply(this, arguments);
-
     var id = sha1(this.model.get('id')).toString().substring(0, 6);
     var editorLabel = 'editor' + id;
     var readonly = this.model.get('data').readonly;
@@ -2355,27 +2132,21 @@ joint.shapes.ice.InfoView = joint.shapes.ice.ModelView.extend({
         <div class="resizer"/></div>
       </div>`)()
     );
-
     this.renderSelector = this.$box.find('.info-render');
     this.editorSelector = this.$box.find('.info-editor');
     this.contentSelector = this.$box.find('.info-content');
-
     this.model.on('change', this.updateBox, this);
     this.model.on('remove', this.removeBox, this);
-
     // Prevent paper from handling pointerdown.
     this.editorSelector.on('mousedown click', function (event) {
       event.stopPropagation();
     });
-
     this.updateBox();
-
     this.updating = false;
     this.deltas = [];
     this.counter = 0;
     this.timer = null;
     var undoGroupingInterval = 200;
-
     var self = this;
     this.editor = ace.edit(this.editorSelector[0]);
     this.updateScrollStatus(false);
@@ -2440,9 +2211,7 @@ joint.shapes.ice.InfoView = joint.shapes.ice.ModelView.extend({
         event.preventDefault();
       }
     });
-
     this.setupResizer();
-
     // Apply data
     this.apply({ini: true});
   },
@@ -2451,13 +2220,10 @@ joint.shapes.ice.InfoView = joint.shapes.ice.ModelView.extend({
     'use strict';
 
     this.updating = true;
-
     var dontselect = false;
     var data = this.model.get('data');
     var deltas = this.model.get('deltas');
-
     opt = opt || {};
-
     switch (opt.attribute) {
       case 'deltas':
         if (deltas) {
@@ -2524,7 +2290,6 @@ joint.shapes.ice.InfoView = joint.shapes.ice.ModelView.extend({
 
     var data = this.model.get('data');
     var markdown = data.text || data.info || '';
-
     // Replace emojis
     markdown = markdown.replace(/(:.*:)/g, function (match) {
       return emoji.emojify(match, null, function (code, name) {
@@ -2616,7 +2381,6 @@ joint.shapes.ice.InfoView = joint.shapes.ice.ModelView.extend({
     var bbox = this.model.getBBox();
     var state = this.model.get('state');
     var data = this.model.get('data');
-
     if (data.readonly) {
       // Scale render
       this.renderSelector.css({
@@ -2644,7 +2408,6 @@ joint.shapes.ice.InfoView = joint.shapes.ice.ModelView.extend({
       this.editor.renderer.$cursorLayer.$padding = Math.round(4 * state.zoom);
       this.editor.resize();
     }
-
     // Render content
     this.contentSelector.css({
       left: Math.round((bbox.width / 2.0) * (state.zoom - 1)),
@@ -2653,7 +2416,6 @@ joint.shapes.ice.InfoView = joint.shapes.ice.ModelView.extend({
       height: Math.round(bbox.height),
       transform: 'scale(' + state.zoom + ')',
     });
-
     // Render block
     this.$box.css({
       left: bbox.x * state.zoom + state.pan.x,
@@ -2675,61 +2437,48 @@ joint.shapes.ice.InfoView = joint.shapes.ice.ModelView.extend({
 // Custom wire
 
 joint.shapes.ice.Wire = joint.dia.Link.extend({
-  markup: [
-    '<path class="connection" d="M 0 0 0 0"/>',
-    '<path class="connection-wrap" d="M 0 0 0 0"/>',
-    '<path class="marker-source" d="M 0 0 0 0"/>',
-    '<path class="marker-target" d="M 0 0 0 0"/>',
-    '<g class="labels"/>',
-    '<g class="marker-vertices"/>',
-    '<g class="marker-bifurcations"/>',
-    '<g class="marker-arrowheads"/>',
-    '<g class="link-tools"/>',
-  ].join(''),
+  markup: `<path class="connection" d="M 0 0 0 0"/>
+<path class="connection-wrap" d="M 0 0 0 0"/>
+<path class="marker-source" d="M 0 0 0 0"/>
+<path class="marker-target" d="M 0 0 0 0"/>
+<g class="labels"/>
+<g class="marker-vertices"/>
+<g class="marker-bifurcations"/>
+<g class="marker-arrowheads"/>
+<g class="link-tools"/>`.replace(/\r?\n|\r/g, ''),
 
-  labelMarkup: [
-    '<g class="label hidden">',
-    '<rect x="-8" y="-6" width="16" height="12" rx="2" ry="2" fill="white" stroke="#777"/>',
-    '<text fill="#555"/>',
-    '</g>',
-  ].join(''),
+  labelMarkup: `<g class="label hidden">
+<rect x="-8" y="-6" width="16" height="12" rx="2" ry="2" fill="white" stroke="#777"/>
+<text fill="#555"/>
+</g>`.replace(/\r?\n|\r/g, ''),
 
-  bifurcationMarkup: [
-    '<g class="marker-bifurcation-group" transform="translate(<%= x %>, <%= y %>)">',
-    '<circle class="marker-bifurcation" idx="<%= idx %>" r="<%= r %>" fill="#777"/>',
-    '</g>',
-  ].join(''),
+  bifurcationMarkup: `<g class="marker-bifurcation-group" transform="translate(<%= x %>, <%= y %>)">
+<circle class="marker-bifurcation" idx="<%= idx %>" r="<%= r %>" fill="#777"/>
+</g>`.replace(/\r?\n|\r/g, ''),
 
-  arrowheadMarkup: [
-    '<g class="marker-arrowhead-group marker-arrowhead-group-<%= end %>">',
-    '<circle class="marker-arrowhead" end="<%= end %>" r="8"/>',
-    '</g>',
-  ].join(''),
+  arrowheadMarkup: `<g class="marker-arrowhead-group marker-arrowhead-group-<%= end %>">
+<circle class="marker-arrowhead" end="<%= end %>" r="8"/>
+</g>`.replace(/\r?\n|\r/g, ''),
 
-  toolMarkup: [
-    '<g class="link-tool">',
-    '<g class="tool-remove" event="remove">',
-    '<circle r="8" />',
-    '<path transform="scale(.6) translate(-16, -16)" d="M24.778,21.419 19.276,15.917 24.777,10.415 21.949,7.585 16.447,13.087 10.945,7.585 8.117,10.415 13.618,15.917 8.116,21.419 10.946,24.248 16.447,18.746 21.948,24.248z" />',
-    '<title>Remove link</title>',
-    '</g>',
-    '</g>',
-  ].join(''),
+  toolMarkup: `<g class="link-tool">
+<g class="tool-remove" event="remove">
+<circle r="8" />
+<path transform="scale(.6) translate(-16, -16)" d="M24.778,21.419 19.276,15.917 24.777,10.415 21.949,7.585 16.447,13.087 10.945,7.585 8.117,10.415 13.618,15.917 8.116,21.419 10.946,24.248 16.447,18.746 21.948,24.248z" />
+<title>Remove link</title>
+</g>
+</g>`.replace(/\r?\n|\r/g, ''),
 
-  vertexMarkup: [
-    '<g class="marker-vertex-group" transform="translate(<%= x %>, <%= y %>)">',
-    '<circle class="marker-vertex" idx="<%= idx %>" r="8" />',
-    '<path class="marker-vertex-remove-area" idx="<%= idx %>" transform="scale(.8) translate(5, -33)" d="M16,5.333c-7.732,0-14,4.701-14,10.5c0,1.982,0.741,3.833,2.016,5.414L2,25.667l5.613-1.441c2.339,1.317,5.237,2.107,8.387,2.107c7.732,0,14-4.701,14-10.5C30,10.034,23.732,5.333,16,5.333z"/>',
-    '<path class="marker-vertex-remove" idx="<%= idx %>" transform="scale(.6) translate(11.5, -39)" d="M24.778,21.419 19.276,15.917 24.777,10.415 21.949,7.585 16.447,13.087 10.945,7.585 8.117,10.415 13.618,15.917 8.116,21.419 10.946,24.248 16.447,18.746 21.948,24.248z">',
-    '<title>Remove vertex</title>',
-    '</path>',
-    '</g>',
-  ].join(''),
+  vertexMarkup: `<g class="marker-vertex-group" transform="translate(<%= x %>, <%= y %>)">
+<circle class="marker-vertex" idx="<%= idx %>" r="8" />
+<path class="marker-vertex-remove-area" idx="<%= idx %>" transform="scale(.8) translate(5, -33)" d="M16,5.333c-7.732,0-14,4.701-14,10.5c0,1.982,0.741,3.833,2.016,5.414L2,25.667l5.613-1.441c2.339,1.317,5.237,2.107,8.387,2.107c7.732,0,14-4.701,14-10.5C30,10.034,23.732,5.333,16,5.333z"/>
+<path class="marker-vertex-remove" idx="<%= idx %>" transform="scale(.6) translate(11.5, -39)" d="M24.778,21.419 19.276,15.917 24.777,10.415 21.949,7.585 16.447,13.087 10.945,7.585 8.117,10.415 13.618,15.917 8.116,21.419 10.946,24.248 16.447,18.746 21.948,24.248z">
+<title>Remove vertex</title>
+</path>
+</g>`.replace(/\r?\n|\r/g, ''),
 
   defaults: joint.util.deepSupplement(
     {
       type: 'ice.Wire',
-
       labels: [
         {
           position: 0.5,
@@ -2744,14 +2493,12 @@ joint.shapes.ice.Wire = joint.dia.Link.extend({
           },
         },
       ],
-
       attrs: {
         '.connection': {
           'stroke-width': WIRE_WIDTH,
           stroke: '#777',
         },
       },
-
       router: {name: 'ice'},
       connector: {name: 'ice'},
     },
@@ -2770,11 +2517,9 @@ joint.shapes.ice.WireView = joint.dia.LinkView.extend({
     'use strict';
 
     joint.dia.LinkView.prototype.initialize.apply(this, arguments);
-
     var self = this;
     setTimeout(function () {
       var size = self.model.get('size');
-
       if (!size) {
         // New wire
         var i,
@@ -2792,7 +2537,6 @@ joint.shapes.ice.WireView = joint.dia.LinkView.extend({
           }
         }
       }
-
       self.updateWireProperties(size);
       self.updateBifurcations();
     }, 0);
@@ -2834,15 +2578,12 @@ joint.shapes.ice.WireView = joint.dia.LinkView.extend({
     if (!this._V.labels) {
       return this;
     }
-
     this._labelCache = {};
     var $labels = $(this._V.labels.node).empty();
-
     var labels = this.model.get('labels') || [];
     if (!labels.length) {
       return this;
     }
-
     var labelTemplate = joint.util.template(
       this.model.get('labelMarkup') || this.model.labelMarkup
     );
@@ -2850,26 +2591,21 @@ joint.shapes.ice.WireView = joint.dia.LinkView.extend({
     // compilation of the labelTemplate. The purpose is that all labels will just `clone()` this
     // node to create a duplicate.
     var labelNodeInstance = V(labelTemplate());
-
     _.each(
       labels,
       function (label, idx) {
         var labelNode = labelNodeInstance.clone().node;
         V(labelNode).attr('label-idx', idx);
         this._labelCache[idx] = V(labelNode);
-
         var $text = $(labelNode).find('text');
         var textAttributes = _.extend(
           {'text-anchor': 'middle', 'font-size': 13},
           joint.util.getByPath(label, 'attrs/text', '/')
         );
-
         $text.attr(_.omit(textAttributes, 'text'));
-
         if (label.attrs.text.text) {
           $(labelNode).removeClass('hidden');
         }
-
         if (!_.isUndefined(textAttributes.text)) {
           V($text[0]).text(textAttributes.text + '', {
             annotations: textAttributes.annotations,
@@ -2879,7 +2615,6 @@ joint.shapes.ice.WireView = joint.dia.LinkView.extend({
       },
       this
     );
-
     return this;
   },
 
@@ -2889,25 +2624,21 @@ joint.shapes.ice.WireView = joint.dia.LinkView.extend({
     if (!this._V.linkTools) {
       return this;
     }
-
     var scale = '';
     var offset = this.options.linkToolsOffset;
     var connectionLength = this.getConnectionLength();
-
     if (!_.isNaN(connectionLength)) {
       // If the link is too short, make the tools half the size and the offset twice as low.
       if (connectionLength < this.options.shortLinkLength) {
         scale = 'scale(.5)';
         offset /= 2;
       }
-
       var toolPosition = this.getPointAtLength(connectionLength - offset);
       this._toolCache.attr(
         'transform',
         'translate(' + toolPosition.x + ', ' + toolPosition.y + ') ' + scale
       );
     }
-
     return this;
   },
 
@@ -2933,23 +2664,19 @@ joint.shapes.ice.WireView = joint.dia.LinkView.extend({
     'use strict';
 
     opt = opt || {};
-
     // Necessary path finding
     var route = (this.route = this.findRoute(
       this.model.get('vertices') || [],
       opt
     ));
     // finds all the connection points taking new vertices into account
-
     this._findConnectionPoints(route);
     var pathData = this.getPathData(route);
-
     // The markup needs to contain a `.connection`
     this._V.connection.attr('d', pathData.full);
     if (this._V.connectionWrap) {
       this._V.connectionWrap.attr('d', pathData.wrap);
     }
-
     this._translateAndAutoOrientArrows(
       this._V.markerSource,
       this._V.markerTarget
@@ -2964,14 +2691,12 @@ joint.shapes.ice.WireView = joint.dia.LinkView.extend({
       var self = this;
       var currentWire = this.model;
       var allWires = this.paper.model.getLinks();
-
       // Find all the wires in the same port
       var portWires = [];
       var wireSource = false;
       var cwireSource = false;
       var wireView = false;
       var markerBifurcations = false;
-
       for (var i = 0, n = allWires.length; i < n; i++) {
         wireSource = allWires[i].get('source');
         cwireSource = currentWire.get('source');
@@ -2990,9 +2715,7 @@ joint.shapes.ice.WireView = joint.dia.LinkView.extend({
           });
         }
       }
-
       var points = [];
-
       // Update all the portWires combinations
       if (portWires.length > 0) {
         var markupTemplate = joint.util.template(
@@ -3021,7 +2744,6 @@ joint.shapes.ice.WireView = joint.dia.LinkView.extend({
         // Find the corners in A that intersects with any B segment
         var vA = v(wireA);
         var vB = v(wireB);
-
         if (vA.length > 2) {
           for (var i = 1; i < vA.length - 1; i++) {
             if (vA[i - 1].x !== vA[i + 1].x && vA[i - 1].y !== vA[i + 1].y) {
@@ -3043,16 +2765,12 @@ joint.shapes.ice.WireView = joint.dia.LinkView.extend({
       }
 
       function contains(point, points) {
-        var found = false;
-        var np = points.length;
-
-        for (var i = 0; i < np; i++) {
-          if (points[i].x === point.x && points[i].y === point.y) {
-            found = true;
-            return;
+        for (var p of points) {
+          if (p.x === point.x && p.y === point.y) {
+            return true;
           }
         }
-        return found;
+        return false;
       }
 
       function v(wire) {
@@ -3092,26 +2810,22 @@ joint.shapes.ice.WireView = joint.dia.LinkView.extend({
 });
 
 function getCSSRule(ruleName) {
-  'use strict';
-
-  if (document.styleSheets) {
-    for (var i = 0; i < document.styleSheets.length; i++) {
-      var styleSheet = document.styleSheets[i];
-      var ii = 0;
-      var cssRule = false;
-      do {
-        if (styleSheet.cssRules) {
-          cssRule = styleSheet.cssRules[ii];
-        } else {
-          cssRule = styleSheet.rules[ii];
+  if (!document.styleSheets) {
+    return false;
+  }
+  for (var styleSheet of document.styleSheets) {
+    var ii = 0;
+    var cssRule = true;
+    while (cssRule) {
+      cssRule = styleSheet.cssRules
+        ? styleSheet.cssRules[ii]
+        : styleSheet.rules[ii];
+      if (cssRule) {
+        if (cssRule.selectorText === ruleName) {
+          return cssRule;
         }
-        if (cssRule) {
-          if (cssRule.selectorText === ruleName) {
-            return cssRule;
-          }
-        }
-        ii++;
-      } while (cssRule);
+      }
+      ii++;
     }
   }
   return false;
