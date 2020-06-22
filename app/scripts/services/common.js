@@ -163,21 +163,6 @@ angular
       return _dir;
     }
 
-    this.showToolchain = function () {
-      return (
-        (this.selectedBoard && this.selectedBoard.info.interface !== 'GPIO') ||
-        false
-      );
-    };
-
-    this.showDrivers = function () {
-      return (
-        (this.selectedBoard &&
-          (this.selectedBoard.info.interface === 'FTDI' ||
-            this.selectedBoard.info.interface === 'Serial')) ||
-        false
-      );
-    };
     this.isEditingSubmodule = false;
 
     // Read list of subdirs of 'resources/boards' which do not start with '_';

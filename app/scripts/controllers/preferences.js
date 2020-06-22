@@ -45,7 +45,10 @@ angular
         toolchain: {
           icon: 'gear',
           title: 'Toolchain',
-          disabled: !common.showToolchain(),
+          disabled: !(
+            common.selectedBoard &&
+            common.selectedBoard.info.interface !== 'GPIO'
+          ),
         },
       };
 

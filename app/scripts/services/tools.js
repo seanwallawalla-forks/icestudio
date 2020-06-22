@@ -1247,8 +1247,15 @@ angular
       });
     }
 
+    this.showDrivers = _showDrivers;
+
+    function _showDrivers() {
+      const bint = common.selectedBoard.info.interface;
+      return common.selectedBoard && (bint === 'FTDI' || bint === 'Serial');
+    }
+
     function setupDriversAlert() {
-      if (common.showDrivers()) {
+      if (_showDrivers()) {
         var message = _tcStr('Click here to <b>setup the drivers</b>');
         if (!infoAlert) {
           setTimeout(function () {
