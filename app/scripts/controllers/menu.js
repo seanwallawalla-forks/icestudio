@@ -35,6 +35,7 @@ angular
     $scope.common = common;
     $scope.profile = profile;
     $scope.project = project;
+
     $scope.tools = tools;
     $scope.toolchain = tools.toolchain;
     $scope.workingdir = '';
@@ -53,7 +54,11 @@ angular
       graph.fitContent();
     };
     $scope.setProjectInformation = _setProjectInformation;
-    $scope.showBoardOptions = _showBoardOptions;
+    $scope.showBoardOptions = () => {
+      _showBoardOptions();
+      _updateIOList();
+    };
+    $scope.updateIOList = _updateIOList;
 
     $scope.setPreferences = function () {
       $uibModal.open({
@@ -64,40 +69,6 @@ angular
         controller: 'PrefCtrl',
         size: 'lg',
       });
-    };
-
-    $scope.selectedDeviceBoards = common.boards.filter(
-      (board) => board.info.device === common.selectedDevice
-    );
-
-    $scope.selectDevice = function (device) {
-      common.selectedDevice = device;
-      $scope.selectedDeviceBoards = common.boards.filter(
-        (board) => board.info.device === device
-      );
-    };
-
-    // Convert the list of boards into a format suitable for 'menutree' directive
-    $scope.boardMenu = common.devices.map(function (key) {
-      return {
-        name: key,
-        children: common.boards
-          .filter((x) => x.info.device === key)
-          .map(function (x) {
-            return {path: x.name, name: x.info.label};
-          }),
-      };
-    });
-
-    $scope.selectedDeviceBoards = common.boards.filter(
-      (board) => board.info.device === common.selectedDevice
-    );
-
-    $scope.selectDevice = function (device) {
-      common.selectedDevice = device;
-      $scope.selectedDeviceBoards = common.boards.filter(
-        (board) => board.info.device === device
-      );
     };
 
     var zeroProject = true; // New project without changes
@@ -551,6 +522,55 @@ angular
 
     //-- Board options
 
+    $scope.IOList = {};
+
+    function _updateIOList() {
+      const io = graph.getIOList();
+      $scope.IOList = {
+        in: io
+          .filter((item) => !item.dir)
+          .reduce((acc, item) => {
+            acc[item.name] = 'any';
+            return acc;
+          }, {}),
+        out: io
+          .filter((item) => item.dir)
+          .reduce((acc, item) => {
+            acc[item.name] = 'any';
+            return acc;
+          }, {}),
+      };
+    }
+
+    $scope.getResolvedIO = (label) => {
+      var map = project.get('design').boards[common.selectedBoard.name];
+      return map && map[label] ? map[label] : {type: 'unset', value: 'unset'};
+    };
+
+    $scope.setIOResolution = (label, val) => {
+      $log.debug('[cnt.menu.setIOResolution]', label, val);
+      const sname = common.selectedBoard.name;
+      var design = project.get('design');
+      if (!design.boards) {
+        design.boards = {};
+      }
+      var board = design.boards[sname];
+      if (!board) {
+        board = {};
+      }
+      board[label] = val;
+      design.boards[sname] = board;
+      project.set('design', design);
+    };
+
+    $scope.deviceList = common.devices.map((key) => key);
+
+    $scope.selectedDeviceBoards = () => {
+      return common.boards.filter(
+        (board) => board.info.device === common.selectedDevice
+      );
+    };
+
     // Create a new dialog based on 'alert';
     // so that 'Board options' window is not affected by other alerts
     // See https://alertifyjs.com/factory.html
@@ -730,44 +750,9 @@ angular
       }
     });
 
-    //-- Boards
-
-    $(document).on('boardChanged', function (evt, board) {
-      if (common.selectedBoard.name !== board.name) {
-        graph.selectBoard(board);
-        profile.set('board', common.selectedBoard.name);
-      }
-    });
-
     function _selectBoard(name) {
-      let board = undefined;
-      for (const val of common.boards) {
-        if (val.name === name) {
-          board = val;
-          break;
-        }
-      }
-
-      if (!common.selectedBoard || graph.isEmpty()) {
-        _selectBoardNotify(board);
-        return;
-      }
-
-      if (common.selectedBoard.name !== name) {
-        alerts.confirm({
-          icon: 'microchip',
-          title: _tcStr('Do you want to change to {{name}} board?', {
-            name: utils.bold(board.info.label),
-          }),
-          body: _tcStr('The current FPGA I/O configuration will be lost.'),
-          onok: function () {
-            _selectBoardNotify(board);
-          },
-        });
-      }
-
-      function _selectBoardNotify(board) {
-        graph.selectBoard(board, true);
+      if (!common.selectedBoard || common.selectedBoard.name !== name) {
+        utils.selectBoard(name);
         profile.setBoard(common.selectedBoard);
       }
     }

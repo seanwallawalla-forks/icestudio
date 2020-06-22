@@ -203,8 +203,10 @@ angular
       return {};
     }
 
-    this.boardLabel = function (name) {
-      const label = this.boards.find((board) => board.name === name).info.label;
-      return label ? label : name;
+    /*
+    function _getBoardLabel (name) {
+      const label = common.boards.find((board) => board.name === name).info.label;
+      return (label) ? label : name;
     };
+    */
   });

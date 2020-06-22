@@ -43,7 +43,7 @@ angular
           }
         );
       }
-      graph.resetView();
+      graph.setState(null);
       !update ? _loadDesign() : project.update({deps: false}, _loadDesign);
 
       common.topModule = false;
@@ -75,7 +75,7 @@ angular
     }
 
     function _resetViewAndLoadDesign(dsgn, opt) {
-      graph.resetView();
+      graph.setState(null);
       graph.loadDesign(dsgn, opt, function () {
         graph.fitContent();
       });

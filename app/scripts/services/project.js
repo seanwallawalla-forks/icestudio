@@ -25,7 +25,6 @@ angular
     this.filepath = ''; // Used to find external resources (.v, .vh, .list)
     this.changed = false;
     this.backup = false;
-    this.boards = [];
 
     var __project = _default();
 
@@ -40,7 +39,7 @@ angular
           image: '',
         },
         design: {
-          board: '',
+          boards: [],
           graph: {blocks: [], wires: []},
         },
         dependencies: {},
@@ -79,59 +78,49 @@ angular
       if (!checkVersion(data.version)) {
         return;
       }
-      __project = _safeLoad(data, name);
-      $log.debug(
-        '[srv.project.load] common.selectedBoard',
-        common.selectedBoard
-      );
-      // FIXME: when opening an example in a new window, sometimes (frequently) common.selectedBoard is 'null' here
-      if (
-        common.selectedBoard &&
-        __project.design.board !== common.selectedBoard.name
-      ) {
-        var projectBoard = common.boardLabel(__project.design.board);
-        alerts.confirm({
-          icon: 'microchip',
-          title: _tcStr('This project is designed for &lt;{{name}}&gt;', {
-            name: projectBoard,
-          }),
-          body: _tcStr(
-            'You can convert it for the &lt;{{name}}&gt; board or change the selected board.',
-            {name: common.selectedBoard.info.label}
-          ),
-          onok: () => {
-            __project.design.board = common.selectedBoard.name;
-            _load(
-              true,
-              boardMigration(projectBoard, common.selectedBoard.name)
-            );
-          },
-          oncancel: _load,
-          labels: {
-            ok: _tcStr('Convert'),
-            cancel: _tcStr('Change board'),
-          },
-        });
-      } else {
-        _load();
+
+      // FIXME: when opening an example in a new window, sometimes common.selectedBoard is 'null' here
+      if (!common.selectedBoard) {
+        $log.error(
+          '[srv.project.load] common.selectedBoard:',
+          common.selectedBoard
+        );
       }
 
-      function _load(reset, originalBoard) {
-        common.allDependencies = __project.dependencies;
-        var opt = {reset: reset || false, disabled: false};
-        if (originalBoard !== undefined && originalBoard !== false) {
-          for (var i = 0; i < common.boards.length; i++) {
-            if (String(common.boards[i].name) === String(originalBoard)) {
-              opt.originalPinout = common.boards[i].info['pinout'];
-            }
-            if (
-              String(common.boards[i].name) === String(__project.design.board)
-            ) {
-              opt.designPinout = common.boards[i].info['pinout'];
-            }
-          }
+      __project = _safeLoad(data, name);
+      if (!__project.design.boards) {
+        // 'Migrate' ICE projects with single board support
+        // TODO: this is not a real migration yet, since the name is retained only;
+        // top-level input/output blocks should be processed to extract the pin table
+        if (__project.design.board) {
+          __project.design.boards = {};
+          __project.design.boards[__project.design.board] = {};
+        } else {
+          $log.error(
+            '[srv.project.load] __project.design.boards is undefined!'
+          );
         }
-        var ret = graph.loadDesign(__project.design, opt, function () {
+      }
+
+      if (!__project.design.boards[common.selectedBoard.name]) {
+        alerts.alert({
+          icon: 'microchip',
+          title: _tcStr(
+            'The selected board is not supported in this project (yet)'
+          ),
+          body: _tcStr(
+            'You need to define top-level pins for &lt;{{name}}&gt;. Alternatively, select one of the boards which is already supported in this project.',
+            {name: common.selectedBoard.info.label}
+          ),
+        });
+      }
+
+      common.allDependencies = __project.dependencies;
+
+      graph.loadDesign(
+        __project.design,
+        {reset: false, disabled: false},
+        function () {
           graph.resetCommandStack();
           graph.fitContent();
           alertify.success(
@@ -140,37 +129,19 @@ angular
             })
           );
           common.hasChangesSinceBuild = true;
-        });
-        if (ret) {
-          utils.selectBoard(__project.design.board);
-          profile.set('board', common.selectedBoard.name);
-          self.updateTitle(name);
-        } else {
-          alertify.error(
-            _tcStr('Wrong project format: {{name}}', {
-              name: utils.bold(name),
-            }),
-            30
-          );
         }
-      }
+      );
+      self.updateTitle(name);
+      _updateIOList();
     };
 
-    function boardMigration(oldBoard, newBoard) {
-      var pboard = false;
-      switch (oldBoard.toLowerCase()) {
-        case 'icezum alhambra':
-        case 'icezum':
-          switch (newBoard.toLowerCase()) {
-            case 'alhambra-ii':
-              pboard = 'icezum';
-              break;
-            default:
-              pboard = 'icezum';
-          }
-          break;
-      }
-      return pboard;
+    this.isBoardSupported = (bname) => {
+      const boards = __project.design.boards;
+      return boards ? boards[bname] : false;
+    };
+
+    function _updateIOList() {
+      graph.getIOList();
     }
 
     function checkVersion(version) {
@@ -245,7 +216,6 @@ angular
           }
         }
         // Add current dependency
-        block = pruneBlock(block);
         delete block.design.deps;
         block.package.name = block.package.name || key;
         block.package.description = block.package.description || key;
@@ -689,7 +659,6 @@ angular
     this.addBlock = function (block) {
       if (block) {
         block = _safeLoad(block);
-        block = pruneBlock(block);
         if (block.package.name.toLowerCase().indexOf('generic-') === 0) {
           var dat = new Date();
           var seq = dat.getTime();
@@ -700,31 +669,6 @@ angular
         graph.createBlock(type, block);
       }
     };
-
-    function pruneBlock(block) {
-      // Remove all unnecessary information for a dependency:
-      // - version, board, FPGA I/O pins (->size if >1), virtual flag
-      delete block.version;
-      delete block.design.board;
-      var i, pins;
-      for (i in block.design.graph.blocks) {
-        if (
-          block.design.graph.blocks[i].type === 'basic.input' ||
-          block.design.graph.blocks[i].type === 'basic.output' ||
-          block.design.graph.blocks[i].type === 'basic.outputLabel' ||
-          block.design.graph.blocks[i].type === 'inputLabel'
-        ) {
-          if (block.design.graph.blocks[i].data.size === undefined) {
-            pins = block.design.graph.blocks[i].data.pins;
-            block.design.graph.blocks[i].data.size =
-              pins && pins.length > 1 ? pins.length : undefined;
-          }
-          delete block.design.graph.blocks[i].data.pins;
-          delete block.design.graph.blocks[i].data.virtual;
-        }
-      }
-      return block;
-    }
 
     this.removeSelected = function () {
       graph.removeSelected();

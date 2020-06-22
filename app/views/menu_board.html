@@ -55,10 +55,10 @@
             >
               <li
                 role="menuitem"
-                ng-repeat="device in boardMenu"
-                ng-click="selectDevice(device.name)"
+                ng-repeat="device in deviceList"
+                ng-click="common.selectedDevice = device"
               >
-                <a>{{device.name}}</a>
+                <a>{{device}}</a>
               </li>
             </ul>
           </div>
@@ -99,7 +99,7 @@
             <ul class="dropdown-menu" uib-dropdown-menu role="menu">
               <li
                 role="menuitem"
-                ng-repeat="board in selectedDeviceBoards"
+                ng-repeat="board in selectedDeviceBoards()"
                 ng-click="selectBoard(board.name)"
               >
                 <a
@@ -164,17 +164,59 @@
         class="table table-hover text-left"
         style="width: unset; display: inline-table;"
       >
-        <tr ng-repeat="pin in common.selectedBoard.info.pinout">
-          <td>
-            <i
-              class="fa fa-fw"
-              ng-class="'fa-chevron-' + (pin.type==='output'?'right':'left')"
-              aria-hidden="true"
-            ></i>
-            {{ pin.name }}
-          </td>
-          <td>{{ pin.value }}</td>
-        </tr>
+        <tbody ng-repeat="(dir, arr) in IOList">
+          <tr ng-repeat="(key, val) in arr">
+            <td>
+              {{ key }}
+            </td>
+            <td>
+              <i
+                class="fa fa-fw"
+                ng-class="'fa-chevron-' + (dir === 'out'?'right':'left')"
+                aria-hidden="true"
+              ></i>
+            </td>
+            <td>
+              <div class="btn-group btn-group-xs" uib-dropdown>
+                <button
+                  type="button"
+                  class="btn btn-default"
+                  uib-dropdown-toggle
+                  title="{{ 'Select label assignment' | translate }}"
+                >
+                  <span class="caret"></span>
+                  <span class="sr-only"
+                    >{{ 'Select label assignment' | translate }}</span
+                  >
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-default is-disabled"
+                  style="width: 140px;"
+                >
+                  {{ getResolvedIO(key).type }}
+                </button>
+                <ul class="dropdown-menu" uib-dropdown-menu role="menu">
+                  <li
+                    role="menuitem"
+                    ng-repeat="item in common.selectedBoard.info.pinout"
+                    ng-if="dir === item.type.slice(0,-3)"
+                    ng-click="setIOResolution(key, {type: item.name, value: item.value})"
+                  >
+                    <a
+                      >{{item.name}}<span class="shortcut"
+                        >{{ item.value }}</span
+                      ></a
+                    >
+                  </li>
+                </ul>
+              </div>
+            </td>
+            <td>
+              {{ getResolvedIO(key).value }}
+            </td>
+          </tr>
+        </tbody>
       </table>
     </div>
   </div>

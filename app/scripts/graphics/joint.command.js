@@ -6,7 +6,7 @@ Copyright (c) 2013 client IO
 joint.dia.CommandManager = Backbone.Model.extend({
   defaults: {
     cmdBeforeAdd: null,
-    cmdNameRegex: /^(?:add|remove|board|info|lang|change:\w+)$/,
+    cmdNameRegex: /^(?:add|remove|info|lang|change:\w+)$/,
   },
 
   // length of prefix 'change:' in the event name
@@ -137,7 +137,7 @@ joint.dia.CommandManager = Backbone.Model.extend({
       return push(command);
     }
 
-    if (cmdName === 'board' || cmdName === 'info' || cmdName === 'lang') {
+    if (cmdName === 'info' || cmdName === 'lang') {
       command.action = cmdName;
       command.data = cell.data;
 
@@ -248,10 +248,6 @@ joint.dia.CommandManager = Backbone.Model.extend({
           this.graph.addCell(cmd.data.attributes);
           break;
 
-        case 'board':
-          this.triggerBoard(cmd.data.previous);
-          break;
-
         case 'info':
           this.triggerInfo(cmd.data.previous);
           break;
@@ -313,10 +309,6 @@ joint.dia.CommandManager = Backbone.Model.extend({
 
         case 'remove':
           cell.remove();
-          break;
-
-        case 'board':
-          this.triggerBoard(cmd.data.next);
           break;
 
         case 'info':
@@ -406,11 +398,6 @@ joint.dia.CommandManager = Backbone.Model.extend({
     'use strict';
     var currentUndoStack = _.clone(this.changesStack);
     $(document).trigger('stackChanged', [currentUndoStack]);
-  },
-
-  triggerBoard: function (board) {
-    'use strict';
-    $(document).trigger('boardChanged', [board]);
   },
 
   triggerInfo: function (info) {

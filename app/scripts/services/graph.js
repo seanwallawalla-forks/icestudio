@@ -3,6 +3,7 @@
 angular
   .module('icestudio')
   .service('graph', function (
+    $log,
     $rootScope,
     joint,
     blocks,
@@ -87,10 +88,6 @@ angular
       this.panAndZoom.pan(_state.pan);
     };
 
-    this.resetView = function () {
-      this.setState(null);
-    };
-
     this.fitContent = function () {
       if (!this.isEmpty()) {
         // Target box
@@ -140,7 +137,7 @@ angular
         $('.joint-paper.joint-theme-default>svg').attr('height', winHeight);
         $('.joint-paper.joint-theme-default>svg').attr('width', winWidth);
       } else {
-        this.resetView();
+        this.setState(null);
       }
     };
 
@@ -1012,21 +1009,6 @@ angular
       graph.attributes.cells.models = cells;
     };
 
-    this.selectBoard = function (board, reset) {
-      graph.startBatch('change');
-      graph.trigger('board', {
-        data: {
-          previous: common.selectedBoard,
-          next: board,
-        },
-      });
-      utils.selectBoard(board.name);
-      if (reset) {
-        resetBlocks();
-      }
-      graph.stopBatch('change');
-    };
-
     this.setBlockInfo = function (values, newValues, blockId) {
       if (common.allDependencies === undefined) {
         return false;
@@ -1079,74 +1061,6 @@ angular
       graph.stopBatch('change');
       return language;
     };
-
-    function resetBlocks() {
-      var data, connectedLinks;
-      var cells = graph.getCells();
-      _.each(cells, function (cell) {
-        if (cell.isLink()) {
-          return;
-        }
-        var type = cell.get('blockType');
-        if (type === 'basic.input' || type === 'basic.output') {
-          // Reset choices in all Input / blocks
-          var view = paper.findViewByModel(cell.id);
-          cell.set(
-            'choices',
-            type === 'basic.input'
-              ? common.pinoutInputHTML
-              : common.pinoutOutputHTML
-          );
-          view.clearValues();
-          view.applyChoices();
-        } else if (type === 'basic.code') {
-          // Reset rules in Code block ports
-          data = utils.clone(cell.get('data'));
-          connectedLinks = graph.getConnectedLinks(cell);
-          if (data && data.ports && data.ports.in) {
-            _.each(data.ports.in, function (port) {
-              var connected = false;
-              _.each(connectedLinks, function (connectedLink) {
-                if (connectedLink.get('target').port === port.name) {
-                  connected = true;
-                  return false;
-                }
-              });
-              port.default = utils.hasInputRule(port.name, !connected);
-              cell.set('data', data);
-              paper.findViewByModel(cell.id).updateBox();
-            });
-          }
-        } else if (type.indexOf('basic.') === -1) {
-          // Reset rules in Generic block ports
-          var block = common.allDependencies[type];
-          data = {ports: {in: []}};
-          connectedLinks = graph.getConnectedLinks(cell);
-          if (block.design.graph.blocks) {
-            _.each(block.design.graph.blocks, function (item) {
-              if (item.type === 'basic.input' && !item.data.range) {
-                var connected = false;
-                _.each(connectedLinks, function (connectedLink) {
-                  if (connectedLink.get('target').port === item.id) {
-                    connected = true;
-                    return false;
-                  }
-                });
-                data.ports.in.push({
-                  name: item.id,
-                  default: utils.hasInputRule(
-                    (item.data.clock ? 'clk' : '') || item.data.name,
-                    !connected
-                  ),
-                });
-              }
-              cell.set('data', data);
-              paper.findViewByModel(cell.id).updateBox();
-            });
-          }
-        }
-      });
-    }
 
     this.resetCommandStack = function () {
       commandManager.reset();
@@ -1373,11 +1287,14 @@ angular
     function graphToCells(_graph, opt) {
       // Options:
       // - new: assign a new id to all the cells
-      // - reset: clear I/O blocks values
       // - disabled: set disabled flag to the blocks
       // - offset: apply an offset to all the cells
-      // - originalPinout: if reset is true (conversion), this variable
-      //   contains the pinout for the previous board.
+
+      if (opt.designPinout) {
+        $log.error(
+          '[srv.graph.graphToCells] opt should not contain designPinout!'
+        );
+      }
 
       var cell;
       var cells = [];
@@ -1386,53 +1303,25 @@ angular
       // Blocks
       var isMigrated = false;
 
-      function getBlocksFromLib(id) {
-        for (var dep in common.allDependencies) {
-          if (id === dep) {
-            return common.allDependencies[dep].design.graph.blocks;
-          }
+      // Check if wire source exists (block+port)
+      function wireExists(wre, blk, edge) {
+        var found = blk.findIndex((b) => b.id === wre[edge].block);
+        if (found < 0) {
+          return false;
+        }
+        const ftype = blk[found].type;
+        if (ftype.slice(0, 6) === 'basic.') {
+          return true;
+        }
+        // Generic type, look into the library
+        const dep = common.allDependencies[ftype];
+        if (dep) {
+          return (
+            -1 <
+            dep.design.graph.blocks.findIndex((b) => b.id === wre[edge].port)
+          );
         }
         return false;
-      }
-      function outputExists(oid, blks) {
-        var founded = false;
-        for (var i = 0; i < blks.length; i++) {
-          if (blks[i].id === oid) {
-            return true;
-          }
-        }
-        return founded;
-      }
-      /* Check if wire source exists (block+port) */
-      function wireExists(wre, blk, edge) {
-        var founded = false;
-        var blk2 = false;
-
-        for (var i = 0; i < blk.length; i++) {
-          if (wre[edge].block === blk[i].id) {
-            founded = i;
-            break;
-          }
-        }
-        if (founded !== false) {
-          switch (blk[founded].type) {
-            case 'basic.memory':
-            case 'basic.constant':
-            case 'basic.outputLabel':
-            case 'basic.inputLabel':
-            case 'basic.code':
-            case 'basic.input':
-            case 'basic.output':
-              founded = true;
-              break;
-
-            default:
-              /* Generic type, look into the library */
-              blk2 = getBlocksFromLib(blk[i].type);
-              founded = outputExists(wre[edge].port, blk2);
-          }
-        }
-        return founded;
       }
 
       // Wires
@@ -1459,48 +1348,6 @@ angular
           blockInstance.type !== false &&
           blockInstance.type.indexOf('basic.') !== -1
         ) {
-          if (
-            opt.reset &&
-            (blockInstance.type === 'basic.input' ||
-              blockInstance.type === 'basic.output')
-          ) {
-            var pins = blockInstance.data.pins;
-
-            // - if conversion from one board to other is in progress,
-            //   now is based on pin names, an improvement could be
-            //   through hash tables with assigned pins previously
-            //   selected by icestudio developers
-            var replaced = false;
-            for (var i in pins) {
-              replaced = false;
-              if (typeof opt.designPinout !== 'undefined') {
-                for (var opin = 0; opin < opt.designPinout.length; opin++) {
-                  if (
-                    String(opt.designPinout[opin].name) === String(pins[i].name)
-                  ) {
-                    replaced = true;
-                  } else {
-                    let prefix = String(pins[i].name).replace(/[0-9]/g, '');
-                    if (String(opt.designPinout[opin].name) === prefix) {
-                      replaced = true;
-                    }
-                  }
-
-                  if (replaced === true) {
-                    pins[i].name = opt.designPinout[opin].name;
-                    pins[i].value = opt.designPinout[opin].value;
-                    opin = opt.designPinout.length;
-                    replaced = true;
-                    isMigrated = true;
-                  }
-                }
-              }
-              if (replaced === false) {
-                pins[i].name = '';
-                pins[i].value = '0';
-              }
-            }
-          }
           cell = blocks.loadBasic(blockInstance, opt.disabled);
         } else {
           if (blockInstance.type in common.allDependencies) {
@@ -1584,7 +1431,6 @@ angular
         var opt = {
           new: true,
           disabled: false,
-          reset: design.board !== common.selectedBoard.name,
           offset: {
             x:
               Math.round(
@@ -1726,4 +1572,23 @@ angular
         }
       });
     });
+
+    this.getIOList = () => {
+      var list = [];
+      for (var cell of graph.getCells()) {
+        if (cell.isLink()) {
+          continue;
+        }
+        var ctype = cell.get('blockType');
+        if (!(ctype === 'basic.input' || ctype === 'basic.output')) {
+          continue;
+        }
+        list.push({
+          name: cell.get('data').name,
+          dir: ctype === 'basic.output',
+        });
+      }
+      //$log.debug('[srv.graph.getIOList] list:', list);
+      return list;
+    };
   });

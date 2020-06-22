@@ -89,7 +89,6 @@ angular
         function (evt, values) {
           var labels = values[0].replace(/\s*,\s*/g, ',').split(',');
           var color = values[1];
-          var virtual = !values[2];
           var clock = values[2];
           if (resultAlert) {
             resultAlert.dismiss(false);
@@ -132,13 +131,11 @@ angular
               name: portInfo.name,
               range: portInfo.rangestr,
               pins: pins,
-              virtual: virtual,
               clock: clock,
             };
             cells.push(loadBasic(blockInstance));
             // Next block position
-            blockInstance.position.y +=
-              (virtual ? 10 : 6 + 4 * pins.length) * gridsize;
+            blockInstance.position.y += 10 * gridsize;
           }
           if (callback) {
             callback(cells);
@@ -163,19 +160,13 @@ angular
           },
           {
             type: 'checkbox',
-            label: _tcStr('FPGA pin'),
-            value: true,
-          },
-          {
-            type: 'checkbox',
             label: _tcStr('Show clock'),
             value: false,
           },
         ],
         function (evt, values) {
           var labels = values[0].replace(/\s*,\s*/g, ',').split(',');
-          var virtual = !values[1];
-          var clock = values[2];
+          var clock = values[1];
           if (resultAlert) {
             resultAlert.dismiss(false);
           }
@@ -216,13 +207,11 @@ angular
               name: portInfo.name,
               range: portInfo.rangestr,
               pins: pins,
-              virtual: virtual,
               clock: clock,
             };
             cells.push(loadBasic(blockInstance));
             // Next block position
-            blockInstance.position.y +=
-              (virtual ? 10 : 6 + 4 * pins.length) * gridsize;
+            blockInstance.position.y += 10 * gridsize;
           }
           if (callback) {
             callback(cells);
@@ -245,15 +234,9 @@ angular
             title: _tcStr('Enter the output blocks'),
             value: '',
           },
-          {
-            type: 'checkbox',
-            label: _tcStr('FPGA pin'),
-            value: true,
-          },
         ],
         function (evt, values) {
           var labels = values[0].replace(/\s*,\s*/g, ',').split(',');
-          var virtual = !values[1];
           if (resultAlert) {
             resultAlert.dismiss(false);
           }
@@ -287,12 +270,10 @@ angular
               name: portInfo.name,
               range: portInfo.rangestr,
               pins: pins,
-              virtual: virtual,
             };
             cells.push(loadBasic(blockInstance));
             // Next block position
-            blockInstance.position.y +=
-              (virtual ? 10 : 6 + 4 * pins.length) * gridsize;
+            blockInstance.position.y += 10 * gridsize;
           }
           if (callback) {
             callback(cells);
@@ -325,7 +306,6 @@ angular
         function (evt, values) {
           var labels = values[0].replace(/\s*,\s*/g, ',').split(',');
           var color = values[1];
-          var virtual = !values[2];
           if (resultAlert) {
             resultAlert.dismiss(false);
           }
@@ -360,12 +340,10 @@ angular
               name: portInfo.name,
               range: portInfo.rangestr,
               pins: pins,
-              virtual: virtual,
             };
             cells.push(loadBasic(blockInstance));
             // Next block position
-            blockInstance.position.y +=
-              (virtual ? 10 : 6 + 4 * pins.length) * gridsize;
+            blockInstance.position.y += 10 * gridsize;
           }
           if (callback) {
             callback(cells);
@@ -1148,529 +1126,494 @@ angular
       }
     }
 
-    function editBasicOutputLabel(cellView, callback) {
-      var graph = cellView.paper.model;
-      var block = cellView.model.attributes;
-      var formSpecs = [
+    function _baseUpdateForm(name) {
+      return [
         {
           type: 'text',
           title: _tcStr('Update the block name'),
-          value: block.data.name + (block.data.range || ''),
-        },
-        {
-          type: 'combobox',
-          title: _tcStr('Choose a color'),
-          value:
-            typeof block.data.blockColor !== 'undefined'
-              ? block.data.blockColor
-              : 'fuchsia',
-          options: colorOpts,
+          value: name,
         },
       ];
-      utils.renderForm(formSpecs, function (evt, values) {
-        var oldSize,
-          newSize,
-          offset = 0;
-        var label = values[0];
-        var color = values[1];
-        var virtual = !values[2];
-        var clock = values[2];
-        if (resultAlert) {
-          resultAlert.dismiss(false);
-        }
-        // Validate values
-        var portInfo = utils.parsePortLabel(
-          label,
-          common.PATTERN_GLOBAL_PORT_LABEL
-        );
-        if (portInfo) {
-          evt.cancel = false;
-          if (portInfo.rangestr && clock) {
-            evt.cancel = true;
-            resultAlert = alertify.warning(
-              _tcStr('Clock not allowed for data buses')
-            );
-            return;
+    }
+
+    function editBasicOutputLabel(cellView, callback) {
+      var graph = cellView.paper.model;
+      var block = cellView.model.attributes;
+      utils.renderForm(
+        _baseUpdateForm(block.data.name + (block.data.range || '')).concat([
+          {
+            type: 'combobox',
+            title: _tcStr('Choose a color'),
+            value:
+              typeof block.data.blockColor !== 'undefined'
+                ? block.data.blockColor
+                : 'fuchsia',
+            options: colorOpts,
+          },
+        ]),
+        function (evt, values) {
+          var oldSize,
+            newSize,
+            offset = 0;
+          var label = values[0];
+          var color = values[1];
+          var clock = values[2];
+          if (resultAlert) {
+            resultAlert.dismiss(false);
           }
-          if ((block.data.range || '') !== (portInfo.rangestr || '')) {
-            var pins = getPins(portInfo);
-            oldSize = block.data.pins ? block.data.pins.length : 1;
-            oldSize = block.data.virtual ? 1 : oldSize;
-            newSize = virtual ? 1 : pins ? pins.length : 1;
-            // Update block position when size changes
-            offset = 16 * (oldSize - newSize);
-            // Create new block
-            var blockInstance = {
-              id: null,
-              data: {
-                name: portInfo.name,
-                range: portInfo.rangestr,
-                pins: pins,
-                virtual: virtual,
-                clock: clock,
-              },
-              type: block.blockType,
-              position: {
-                x: block.position.x,
-                y: block.position.y + offset,
-              },
-            };
-            if (callback) {
+          // Validate values
+          var portInfo = utils.parsePortLabel(
+            label,
+            common.PATTERN_GLOBAL_PORT_LABEL
+          );
+          if (portInfo) {
+            evt.cancel = false;
+            if (portInfo.rangestr && clock) {
+              evt.cancel = true;
+              resultAlert = alertify.warning(
+                _tcStr('Clock not allowed for data buses')
+              );
+              return;
+            }
+            if ((block.data.range || '') !== (portInfo.rangestr || '')) {
+              var pins = getPins(portInfo);
+              oldSize = block.data.pins ? block.data.pins.length : 1;
+              oldSize = block.data.virtual ? 1 : oldSize;
+              // Update block position when size changes
+              offset = 16 * (oldSize - 1);
+              // Create new block
+              var blockInstance = {
+                id: null,
+                data: {
+                  name: portInfo.name,
+                  range: portInfo.rangestr,
+                  pins: pins,
+                  clock: clock,
+                },
+                type: block.blockType,
+                position: {
+                  x: block.position.x,
+                  y: block.position.y + offset,
+                },
+              };
+              if (callback) {
+                graph.startBatch('change');
+                callback(loadBasic(blockInstance));
+                cellView.model.remove();
+                graph.stopBatch('change');
+                resultAlert = alertify.success(_tcStr('Block updated'));
+              }
+            } else if (
+              block.data.name !== portInfo.name ||
+              block.data.virtual === false ||
+              block.data.clock !== clock ||
+              block.data.blockColor !== color
+            ) {
+              var size = block.data.pins ? block.data.pins.length : 1;
+              oldSize = block.data.virtual ? 1 : size;
+              // Update block position when size changes
+              offset = 16 * (oldSize - 1);
+              // Edit block
               graph.startBatch('change');
-              callback(loadBasic(blockInstance));
-              cellView.model.remove();
+              var data = utils.clone(block.data);
+              data.name = portInfo.name;
+              data.oldBlockColor = data.blockColor;
+              data.blockColor = color;
+              delete data.virtual;
+              data.clock = clock;
+              cellView.model.set('data', data, {
+                translateBy: cellView.model.id,
+                tx: 0,
+                ty: -offset,
+              });
+              cellView.model.translate(0, offset);
               graph.stopBatch('change');
+              cellView.apply();
               resultAlert = alertify.success(_tcStr('Block updated'));
             }
-          } else if (
-            block.data.name !== portInfo.name ||
-            block.data.virtual !== virtual ||
-            block.data.clock !== clock ||
-            block.data.blockColor !== color
-          ) {
-            var size = block.data.pins ? block.data.pins.length : 1;
-            oldSize = block.data.virtual ? 1 : size;
-            newSize = virtual ? 1 : size;
-            // Update block position when size changes
-            offset = 16 * (oldSize - newSize);
-            // Edit block
-            graph.startBatch('change');
-            var data = utils.clone(block.data);
-            data.name = portInfo.name;
-            data.oldBlockColor = data.blockColor;
-            data.blockColor = color;
-            data.virtual = virtual;
-            data.clock = clock;
-            cellView.model.set('data', data, {
-              translateBy: cellView.model.id,
-              tx: 0,
-              ty: -offset,
-            });
-            cellView.model.translate(0, offset);
-            graph.stopBatch('change');
-            cellView.apply();
-            resultAlert = alertify.success(_tcStr('Block updated'));
+          } else {
+            evt.cancel = true;
+            resultAlert = alertify.warning(
+              _tcStr('Wrong block name {{name}}', {name: label})
+            );
           }
-        } else {
-          evt.cancel = true;
-          resultAlert = alertify.warning(
-            _tcStr('Wrong block name {{name}}', {name: label})
-          );
         }
-      });
+      );
     }
 
     function editBasicInputLabel(cellView, callback) {
       var graph = cellView.paper.model;
       var block = cellView.model.attributes;
-      var formSpecs = [
-        {
-          type: 'text',
-          title: _tcStr('Update the block name'),
-          value: block.data.name + (block.data.range || ''),
-        },
-        {
-          type: 'combobox',
-          title: _tcStr('Choose a color'),
-          value:
-            typeof block.data.blockColor !== 'undefined'
-              ? block.data.blockColor
-              : 'fuchsia',
-          options: colorOpts,
-        },
-      ];
-      utils.renderForm(formSpecs, function (evt, values) {
-        var oldSize,
-          newSize,
-          offset = 0;
-        var label = values[0];
-        var color = values[1];
-        var virtual = !values[2];
-        if (resultAlert) {
-          resultAlert.dismiss(false);
-        }
-        // Validate values
-        var portInfo = utils.parsePortLabel(
-          label,
-          common.PATTERN_GLOBAL_PORT_LABEL
-        );
-        if (portInfo) {
-          evt.cancel = false;
-          if ((block.data.range || '') !== (portInfo.rangestr || '')) {
-            var pins = getPins(portInfo);
-            oldSize = block.data.pins ? block.data.pins.length : 1;
-            oldSize = block.data.virtual ? 1 : oldSize;
-            newSize = virtual ? 1 : pins ? pins.length : 1;
-            // Update block position when size changes
-            offset = 16 * (oldSize - newSize);
-            // Create new block
-            var blockInstance = {
-              id: null,
-              data: {
-                name: portInfo.name,
-                range: portInfo.rangestr,
-                pins: pins,
-                virtual: virtual,
-              },
-              type: block.blockType,
-              position: {
-                x: block.position.x,
-                y: block.position.y + offset,
-              },
-            };
-            if (callback) {
+      utils.renderForm(
+        _baseUpdateForm(block.data.name + (block.data.range || '')).concat([
+          {
+            type: 'combobox',
+            title: _tcStr('Choose a color'),
+            value:
+              typeof block.data.blockColor !== 'undefined'
+                ? block.data.blockColor
+                : 'fuchsia',
+            options: colorOpts,
+          },
+        ]),
+        function (evt, values) {
+          var oldSize,
+            newSize,
+            offset = 0;
+          var label = values[0];
+          var color = values[1];
+          if (resultAlert) {
+            resultAlert.dismiss(false);
+          }
+          // Validate values
+          var portInfo = utils.parsePortLabel(
+            label,
+            common.PATTERN_GLOBAL_PORT_LABEL
+          );
+          if (portInfo) {
+            evt.cancel = false;
+            if ((block.data.range || '') !== (portInfo.rangestr || '')) {
+              var pins = getPins(portInfo);
+              oldSize = block.data.pins ? block.data.pins.length : 1;
+              oldSize = block.data.virtual ? 1 : oldSize;
+              // Update block position when size changes
+              offset = 16 * (oldSize - 1);
+              // Create new block
+              var blockInstance = {
+                id: null,
+                data: {
+                  name: portInfo.name,
+                  range: portInfo.rangestr,
+                  pins: pins,
+                },
+                type: block.blockType,
+                position: {
+                  x: block.position.x,
+                  y: block.position.y + offset,
+                },
+              };
+              if (callback) {
+                graph.startBatch('change');
+                callback(loadBasic(blockInstance));
+                cellView.model.remove();
+                graph.stopBatch('change');
+                resultAlert = alertify.success(_tcStr('Block updated'));
+              }
+            } else if (
+              block.data.name !== portInfo.name ||
+              block.data.virtual === false ||
+              block.data.blockColor !== color
+            ) {
+              var size = block.data.pins ? block.data.pins.length : 1;
+              oldSize = block.data.virtual ? 1 : size;
+              // Update block position when size changes
+              offset = 16 * (oldSize - 1);
+              // Edit block
               graph.startBatch('change');
-              callback(loadBasic(blockInstance));
-              cellView.model.remove();
+              var data = utils.clone(block.data);
+              data.name = portInfo.name;
+              data.oldBlockColor = data.blockColor;
+              data.blockColor = color;
+              delete data.virtual;
+              cellView.model.set('data', data, {
+                translateBy: cellView.model.id,
+                tx: 0,
+                ty: -offset,
+              });
+              cellView.model.translate(0, offset);
               graph.stopBatch('change');
+              cellView.apply();
               resultAlert = alertify.success(_tcStr('Block updated'));
             }
-          } else if (
-            block.data.name !== portInfo.name ||
-            block.data.virtual !== virtual ||
-            block.data.blockColor !== color
-          ) {
-            var size = block.data.pins ? block.data.pins.length : 1;
-            oldSize = block.data.virtual ? 1 : size;
-            newSize = virtual ? 1 : size;
-            // Update block position when size changes
-            offset = 16 * (oldSize - newSize);
-            // Edit block
-            graph.startBatch('change');
-            var data = utils.clone(block.data);
-            data.name = portInfo.name;
-            data.oldBlockColor = data.blockColor;
-            data.blockColor = color;
-            data.virtual = virtual;
-            cellView.model.set('data', data, {
-              translateBy: cellView.model.id,
-              tx: 0,
-              ty: -offset,
-            });
-            cellView.model.translate(0, offset);
-            graph.stopBatch('change');
-            cellView.apply();
-            resultAlert = alertify.success(_tcStr('Block updated'));
+          } else {
+            evt.cancel = true;
+            resultAlert = alertify.warning(
+              _tcStr('Wrong block name {{name}}', {name: label})
+            );
           }
-        } else {
-          evt.cancel = true;
-          resultAlert = alertify.warning(
-            _tcStr('Wrong block name {{name}}', {name: label})
-          );
         }
-      });
+      );
     }
 
     function editBasicInput(cellView, callback) {
       var graph = cellView.paper.model;
       var block = cellView.model.attributes;
-      var formSpecs = [
-        {
-          type: 'text',
-          title: _tcStr('Update the block name'),
-          value: block.data.name + (block.data.range || ''),
-        },
-        {
-          type: 'checkbox',
-          label: _tcStr('FPGA pin'),
-          value: !block.data.virtual,
-        },
-        {
-          type: 'checkbox',
-          label: _tcStr('Show clock'),
-          value: block.data.clock,
-        },
-      ];
-      utils.renderForm(formSpecs, function (evt, values) {
-        var oldSize,
-          newSize,
-          offset = 0;
-        var label = values[0];
-        var virtual = !values[1];
-        var clock = values[2];
-        if (resultAlert) {
-          resultAlert.dismiss(false);
-        }
-        // Validate values
-        var portInfo = utils.parsePortLabel(
-          label,
-          common.PATTERN_GLOBAL_PORT_LABEL
-        );
-        if (portInfo) {
-          evt.cancel = false;
-          if (portInfo.rangestr && clock) {
-            evt.cancel = true;
-            resultAlert = alertify.warning(
-              _tcStr('Clock not allowed for data buses')
-            );
-            return;
+      utils.renderForm(
+        _baseUpdateForm(block.data.name + (block.data.range || '')).concat([
+          {
+            type: 'checkbox',
+            label: _tcStr('Show clock'),
+            value: block.data.clock,
+          },
+        ]),
+        function (evt, values) {
+          var oldSize,
+            newSize,
+            offset = 0;
+          var label = values[0];
+          var clock = values[1];
+          if (resultAlert) {
+            resultAlert.dismiss(false);
           }
-          if ((block.data.range || '') !== (portInfo.rangestr || '')) {
-            var pins = getPins(portInfo);
-            oldSize = block.data.pins ? block.data.pins.length : 1;
-            oldSize = block.data.virtual ? 1 : oldSize;
-            newSize = virtual ? 1 : pins ? pins.length : 1;
-            // Update block position when size changes
-            offset = 16 * (oldSize - newSize);
-            // Create new block
-            var blockInstance = {
-              id: null,
-              data: {
-                name: portInfo.name,
-                range: portInfo.rangestr,
-                pins: pins,
-                virtual: virtual,
-                clock: clock,
-              },
-              type: block.blockType,
-              position: {
-                x: block.position.x,
-                y: block.position.y + offset,
-              },
-            };
-            if (callback) {
+          // Validate values
+          var portInfo = utils.parsePortLabel(
+            label,
+            common.PATTERN_GLOBAL_PORT_LABEL
+          );
+          if (portInfo) {
+            evt.cancel = false;
+            if (portInfo.rangestr && clock) {
+              evt.cancel = true;
+              resultAlert = alertify.warning(
+                _tcStr('Clock not allowed for data buses')
+              );
+              return;
+            }
+            if ((block.data.range || '') !== (portInfo.rangestr || '')) {
+              var pins = getPins(portInfo);
+              oldSize = block.data.pins ? block.data.pins.length : 1;
+              oldSize = block.data.virtual ? 1 : oldSize;
+              // Update block position when size changes
+              offset = 16 * (oldSize - 1);
+              // Create new block
+              var blockInstance = {
+                id: null,
+                data: {
+                  name: portInfo.name,
+                  range: portInfo.rangestr,
+                  pins: pins,
+                  clock: clock,
+                },
+                type: block.blockType,
+                position: {
+                  x: block.position.x,
+                  y: block.position.y + offset,
+                },
+              };
+              if (callback) {
+                graph.startBatch('change');
+                callback(loadBasic(blockInstance));
+                cellView.model.remove();
+                graph.stopBatch('change');
+                resultAlert = alertify.success(_tcStr('Block updated'));
+              }
+            } else if (
+              block.data.name !== portInfo.name ||
+              block.data.virtual === false ||
+              block.data.clock !== clock
+            ) {
+              var size = block.data.pins ? block.data.pins.length : 1;
+              oldSize = block.data.virtual ? 1 : size;
+              // Update block position when size changes
+              offset = 16 * (oldSize - 1);
+              // Edit block
               graph.startBatch('change');
-              callback(loadBasic(blockInstance));
-              cellView.model.remove();
+              var data = utils.clone(block.data);
+              data.name = portInfo.name;
+              delete data.virtual;
+              data.clock = clock;
+              cellView.model.set('data', data, {
+                translateBy: cellView.model.id,
+                tx: 0,
+                ty: -offset,
+              });
+              cellView.model.translate(0, offset);
               graph.stopBatch('change');
+              cellView.apply();
               resultAlert = alertify.success(_tcStr('Block updated'));
             }
-          } else if (
-            block.data.name !== portInfo.name ||
-            block.data.virtual !== virtual ||
-            block.data.clock !== clock
-          ) {
-            var size = block.data.pins ? block.data.pins.length : 1;
-            oldSize = block.data.virtual ? 1 : size;
-            newSize = virtual ? 1 : size;
-            // Update block position when size changes
-            offset = 16 * (oldSize - newSize);
-            // Edit block
-            graph.startBatch('change');
-            var data = utils.clone(block.data);
-            data.name = portInfo.name;
-            data.virtual = virtual;
-            data.clock = clock;
-            cellView.model.set('data', data, {
-              translateBy: cellView.model.id,
-              tx: 0,
-              ty: -offset,
-            });
-            cellView.model.translate(0, offset);
-            graph.stopBatch('change');
-            cellView.apply();
-            resultAlert = alertify.success(_tcStr('Block updated'));
+          } else {
+            evt.cancel = true;
+            resultAlert = alertify.warning(
+              _tcStr('Wrong block name {{name}}', {name: label})
+            );
           }
-        } else {
-          evt.cancel = true;
-          resultAlert = alertify.warning(
-            _tcStr('Wrong block name {{name}}', {name: label})
-          );
         }
-      });
+      );
     }
 
     function editBasicOutput(cellView, callback) {
       var graph = cellView.paper.model;
       var block = cellView.model.attributes;
-      var formSpecs = [
-        {
-          type: 'text',
-          title: _tcStr('Update the block name'),
-          value: block.data.name + (block.data.range || ''),
-        },
-        {
-          type: 'checkbox',
-          label: _tcStr('FPGA pin'),
-          value: !block.data.virtual,
-        },
-      ];
-      utils.renderForm(formSpecs, function (evt, values) {
-        var oldSize,
-          newSize,
-          offset = 0;
-        var label = values[0];
-        var virtual = !values[1];
-        if (resultAlert) {
-          resultAlert.dismiss(false);
-        }
-        // Validate values
-        var portInfo = utils.parsePortLabel(
-          label,
-          common.PATTERN_GLOBAL_PORT_LABEL
-        );
-        if (portInfo) {
-          evt.cancel = false;
-          if ((block.data.range || '') !== (portInfo.rangestr || '')) {
-            var pins = getPins(portInfo);
-            oldSize = block.data.pins ? block.data.pins.length : 1;
-            oldSize = block.data.virtual ? 1 : oldSize;
-            newSize = virtual ? 1 : pins ? pins.length : 1;
-            // Update block position when size changes
-            offset = 16 * (oldSize - newSize);
-            // Create new block
-            var blockInstance = {
-              id: null,
-              data: {
-                name: portInfo.name,
-                range: portInfo.rangestr,
-                pins: pins,
-                virtual: virtual,
-              },
-              type: block.blockType,
-              position: {
-                x: block.position.x,
-                y: block.position.y + offset,
-              },
-            };
-            if (callback) {
+      utils.renderForm(
+        _baseUpdateForm(block.data.name + (block.data.range || '')),
+        function (evt, values) {
+          var oldSize,
+            newSize,
+            offset = 0;
+          var label = values[0];
+          if (resultAlert) {
+            resultAlert.dismiss(false);
+          }
+          // Validate values
+          var portInfo = utils.parsePortLabel(
+            label,
+            common.PATTERN_GLOBAL_PORT_LABEL
+          );
+          if (portInfo) {
+            evt.cancel = false;
+            if ((block.data.range || '') !== (portInfo.rangestr || '')) {
+              var pins = getPins(portInfo);
+              oldSize = block.data.pins ? block.data.pins.length : 1;
+              oldSize = block.data.virtual ? 1 : oldSize;
+              // Update block position when size changes
+              offset = 16 * (oldSize - 1);
+              // Create new block
+              var blockInstance = {
+                id: null,
+                data: {
+                  name: portInfo.name,
+                  range: portInfo.rangestr,
+                  pins: pins,
+                },
+                type: block.blockType,
+                position: {
+                  x: block.position.x,
+                  y: block.position.y + offset,
+                },
+              };
+              if (callback) {
+                graph.startBatch('change');
+                callback(loadBasic(blockInstance));
+                cellView.model.remove();
+                graph.stopBatch('change');
+                resultAlert = alertify.success(_tcStr('Block updated'));
+              }
+            } else if (
+              block.data.name !== portInfo.name ||
+              block.data.virtual === false
+            ) {
+              var size = block.data.pins ? block.data.pins.length : 1;
+              oldSize = block.data.virtual ? 1 : size;
+              // Update block position when size changes
+              offset = 16 * (oldSize - 1);
+              // Edit block
               graph.startBatch('change');
-              callback(loadBasic(blockInstance));
-              cellView.model.remove();
+              var data = utils.clone(block.data);
+              data.name = portInfo.name;
+              delete data.virtual;
+              cellView.model.set('data', data, {
+                translateBy: cellView.model.id,
+                tx: 0,
+                ty: -offset,
+              });
+              cellView.model.translate(0, offset);
               graph.stopBatch('change');
+              cellView.apply();
               resultAlert = alertify.success(_tcStr('Block updated'));
             }
-          } else if (
-            block.data.name !== portInfo.name ||
-            block.data.virtual !== virtual
-          ) {
-            var size = block.data.pins ? block.data.pins.length : 1;
-            oldSize = block.data.virtual ? 1 : size;
-            newSize = virtual ? 1 : size;
-            // Update block position when size changes
-            offset = 16 * (oldSize - newSize);
-            // Edit block
-            graph.startBatch('change');
-            var data = utils.clone(block.data);
-            data.name = portInfo.name;
-            data.virtual = virtual;
-            cellView.model.set('data', data, {
-              translateBy: cellView.model.id,
-              tx: 0,
-              ty: -offset,
-            });
-            cellView.model.translate(0, offset);
-            graph.stopBatch('change');
-            cellView.apply();
-            resultAlert = alertify.success(_tcStr('Block updated'));
+          } else {
+            evt.cancel = true;
+            resultAlert = alertify.warning(
+              _tcStr('Wrong block name {{name}}', {name: label})
+            );
           }
-        } else {
-          evt.cancel = true;
-          resultAlert = alertify.warning(
-            _tcStr('Wrong block name {{name}}', {name: label})
-          );
         }
-      });
+      );
     }
 
     function editBasicConstant(cellView) {
       var block = cellView.model.attributes;
-      var formSpecs = [
-        {
-          type: 'text',
-          title: _tcStr('Update the block name'),
-          value: block.data.name,
-        },
-        {
-          type: 'checkbox',
-          label: _tcStr('Local parameter'),
-          value: block.data.local,
-        },
-      ];
-      utils.renderForm(formSpecs, function (evt, values) {
-        var label = values[0];
-        var local = values[1];
-        if (resultAlert) {
-          resultAlert.dismiss(false);
-        }
-        // Validate values
-        var paramInfo = utils.parseParamLabel(
-          label,
-          common.PATTERN_GLOBAL_PARAM_LABEL
-        );
-        if (paramInfo) {
-          var name = paramInfo.name;
-          evt.cancel = false;
-          if (block.data.name !== name || block.data.local !== local) {
-            // Edit block
-            var data = utils.clone(block.data);
-            data.name = name;
-            data.local = local;
-            cellView.model.set('data', data);
-            cellView.apply();
-            resultAlert = alertify.success(_tcStr('Block updated'));
+      utils.renderForm(
+        _baseUpdateForm(block.data.name).concat([
+          {
+            type: 'checkbox',
+            label: _tcStr('Local parameter'),
+            value: block.data.local,
+          },
+        ]),
+        function (evt, values) {
+          var label = values[0];
+          var local = values[1];
+          if (resultAlert) {
+            resultAlert.dismiss(false);
           }
-        } else {
-          evt.cancel = true;
-          resultAlert = alertify.warning(
-            _tcStr('Wrong block name {{name}}', {name: label})
+          // Validate values
+          var paramInfo = utils.parseParamLabel(
+            label,
+            common.PATTERN_GLOBAL_PARAM_LABEL
           );
-          return;
+          if (paramInfo) {
+            var name = paramInfo.name;
+            evt.cancel = false;
+            if (block.data.name !== name || block.data.local !== local) {
+              // Edit block
+              var data = utils.clone(block.data);
+              data.name = name;
+              data.local = local;
+              cellView.model.set('data', data);
+              cellView.apply();
+              resultAlert = alertify.success(_tcStr('Block updated'));
+            }
+          } else {
+            evt.cancel = true;
+            resultAlert = alertify.warning(
+              _tcStr('Wrong block name {{name}}', {name: label})
+            );
+            return;
+          }
         }
-      });
+      );
     }
 
     function editBasicMemory(cellView) {
       var block = cellView.model.attributes;
-      var formSpecs = [
-        {
-          type: 'text',
-          title: _tcStr('Update the block name'),
-          value: block.data.name,
-        },
-        {
-          type: 'combobox',
-          label: _tcStr('Address format'),
-          value: block.data.format,
-          options: [
-            {value: 2, label: _tcStr('Binary')},
-            {value: 10, label: _tcStr('Decimal')},
-            {value: 16, label: _tcStr('Hexadecimal')},
-          ],
-        },
-        {
-          type: 'checkbox',
-          label: _tcStr('Local parameter'),
-          value: block.data.local,
-        },
-      ];
-      utils.renderForm(formSpecs, function (evt, values) {
-        var label = values[0];
-        var local = values[2];
-        var format = parseInt(values[1]);
-        if (resultAlert) {
-          resultAlert.dismiss(false);
-        }
-        // Validate values
-        var paramInfo = utils.parseParamLabel(
-          label,
-          common.PATTERN_GLOBAL_PARAM_LABEL
-        );
-        if (paramInfo) {
-          var name = paramInfo.name;
-          evt.cancel = false;
-          if (
-            block.data.name !== name ||
-            block.data.local !== local ||
-            block.data.format !== format
-          ) {
-            // Edit block
-            var data = utils.clone(block.data);
-            data.name = name;
-            data.local = local;
-            data.format = format;
-            cellView.model.set('data', data);
-            cellView.apply();
-            resultAlert = alertify.success(_tcStr('Block updated'));
+      utils.renderForm(
+        _baseUpdateForm(block.data.name).concat([
+          {
+            type: 'combobox',
+            label: _tcStr('Address format'),
+            value: block.data.format,
+            options: [
+              {value: 2, label: _tcStr('Binary')},
+              {value: 10, label: _tcStr('Decimal')},
+              {value: 16, label: _tcStr('Hexadecimal')},
+            ],
+          },
+          {
+            type: 'checkbox',
+            label: _tcStr('Local parameter'),
+            value: block.data.local,
+          },
+        ]),
+        function (evt, values) {
+          var label = values[0];
+          var local = values[2];
+          var format = parseInt(values[1]);
+          if (resultAlert) {
+            resultAlert.dismiss(false);
           }
-        } else {
-          evt.cancel = true;
-          resultAlert = alertify.warning(
-            _tcStr('Wrong block name {{name}}', {name: label})
+          // Validate values
+          var paramInfo = utils.parseParamLabel(
+            label,
+            common.PATTERN_GLOBAL_PARAM_LABEL
           );
-          return;
+          if (paramInfo) {
+            var name = paramInfo.name;
+            evt.cancel = false;
+            if (
+              block.data.name !== name ||
+              block.data.local !== local ||
+              block.data.format !== format
+            ) {
+              // Edit block
+              var data = utils.clone(block.data);
+              data.name = name;
+              data.local = local;
+              data.format = format;
+              cellView.model.set('data', data);
+              cellView.apply();
+              resultAlert = alertify.success(_tcStr('Block updated'));
+            }
+          } else {
+            evt.cancel = true;
+            resultAlert = alertify.warning(
+              _tcStr('Wrong block name {{name}}', {name: label})
+            );
+            return;
+          }
         }
-      });
+      );
     }
 
     function editBasicCode(cellView, callback) {

@@ -1,5 +1,14 @@
 <!DOCTYPE html>
-<div ng-controller="MenuCtrl">
+<!-- FIXME:
+  Using 'ng-mouseover="updateIOList()"' here is a very dirty solution to have the table
+  in window 'Board options' updated pseudo-automatically when opening a design, or browsing
+  through submodules, and then moving the mouse around.
+  However, a better solution would be to save the output of 'graph.getIOList' as a variable
+  and let angularjs handle updating the menu view (IOList). Unfortunately, when attempted to
+  do so, it crashes because an "infinite loop" of updates is triggered.
+  t
+-->
+<div ng-controller="MenuCtrl" ng-mouseover="updateIOList()">
   <div id="menu" ondragstart="return false;" ondrop="return false;">
     <!-- TODO: rework to (re)use 1-2 'input', instead of +10 -->
     <input

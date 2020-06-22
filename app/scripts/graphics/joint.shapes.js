@@ -22,22 +22,22 @@ if (DARWIN) {
 joint.shapes.ice = {};
 joint.shapes.ice.Model = joint.shapes.basic.Generic.extend({
   markup: `<g class="rotatable">
-             <g class="scalable">
-               <rect class="body"/>
-             </g>
-             <g class="leftPorts disable-port"/>
-             <g class="rightPorts"/>
-             <g class="topPorts disable-port"/>
-             <g class="bottomPorts"/>
-           </g>`,
+      <g class="scalable">
+        <rect class="body"/>
+      </g>
+      <g class="leftPorts disable-port"/>
+      <g class="rightPorts"/>
+      <g class="topPorts disable-port"/>
+      <g class="bottomPorts"/>
+    </g>`,
   portMarkup: `<g class="port port<%= index %>">
-                 <g class="port-default" id="port-default-<%= id %>-<%= port.id %>">
-                    <path/><rect/>
-                 </g>
-                 <path class="port-wire" id="port-wire-<%= id %>-<%= port.id %>"/>
-                 <text class="port-label"/>
-                 <circle class="port-body"/>
-               </g>`,
+      <g class="port-default" id="port-default-<%= id %>-<%= port.id %>">
+         <path/><rect/>
+      </g>
+      <path class="port-wire" id="port-wire-<%= id %>-<%= port.id %>"/>
+      <text class="port-label"/>
+      <circle class="port-body"/>
+    </g>`,
 
   defaults: joint.util.deepSupplement(
     {
@@ -935,61 +935,28 @@ joint.shapes.ice.IOView = joint.shapes.ice.ModelView.extend({
     joint.dia.ElementView.prototype.initialize.apply(this, arguments);
 
     this.id = sha1(this.model.get('id')).toString().substring(0, 6);
-    var comboId = 'combo' + this.id;
-    var virtual = this.model.get('data').virtual || this.model.get('disabled');
 
-    var selectCode = '';
-    var selectScript = '';
     var data = this.model.get('data');
     var name = data.name + (data.range || '');
 
-    if (data.pins) {
-      for (var i in data.pins) {
-        selectCode += '<select id="' + comboId + data.pins[i].index + '"';
-        selectCode += 'class="select2" i="' + i + '">';
-        selectCode += '</select>';
-
-        selectScript += '$("#' + comboId + data.pins[i].index + '").select2(';
-        selectScript +=
-          '{placeholder: "", allowClear: true, dropdownCssClass: "bigdrop",';
-        // Match only words that start with the selected search term
-        // http://stackoverflow.com/questions/31571864/select2-search-match-only-words-that-start-with-search-term
-        selectScript += 'matcher: function(params, data) {';
-        selectScript += '  params.term = params.term || "";';
-        selectScript +=
-          '  if (data.text.toUpperCase().indexOf(params.term.toUpperCase()) == 0) { return data; }';
-        selectScript += '  return false; } });';
-      }
-    }
-
     this.$box = $(
       joint.util.template(`<div class="io-block">
-        <div class="io-virtual-content${virtual ? '' : ' hidden'}">
+        <div class="io-virtual-content">
           <div class="header">
             <label>${name}</label>
             <svg viewBox="0 0 12 18"><path d="M-1 0 l10 8-10 8" fill="none" stroke-width="2" stroke-linejoin="round"/>
           </div>
-        </div>
-        <div class="io-fpga-content${virtual ? ' hidden' : ''}">
-          <div class="header">
-            <label>${name}</label>
-            <svg viewBox="0 0 12 18"><path d="M-1 0 l10 8-10 8" fill="none" stroke-width="2" stroke-linejoin="round"/>
-          </div>
-          <div>${selectCode}</div>
-          <script>${selectScript}</script>
         </div>
       </div>`)()
     );
 
     this.virtualContentSelector = this.$box.find('.io-virtual-content');
-    this.fpgaContentSelector = this.$box.find('.io-fpga-content');
     this.headerSelector = this.$box.find('.header');
     this.nativeDom = {
       box: this.$box[0],
       virtualContentSelector: this.$box[0].querySelectorAll(
         '.io-virtual-content'
       ),
-      fpgaContentSelector: this.$box[0].querySelectorAll('.io-fpga-content'),
     };
 
     this.model.on('change', this.updateBox, this);
@@ -1076,33 +1043,20 @@ joint.shapes.ice.IOView = joint.shapes.ice.ModelView.extend({
 
     var data = this.model.get('data');
     var name = data.name + (data.range || '');
-    var virtual = data.virtual || this.model.get('disabled') || subModuleActive;
     var $label = this.$box.find('label');
 
     $label.text(name || '');
 
-    if (virtual) {
-      // Virtual port (green)
-      this.fpgaContentSelector.addClass('hidden');
+    // Virtual port (green)
 
-      this.virtualContentSelector.removeClass('hidden');
-      if (typeof data.blockColor !== 'undefined') {
-        if (typeof data.oldBlockColor !== 'undefined') {
-          this.virtualContentSelector.removeClass(
-            'color-' + data.oldBlockColor
-          );
-        }
-        this.virtualContentSelector.addClass('color-' + data.blockColor);
+    this.virtualContentSelector.removeClass('hidden');
+    if (typeof data.blockColor !== 'undefined') {
+      if (typeof data.oldBlockColor !== 'undefined') {
+        this.virtualContentSelector.removeClass('color-' + data.oldBlockColor);
       }
-      this.model.attributes.size.height = 64;
-    } else {
-      // FPGA I/O port (yellow)
-      this.virtualContentSelector.addClass('hidden');
-      this.fpgaContentSelector.removeClass('hidden');
-      if (data.pins) {
-        this.model.attributes.size.height = 32 + 32 * data.pins.length;
-      }
+      this.virtualContentSelector.addClass('color-' + data.blockColor);
     }
+    this.model.attributes.size.height = 64;
   },
 
   applyClock: function () {
@@ -1280,40 +1234,7 @@ joint.shapes.ice.IOView = joint.shapes.ice.ModelView.extend({
         value: 'scale(' + state.zoom + ')',
       });
     }
-    // Render io FPGA content
-    var fpgaTopOffset = data.name || data.range || data.clock ? 0 : 24;
 
-    for (i = 0; i < this.nativeDom.fpgaContentSelector.length; i++) {
-      pendingTasks.push({
-        e: this.nativeDom.fpgaContentSelector[i],
-        property: 'left',
-        value: Math.round((bbox.width / 2.0) * (state.zoom - 1)) + 'px',
-      });
-      pendingTasks.push({
-        e: this.nativeDom.fpgaContentSelector[i],
-        property: 'top',
-        value:
-          Math.round(
-            ((bbox.height - fpgaTopOffset) / 2.0) * (state.zoom - 1) +
-              (fpgaTopOffset / 2.0) * state.zoom
-          ) + 'px',
-      });
-      pendingTasks.push({
-        e: this.nativeDom.fpgaContentSelector[i],
-        property: 'width',
-        value: Math.round(bbox.width) + 'px',
-      });
-      pendingTasks.push({
-        e: this.nativeDom.fpgaContentSelector[i],
-        property: 'height',
-        value: Math.round(bbox.height - fpgaTopOffset) + 'px',
-      });
-      pendingTasks.push({
-        e: this.nativeDom.fpgaContentSelector[i],
-        property: 'transform',
-        value: 'scale(' + state.zoom + ')',
-      });
-    }
     if (data.name || data.range || data.clock) {
       this.headerSelector.removeClass('hidden');
     } else {

@@ -238,12 +238,18 @@
 .table .btn-group {
   white-space: nowrap;
 }
+
 .table .btn-group .btn {
   display: inline-block;
   float: none;
 }
+
 .table .btn-group .btn + .btn {
   margin-left: -5px;
+}
+
+.table > tbody + tbody {
+  border-width: 1px;
 }
 
 /* Preferences */
