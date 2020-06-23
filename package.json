@@ -29,6 +29,8 @@
   "scripts": {
     "prettify": "prettier --write .",
     "check": "prettier --check .",
+    "lint": "eslint app/scripts/**/*.js tasks/*.js gruntfile.js",
+    "fix": "eslint --fix app/scripts/**/*.js tasks/*.js gruntfile.js",
     "start": "grunt serve",
     "dist": "grunt dist",
     "gettext": "grunt gettext",
@@ -36,6 +38,7 @@
   },
   "devDependencies": {
     "bower": "^1.8.0",
+    "eslint": "^7.3.1",
     "grunt": "^1.0.4",
     "grunt-angular-gettext": "^2.5.0",
     "grunt-appimage": "^0.6.0",
@@ -45,7 +48,6 @@
     "grunt-contrib-concat": "^1.0.1",
     "grunt-contrib-copy": "^1.0.0",
     "grunt-contrib-cssmin": "^1.0.1",
-    "grunt-contrib-jshint": "^1.1.0",
     "grunt-contrib-uglify": "github:gruntjs/grunt-contrib-uglify#harmony",
     "grunt-contrib-watch": "^1.0.0",
     "grunt-exec": "^1.0.0",

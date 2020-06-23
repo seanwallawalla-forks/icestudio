@@ -1,8 +1,9 @@
-'use strict';
+/* eslint-disable new-cap */
 
 angular
   .module('icestudio')
-  .controller('MainCtrl', function ($scope, gettextCatalog, tools, utils) {
+  .controller('MainCtrl', function (gettextCatalog, tools, utils) {
+    'use strict';
     alertify.defaults.movable = false;
     alertify.defaults.closable = false;
     alertify.defaults.transition = 'fade';
@@ -39,7 +40,7 @@ angular
 
     /* Plugin menu*/
 
-    let icmBodyEl = $('body'),
+    var icmBodyEl = $('body'),
       icmOpenbtn = document.getElementById('icm-open-button'),
       icmClosebtn = document.getElementById('icm-close-button'),
       icmIsOpen = false,

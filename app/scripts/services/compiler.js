@@ -1,8 +1,8 @@
-'use strict';
-
 angular
   .module('icestudio')
   .service('compiler', function (common, utils, nodeSha1, _package) {
+    'use strict';
+
     this.generate = function (target, project, opt) {
       var content = '';
       var files = [];
@@ -827,14 +827,13 @@ angular
       return code;
     }
 
-    function lpfCompiler(project, opt) {
+    function lpfCompiler(project) {
       var i,
         block,
         pin,
         value,
         code = '';
       var blocks = project.design.graph.blocks;
-      opt = opt || {};
 
       code += '# -- Board: '
       code += common.selectedBoard.name

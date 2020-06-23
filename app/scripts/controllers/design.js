@@ -1,7 +1,3 @@
-'use strict';
-
-var subModuleActive = false;
-
 angular
   .module('icestudio')
   .controller('DesignCtrl', function (
@@ -14,6 +10,8 @@ angular
     utils,
     common
   ) {
+    'use strict';
+
     $scope.graph = graph;
     $scope.common = common;
     $scope.profile = profile;

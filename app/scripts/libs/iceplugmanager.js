@@ -1,7 +1,8 @@
-/*jshint unused:false*/
-/*jshint evil:true */
-'use strict';
+/* eslint-disable no-unused-vars */
+
 var IcePlugManager = function () {
+  'use strict';
+
   this.pluginDir = false;
   this.pluginUri = false;
   this.env = false;

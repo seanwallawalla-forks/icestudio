@@ -3,8 +3,6 @@ Copyright (c) 2016-2019 FPGAwars
 Copyright (c) 2013 client IO
 */
 
-'use strict';
-
 joint.dia.CommandManager = Backbone.Model.extend({
   defaults: {
     cmdBeforeAdd: null,
@@ -15,25 +13,24 @@ joint.dia.CommandManager = Backbone.Model.extend({
   PREFIX_LENGTH: 7,
 
   initialize: function (options) {
+    'use strict';
     _.bindAll(this, 'initBatchCommand', 'storeBatchCommand');
-
     this.paper = options.paper;
     this.graph = options.graph;
-
     this.reset();
     this.listen();
   },
 
   listen: function () {
+    'use strict';
     this.listenTo(this.graph, 'state', this.updateState, this);
-
     this.listenTo(this.graph, 'all', this.addCommand, this);
-
     this.listenTo(this.graph, 'batch:start', this.initBatchCommand, this);
     this.listenTo(this.graph, 'batch:stop', this.storeBatchCommand, this);
   },
 
   createCommand: function (options) {
+    'use strict';
     var cmd = {
       action: undefined,
       data: {id: undefined, type: undefined, previous: {}, next: {}},
@@ -44,25 +41,25 @@ joint.dia.CommandManager = Backbone.Model.extend({
   },
 
   updateState: function (state) {
+    'use strict';
     this.state = state;
   },
 
   addCommand: function (cmdName, cell, graph, options) {
+    'use strict';
+
     if (cmdName === 'change:labels' || cmdName === 'change:z') {
       return;
     }
-
     if (!this.get('cmdNameRegex').test(cmdName)) {
       return;
     }
-
     if (
       typeof this.get('cmdBeforeAdd') === 'function' &&
       !this.get('cmdBeforeAdd').apply(this, arguments)
     ) {
       return;
     }
-
     var push = _.bind(function (cmd) {
       this.redoStack = [];
 
@@ -177,6 +174,7 @@ joint.dia.CommandManager = Backbone.Model.extend({
   // are also being removed to be part of different command
 
   initBatchCommand: function () {
+    'use strict';
     if (!this.batchCommand) {
       this.batchCommand = [this.createCommand({batch: true})];
       this.lastCmdIndex = -1;
@@ -191,6 +189,7 @@ joint.dia.CommandManager = Backbone.Model.extend({
   },
 
   storeBatchCommand: function () {
+    'use strict';
     // In order to store batch command it is necesary to run storeBatchCommand as many times as
     // initBatchCommand was executed
     if (this.batchCommand && this.batchLevel <= 0) {
@@ -222,6 +221,7 @@ joint.dia.CommandManager = Backbone.Model.extend({
   },
 
   revertCommand: function (command) {
+    'use strict';
     this.stopListening();
 
     var batchCommand;
@@ -290,6 +290,7 @@ joint.dia.CommandManager = Backbone.Model.extend({
   },
 
   applyCommand: function (command) {
+    'use strict';
     this.stopListening();
 
     var batchCommand;
@@ -350,6 +351,7 @@ joint.dia.CommandManager = Backbone.Model.extend({
   },
 
   undo: function () {
+    'use strict';
     var command = this.undoStack.pop();
     if (command) {
       this.revertCommand(command);
@@ -360,6 +362,7 @@ joint.dia.CommandManager = Backbone.Model.extend({
   },
 
   redo: function () {
+    'use strict';
     var command = this.redoStack.pop();
 
     if (command) {
@@ -374,6 +377,7 @@ joint.dia.CommandManager = Backbone.Model.extend({
   },
 
   cancel: function () {
+    'use strict';
     if (this.hasUndo()) {
       this.revertCommand(this.undoStack.pop());
       this.redoStack = [];
@@ -381,6 +385,7 @@ joint.dia.CommandManager = Backbone.Model.extend({
   },
 
   reset: function () {
+    'use strict';
     this.undoStack = [];
     this.redoStack = [];
 
@@ -388,27 +393,33 @@ joint.dia.CommandManager = Backbone.Model.extend({
   },
 
   hasUndo: function () {
+    'use strict';
     return this.undoStack.length > 0;
   },
 
   hasRedo: function () {
+    'use strict';
     return this.redoStack.length > 0;
   },
 
   triggerChange: function () {
+    'use strict';
     var currentUndoStack = _.clone(this.changesStack);
     $(document).trigger('stackChanged', [currentUndoStack]);
   },
 
   triggerBoard: function (board) {
+    'use strict';
     $(document).trigger('boardChanged', [board]);
   },
 
   triggerInfo: function (info) {
+    'use strict';
     $(document).trigger('infoChanged', [info]);
   },
 
   triggerLanguage: function (lang) {
+    'use strict';
     $(document).trigger('langChanged', [lang]);
   },
 });

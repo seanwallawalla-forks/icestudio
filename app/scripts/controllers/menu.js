@@ -1,4 +1,4 @@
-'use strict';
+/* eslint-disable camelcase */
 
 angular
   .module('icestudio')
@@ -21,7 +21,7 @@ angular
     nodeFs,
     nodePath
   ) {
-    //-- Initialize scope
+    'use strict';
 
     $scope.profile = profile;
     $scope.project = project;
@@ -128,9 +128,9 @@ angular
         project.path = '';
       }
       var versionW = $scope.profile.get('displayVersionInfoWindow');
-      let lastversionReview = $scope.profile.get('lastVersionReview');
-      let hasNewVersion =
-        lastversionReview === false || lastversionReview < _package.version;
+      var lastversionReview = $scope.profile.get('lastVersionReview');
+      var hasNewVersion =
+        !lastversionReview || lastversionReview < _package.version;
       if (versionW === 'yes' || hasNewVersion) {
         $scope.openVersionInfoWindow(hasNewVersion);
       }
@@ -169,11 +169,8 @@ angular
 
     $scope.openVersionInfoWindow = function (showPopUp) {
       $('#version-info-tab').removeClass('hidden');
-      var versionW = $scope.profile.get('displayVersionInfoWindow');
-      let noShowVersion = false;
-      if (versionW === 'no') {
-        noShowVersion = true;
-      }
+      var noShowVersion =
+        $scope.profile.get('displayVersionInfoWindow') === 'no';
       if (typeof showPopUp !== 'undefined' && showPopUp === true) {
         profile.set('displayVersionInfoWindow', 'yes');
         profile.set('lastVersionReview', _package.version);
@@ -482,14 +479,10 @@ angular
         }, 250);
       }
     };
-    var pasteAndClone = true;
+
     $scope.pasteAndCloneSelected = function () {
       if (paste) {
-        pasteAndClone = false;
         graph.pasteAndCloneSelected();
-        setTimeout(function () {
-          pasteAndClone = true;
-        }, 250);
       }
     };
 
@@ -659,9 +652,9 @@ angular
       utils.projectinfoprompt(values, function (evt, newValues) {
         if (!_.isEqual(values, newValues)) {
           if (
-            subModuleActive &&
-            typeof common.submoduleId !== 'undefined' &&
-            typeof common.allDependencies[common.submoduleId] !== 'undefined'
+            common.isEditingSubmodule &&
+            common.submoduleId &&
+            common.allDependencies[common.submoduleId]
           ) {
             graph.setBlockInfo(values, newValues, common.submoduleId);
           } else {
@@ -677,9 +670,9 @@ angular
     function getProjectInformation() {
       var p = false;
       if (
-        subModuleActive &&
-        typeof common.submoduleId !== 'undefined' &&
-        typeof common.allDependencies[common.submoduleId] !== 'undefined'
+        common.isEditingSubmodule &&
+        common.submoduleId &&
+        common.allDependencies[common.submoduleId]
       ) {
         p = common.allDependencies[common.submoduleId].package;
       } else {

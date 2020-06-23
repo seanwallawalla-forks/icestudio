@@ -1,8 +1,10 @@
-'use strict';
+/* eslint-disable new-cap */
 
 angular
   .module('icestudio')
   .service('common', function (nodePath, nodeTmp, nodeFs) {
+    'use strict';
+
     // Project version
     this.VERSION = '1.2';
 

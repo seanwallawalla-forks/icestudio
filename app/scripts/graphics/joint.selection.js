@@ -3,7 +3,7 @@ Copyright (c) 2016-2019 FPGAwars
 Copyright (c) 2013 client IO
 */
 
-'use strict';
+/* eslint-disable new-cap */
 
 joint.ui.SelectionView = Backbone.View.extend({
   className: 'selection',
@@ -22,6 +22,8 @@ joint.ui.SelectionView = Backbone.View.extend({
   $selectionArea: null,
 
   initialize: function (options) {
+    'use strict';
+
     _.bindAll(
       this,
       'click',
@@ -48,6 +50,8 @@ joint.ui.SelectionView = Backbone.View.extend({
   },
 
   click: function (evt) {
+    'use strict';
+
     if (evt.which === 1) {
       // Mouse left button
       this.trigger('selection-box:pointerclick', evt);
@@ -55,6 +59,8 @@ joint.ui.SelectionView = Backbone.View.extend({
   },
 
   dblclick: function (evt) {
+    'use strict';
+
     var id = evt.target.getAttribute('data-model');
     if (id) {
       var view = this.options.paper.findViewByModel(id);
@@ -66,18 +72,26 @@ joint.ui.SelectionView = Backbone.View.extend({
   },
 
   mouseover: function (evt) {
+    'use strict';
+
     this.mouseManager(evt, 'mouseovercard');
   },
 
   mouseout: function (evt) {
+    'use strict';
+
     this.mouseManager(evt, 'mouseoutcard');
   },
 
   mouseup: function (evt) {
+    'use strict';
+
     this.mouseManager(evt, 'mouseupcard');
   },
 
   mousedown: function (evt) {
+    'use strict';
+
     if (!this.showtooltip && evt.which === 1) {
       // Mouse left button: block fixed
       this.showtooltip = true;
@@ -87,6 +101,8 @@ joint.ui.SelectionView = Backbone.View.extend({
   },
 
   mouseManager: function (evt, fnc) {
+    'use strict';
+
     evt.preventDefault();
 
     if (this.showtooltip) {
@@ -101,6 +117,8 @@ joint.ui.SelectionView = Backbone.View.extend({
   },
 
   startTranslatingSelection: function (evt) {
+    'use strict';
+
     if (this._action !== 'adding' && evt.which === 1) {
       // Mouse left button
 
@@ -122,6 +140,7 @@ joint.ui.SelectionView = Backbone.View.extend({
   },
 
   startAddingSelection: function (evt) {
+    'use strict';
     this._action = 'adding';
 
     var snappedClientCoords = this.options.paper.snapToGrid(
@@ -134,6 +153,8 @@ joint.ui.SelectionView = Backbone.View.extend({
   },
 
   startSelecting: function (evt /*, x, y*/) {
+    'use strict';
+
     this.createSelectionArea();
 
     this._action = 'selecting';
@@ -165,6 +186,8 @@ joint.ui.SelectionView = Backbone.View.extend({
   },
 
   adjustSelection: function (evt) {
+    'use strict';
+
     var dx;
     var dy;
 
@@ -241,6 +264,8 @@ joint.ui.SelectionView = Backbone.View.extend({
   },
 
   stopSelecting: function (evt) {
+    'use strict';
+
     switch (this._action) {
       case 'selecting':
         if (!evt.shiftKey) {
@@ -297,6 +322,8 @@ joint.ui.SelectionView = Backbone.View.extend({
   },
 
   findBlocksInArea: function (rect, opt) {
+    'use strict';
+
     opt = _.defaults(opt || {}, {strict: false});
     rect = g.rect(rect);
 
@@ -322,17 +349,23 @@ joint.ui.SelectionView = Backbone.View.extend({
   },
 
   cancelSelection: function () {
+    'use strict';
+
     this.$('.selection-box').remove();
     this.model.reset([]);
   },
 
   destroySelectionArea: function () {
+    'use strict';
+
     this.$selectionArea.remove();
     this.$selectionArea = this.$('.selection-area');
     this.$el.addClass('selected');
   },
 
   createSelectionArea: function () {
+    'use strict';
+
     var $selectionArea = $('<div/>', {
       class: 'selection-area',
     });
@@ -342,10 +375,14 @@ joint.ui.SelectionView = Backbone.View.extend({
   },
 
   destroySelectionBox: function (element) {
+    'use strict';
+
     this.$('[data-model="' + element.get('id') + '"]').remove();
   },
 
   createSelectionBox: function (element, opt) {
+    'use strict';
+
     opt = opt || {};
 
     if (!element.isLink()) {
@@ -366,6 +403,8 @@ joint.ui.SelectionView = Backbone.View.extend({
   },
 
   updateBox: function (element) {
+    'use strict';
+
     var bbox = element.getBBox();
     var state = this.options.state;
 

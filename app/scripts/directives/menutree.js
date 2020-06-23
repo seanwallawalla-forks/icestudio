@@ -1,8 +1,7 @@
-'use strict';
-
 angular
   .module('icestudio')
   .directive('menutree', function () {
+    'use strict';
     return {
       restrict: 'E',
       replace: true,
@@ -23,6 +22,7 @@ angular
     };
   })
   .directive('child', function ($compile) {
+    'use strict';
     return {
       restrict: 'E',
       replace: true,

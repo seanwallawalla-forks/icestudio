@@ -1,5 +1,3 @@
-'use strict';
-
 angular
   .module('icestudio')
   .service('project', function (
@@ -15,6 +13,8 @@ angular
     nodeFs,
     nodePath
   ) {
+    'use strict';
+
     this.name = ''; // Used in File dialogs
     this.path = ''; // Used in Save / Save as
     this.filepath = ''; // Used to find external resources (.v, .vh, .list)
@@ -365,7 +365,7 @@ angular
     this.save = function (filepath, callback) {
       var backupProject = false;
       var name = utils.basename(filepath);
-      if (subModuleActive) {
+      if (common.isEditingSubmodule) {
         backupProject = utils.clone(project);
       } else {
         this.updateTitle(name);
@@ -409,7 +409,7 @@ angular
         // 4. Save project
         doSaveProject();
       }
-      if (subModuleActive) {
+      if (common.isEditingSubmodule) {
         project = utils.clone(backupProject);
         //        sortGraph();
         //        this.update();
@@ -667,9 +667,9 @@ angular
       project.design.graph = p.design.graph;
       project.dependencies = p.dependencies;
       if (
-        subModuleActive &&
-        typeof common.submoduleId !== 'undefined' &&
-        typeof common.allDependencies[common.submoduleId] !== 'undefined'
+        common.isEditingSubmodule &&
+        common.submoduleId &&
+        common.allDependencies[common.submoduleId]
       ) {
         project.package = common.allDependencies[common.submoduleId].package;
       }

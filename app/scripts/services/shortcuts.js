@@ -1,13 +1,13 @@
-'use strict';
-
 angular
   .module('icestudio')
   .filter('shortcut', function (shortcuts) {
+    'use strict';
     return function (action) {
       return shortcuts.label(action);
     };
   })
   .service('shortcuts', function (common) {
+    'use strict';
     this.method = function (action, method) {
       // Configure shortcut method
       if (action in shortcuts) {

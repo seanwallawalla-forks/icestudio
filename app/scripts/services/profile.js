@@ -1,8 +1,8 @@
-'use strict';
-
 angular
   .module('icestudio')
   .service('profile', function (utils, common, _package, nodeFs) {
+    'use strict';
+
     this.data = {
       board: '',
       boardRules: true,

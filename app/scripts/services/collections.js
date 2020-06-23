@@ -1,5 +1,3 @@
-'use strict';
-
 angular
   .module('icestudio')
   .service('collections', function (
@@ -9,6 +7,8 @@ angular
     gettextCatalog,
     nodePath
   ) {
+    'use strict';
+
     const DEFAULT = '';
     const MAX_LEVEL_SEARCH = 20;
 

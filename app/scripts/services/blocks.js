@@ -1,8 +1,8 @@
-'use strict';
-
 angular
   .module('icestudio')
   .service('blocks', function (joint, utils, common, gettextCatalog) {
+    'use strict';
+
     var gridsize = 8;
     var resultAlert = null;
 
@@ -1299,11 +1299,8 @@ angular
           }
           if ((block.data.range || '') !== (portInfo.rangestr || '')) {
             var pins = getPins(portInfo);
-            oldSize = block.data.virtual
-              ? 1
-              : block.data.pins
-              ? block.data.pins.length
-              : 1;
+            oldSize = block.data.pins ? block.data.pins.length : 1;
+            oldSize = block.data.virtual ? 1 : oldSize;
             newSize = virtual ? 1 : pins ? pins.length : 1;
             // Update block position when size changes
             offset = 16 * (oldSize - newSize);
@@ -1450,11 +1447,8 @@ angular
           evt.cancel = false;
           if ((block.data.range || '') !== (portInfo.rangestr || '')) {
             var pins = getPins(portInfo);
-            oldSize = block.data.virtual
-              ? 1
-              : block.data.pins
-              ? block.data.pins.length
-              : 1;
+            oldSize = block.data.pins ? block.data.pins.length : 1;
+            oldSize = block.data.virtual ? 1 : oldSize;
             newSize = virtual ? 1 : pins ? pins.length : 1;
             // Update block position when size changes
             offset = 16 * (oldSize - newSize);
@@ -1566,11 +1560,8 @@ angular
           }
           if ((block.data.range || '') !== (portInfo.rangestr || '')) {
             var pins = getPins(portInfo);
-            oldSize = block.data.virtual
-              ? 1
-              : block.data.pins
-              ? block.data.pins.length
-              : 1;
+            oldSize = block.data.pins ? block.data.pins.length : 1;
+            oldSize = block.data.virtual ? 1 : oldSize;
             newSize = virtual ? 1 : pins ? pins.length : 1;
             // Update block position when size changes
             offset = 16 * (oldSize - newSize);
@@ -1669,11 +1660,8 @@ angular
           evt.cancel = false;
           if ((block.data.range || '') !== (portInfo.rangestr || '')) {
             var pins = getPins(portInfo);
-            oldSize = block.data.virtual
-              ? 1
-              : block.data.pins
-              ? block.data.pins.length
-              : 1;
+            oldSize = block.data.pins ? block.data.pins.length : 1;
+            oldSize = block.data.virtual ? 1 : oldSize;
             newSize = virtual ? 1 : pins ? pins.length : 1;
             // Update block position when size changes
             offset = 16 * (oldSize - newSize);

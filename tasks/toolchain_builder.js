@@ -1,5 +1,3 @@
-'use strict';
-
 // Toolchain builder
 
 var fs = require('fs');
@@ -18,6 +16,7 @@ var EventEmitter = require('events').EventEmitter;
 inherits(ToolchainBuilder, EventEmitter);
 module.exports = ToolchainBuilder;
 function ToolchainBuilder(options) {
+  'use strict';
   var defaults = {
     apioMin: '',
     apioMax: '',
@@ -69,6 +68,7 @@ function ToolchainBuilder(options) {
 }
 
 ToolchainBuilder.prototype.build = function () {
+  'use strict';
   this.emit('log', this.options.venvPip);
   // Let's create the standalone toolchains
   return (
@@ -87,6 +87,7 @@ ToolchainBuilder.prototype.build = function () {
 };
 
 ToolchainBuilder.prototype.ensurePythonIsAvailable = function () {
+  'use strict';
   return new Promise(function (resolve, reject) {
     if (getPythonExecutable()) {
       resolve();
@@ -97,6 +98,7 @@ ToolchainBuilder.prototype.ensurePythonIsAvailable = function () {
 };
 
 ToolchainBuilder.prototype.extractVirtualenv = function () {
+  'use strict';
   var self = this;
   self.emit('log', '> Extract virtualenv zip');
   return new Promise(function (resolve, reject) {
@@ -113,6 +115,7 @@ ToolchainBuilder.prototype.extractVirtualenv = function () {
 };
 
 ToolchainBuilder.prototype.createVirtualenv = function () {
+  'use strict';
   var self = this;
   self.emit('log', '> Create virtualenv');
   return new Promise(function (resolve, reject) {
@@ -132,6 +135,7 @@ ToolchainBuilder.prototype.createVirtualenv = function () {
 };
 
 ToolchainBuilder.prototype.downloadPythonPackages = function () {
+  'use strict';
   var self = this;
   self.emit('log', '> Download python packages');
   return new Promise(function (resolve, reject) {
@@ -153,6 +157,7 @@ ToolchainBuilder.prototype.downloadPythonPackages = function () {
 };
 
 ToolchainBuilder.prototype.packagePythonPackages = function () {
+  'use strict';
   var self = this;
   self.emit('log', '> Package python packages');
   return new Promise(function (resolve, reject) {
@@ -166,6 +171,7 @@ ToolchainBuilder.prototype.packagePythonPackages = function () {
 };
 
 ToolchainBuilder.prototype.downloadApio = function () {
+  'use strict';
   var self = this;
   self.emit('log', '> Download apio');
   return new Promise(function (resolve, reject) {
@@ -189,6 +195,7 @@ ToolchainBuilder.prototype.downloadApio = function () {
 };
 
 ToolchainBuilder.prototype.packageApio = function () {
+  'use strict';
   var self = this;
   self.emit('log', '> Package apio');
   return new Promise(function (resolve, reject) {
@@ -199,6 +206,7 @@ ToolchainBuilder.prototype.packageApio = function () {
 };
 
 ToolchainBuilder.prototype.installApio = function () {
+  'use strict';
   var self = this;
   self.emit('log', '> Install apio');
   return new Promise(function (resolve, reject) {
@@ -227,6 +235,7 @@ ToolchainBuilder.prototype.installApio = function () {
 };
 
 ToolchainBuilder.prototype.downloadApioPackages = function () {
+  'use strict';
   var self = this;
   self.emit('log', '> Download apio packages');
   return new Promise(function (resolve, reject) {
@@ -271,6 +280,7 @@ ToolchainBuilder.prototype.downloadApioPackages = function () {
 };
 
 ToolchainBuilder.prototype.packageApioPackages = function () {
+  'use strict';
   var self = this;
   self.emit('log', '> Package apio packages');
   return new Promise(function (resolve, reject) {
@@ -309,6 +319,7 @@ ToolchainBuilder.prototype.packageApioPackages = function () {
 };
 
 ToolchainBuilder.prototype.createDefaultToolchains = function () {
+  'use strict';
   var self = this;
   self.emit('log', '> Create default toolchains');
   return new Promise(function (resolve /*, reject*/) {
@@ -352,6 +363,7 @@ ToolchainBuilder.prototype.createDefaultToolchains = function () {
 var _pythonExecutableCached = null;
 // Get the system executable
 function getPythonExecutable() {
+  'use strict';
   if (!_pythonExecutableCached) {
     const possibleExecutables = [];
 
@@ -403,6 +415,7 @@ function getPythonExecutable() {
 }
 
 function isPython3(executable) {
+  'use strict';
   const args = ['-V'];
   try {
     const result = childProcess.spawnSync(executable, args);
@@ -421,6 +434,7 @@ function isPython3(executable) {
 }
 
 function getRealPlatform(platform) {
+  'use strict';
   switch (platform) {
     case 'linux32':
       return 'linux_i686';
@@ -439,6 +453,7 @@ function getRealPlatform(platform) {
 }
 
 function compress(source, target, resolve, reject) {
+  'use strict';
   var output = fs.createWriteStream(target);
   var archive = archiver.create('zip');
 

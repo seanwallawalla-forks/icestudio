@@ -1,8 +1,8 @@
-'use strict';
-
 angular
   .module('icestudio')
   .service('boards', function (utils, common, nodeFs, nodePath) {
+    'use strict';
+
     const DEFAULT = 'icezum';
 
     this.loadBoards = function () {
