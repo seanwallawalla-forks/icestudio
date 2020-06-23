@@ -1,6 +1,8 @@
-/*jshint unused:false*/
-'use strict';
+/* eslint-disable no-unused-vars */
+
 var IceEventBus = function () {
+  'use strict';
+
   this.events = {};
 
   this.subscribe = function (event, callback, target) {

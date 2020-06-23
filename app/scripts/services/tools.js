@@ -1,5 +1,3 @@
-'use strict';
-
 angular
   .module('icestudio')
   .service('tools', function (
@@ -24,6 +22,8 @@ angular
     _package,
     $rootScope
   ) {
+    'use strict';
+
     var taskRunning = false;
     var resources = [];
     var startAlert = null;
@@ -861,22 +861,24 @@ angular
 
     function findValueNPNR(pattern, output, previousValue) {
       var match = pattern.exec(output);
-      return match && match[1] && match[2] && match[3]
-        ? {
-            used: match[1],
-            total: match[2],
-            percentage: match[3],
-          }
-        : previousValue;
+      if (match && match[1] && match[2] && match[3]) {
+        return {
+          used: match[1],
+          total: match[2],
+          percentage: match[3],
+        };
+      }
+      return previousValue;
     }
 
     function findMaxFreq(pattern, output, previousValue) {
       var match = pattern.exec(output);
-      return match && match[1]
-        ? {
-            value: match[1],
-          }
-        : previousValue;
+      if (match && match[1]) {
+        return {
+          value: match[1],
+        };
+      }
+      return previousValue;
     }
 
     /*    function findValue(pattern, output, previousValue) {
@@ -1624,21 +1626,27 @@ angular
               if (hasNewVersion !== false) {
                 var msg = '';
                 if (hasNewVersion === 'stable') {
-                  msg =
-                    '<div class="new-version-notifier-box"><div class="new-version-notifier-box--icon"><img src="resources/images/confetti.svg"></div>\
-                                          <div class="new-version-notifier-box--text">' +
-                    gettextCatalog.getString(
-                      'There is a new stable version available'
-                    ) +
-                    '<br/><a class="action-open-url-external-browser" href="https://icestudio.io" target="_blank">Click here to download it.</a></div></div>';
+                  const str = gettextCatalog.getString(
+                    'There is a new stable version available'
+                  );
+                  msg = `<div class="new-version-notifier-box"><div class="new-version-notifier-box--icon"><img src="resources/images/confetti.svg"></div>
+                    <div class="new-version-notifier-box--text">
+                      ${str}
+                      <br/>
+                      <a class="action-open-url-external-browser" href="https://icestudio.io" target="_blank">Click here to download it.</a>
+                    </div>
+                  </div>`;
                 } else {
-                  msg =
-                    '<div class="new-version-notifier-box"><div class="new-version-notifier-box--icon"><img src="resources/images/confetti.svg"></div>\
-                                          <div class="new-version-notifier-box--text">' +
-                    gettextCatalog.getString(
-                      'There is a new nightly version available'
-                    ) +
-                    '<br/><a class="action-open-url-external-browser" href="https://icestudio.io" target="_blank">Click here to download it.</a></div></div>';
+                  const str = gettextCatalog.getString(
+                    'There is a new nightly version available'
+                  );
+                  msg = `<div class="new-version-notifier-box"><div class="new-version-notifier-box--icon"><img src="resources/images/confetti.svg"></div>
+                    <div class="new-version-notifier-box--text">
+                      ${str}
+                      <br/>
+                      <a class="action-open-url-external-browser" href="https://icestudio.io" target="_blank">Click here to download it.</a>
+                    </div>
+                  </div>`;
                 }
                 alertify.notify(msg, 'notify', 30);
               }

@@ -1,7 +1,7 @@
-/* exported iprof */
+/* eslint-disable no-unused-vars */
 
-'use strict';
 var IceProfiler = function () {
+  'use strict';
   this.measures = {};
   this.stats = {};
 

@@ -1,6 +1,8 @@
-'use strict';
+/* eslint-disable camelcase */
 
 module.exports = function (grunt) {
+  'use strict';
+
   const WIN32 = process.platform === 'win32';
   const DARWIN = process.platform === 'darwin';
 
@@ -331,14 +333,6 @@ module.exports = function (grunt) {
       },
     },
 
-    // Check all js files
-    jshint: {
-      all: ['app/scripts/**/*.js', 'tasks/*.js', 'gruntfile.js'],
-      options: {
-        jshintrc: '.jshintrc',
-      },
-    },
-
     // Wget: Python installer and Default collection
     wget: {
       python32: {
@@ -445,7 +439,6 @@ module.exports = function (grunt) {
     'dist',
     [
       'checksettings',
-      'jshint',
       'clean:dist',
       'clean:toolchain',
       'nggettext_compile',

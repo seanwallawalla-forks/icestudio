@@ -1,5 +1,3 @@
-'use strict';
-
 angular
   .module('icestudio')
   .service('drivers', function (
@@ -13,6 +11,8 @@ angular
     nodeChildProcess,
     $rootScope
   ) {
+    'use strict';
+
     this.enable = function () {
       switch (common.selectedBoard.info.interface) {
         case 'FTDI':

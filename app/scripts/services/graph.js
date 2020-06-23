@@ -1,4 +1,4 @@
-'use strict';
+/* eslint-disable new-cap */
 
 angular
   .module('icestudio')
@@ -14,6 +14,8 @@ angular
     nodeDebounce,
     window
   ) {
+    'use strict';
+
     var z = {index: 100};
     var graph = null;
     var paper = null;

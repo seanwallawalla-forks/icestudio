@@ -1,6 +1,8 @@
-/*jshint unused:false*/
-'use strict';
+/* eslint-disable no-unused-vars */
+
 var IceParametricHelper = function () {
+  'use strict';
+
   this.pair = function (A, B) {
     if (A.length !== B.length) {
       return false;

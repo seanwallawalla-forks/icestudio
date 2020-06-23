@@ -1,10 +1,9 @@
-'use strict';
-
 // Task to build a standalone toolchain for each OS
 
 var ToolchainBuilder = require('./toolchain_builder.js');
 
 module.exports = function (grunt) {
+  'use strict';
   grunt.registerTask(
     'toolchain',
     'Packaging the current toolchain',

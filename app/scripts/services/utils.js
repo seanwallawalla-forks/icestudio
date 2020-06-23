@@ -1,5 +1,3 @@
-'use strict';
-
 angular
   .module('icestudio')
   .service('utils', function (
@@ -24,6 +22,7 @@ angular
     SVGO,
     fastCopy
   ) {
+    'use strict';
     var _pythonExecutableCached = null;
     // Get the system executable
     this.getPythonExecutable = function () {
@@ -626,31 +625,17 @@ angular
         var spec = specs[i];
         switch (spec.type) {
           case 'text':
-            content.push(
-              '\
-              <p>' +
-                spec.title +
-                '</p>\
-              <input class="ajs-input" type="text" id="form' +
-                i +
-                '"/>\
-            '
-            );
+            content.push(`<p>${spec.title}</p>\
+              <input class="ajs-input" type="text" id="form${i}"/>`);
             break;
           case 'checkbox':
-            content.push(
-              '\
-              <div class="checkbox">\
-                <label><input type="checkbox" ' +
-                (spec.value ? 'checked' : '') +
-                ' id="form' +
-                i +
-                '"/>' +
-                spec.label +
-                '</label>\
-              </div>\
-            '
-            );
+            content.push(`<div class="checkbox">
+                <label><input
+                  type="checkbox"
+                  ${spec.value ? 'checked' : ''}
+                  id="form${i}"
+                />${spec.label}</label>
+              </div>`);
             break;
           case 'combobox':
             var options = spec.options
@@ -667,22 +652,10 @@ angular
                 );
               })
               .join('');
-            content.push(
-              '\
-              <div class="form-group">\
-                <label style="font-weight:normal">' +
-                spec.label +
-                '</label>\
-                <select class="form-control" id="form' +
-                i +
-                '">\
-                  ' +
-                options +
-                '\
-                </select>\
-              </div>\
-            '
-            );
+            content.push(`<div class="form-group">
+                <label style="font-weight:normal">${spec.label}</label>
+                <select class="form-control" id="form${i}">${options}</select>
+              </div>`);
             break;
         }
       }

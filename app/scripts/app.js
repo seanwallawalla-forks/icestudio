@@ -1,6 +1,5 @@
-'use strict';
+/* eslint-disable no-unused-vars */
 
-/* exported ICEpm */
 var ICEpm = new IcePlugManager();
 
 angular
@@ -8,6 +7,7 @@ angular
   .config([
     '$routeProvider',
     function ($routeProvider) {
+      'use strict';
       $routeProvider
         .when('/', {
           templateUrl: 'views/main.html',
@@ -29,6 +29,7 @@ angular
     gettextCatalog,
     $timeout
   ) {
+    'use strict';
     $timeout(function () {
       $('body').addClass('waiting');
     }, 0);

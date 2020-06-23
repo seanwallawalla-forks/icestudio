@@ -1,3 +1,5 @@
+/* eslint-disable new-cap */
+
 joint.routers.ice = (function (g, _, joint) {
   'use strict';
 
@@ -407,14 +409,17 @@ joint.routers.ice = (function (g, _, joint) {
         var currentPoint = g.point(currentKey);
         var currentDist = costs[currentKey];
         previousDirAngle = currentDirAngle;
-        /* jshint -W116 */
-        currentDirAngle = parents[currentKey]
-          ? getDirectionAngle(parents[currentKey], currentPoint, dirLen)
-          : opt.previousDirAngle != null
-          ? opt.previousDirAngle
-          : getDirectionAngle(startCenter, currentPoint, dirLen);
-        /* jshint +W116 */
-
+        if (parents[currentKey]) {
+          currentDirAngle = getDirectionAngle(
+            parents[currentKey],
+            currentPoint,
+            dirLen
+          );
+        } else {
+          currentDirAngle = opt.previousDirAngle
+            ? opt.previousDirAngle
+            : getDirectionAngle(startCenter, currentPoint, dirLen);
+        }
         // Check if we reached any endpoint
         if (endPointsKeys.indexOf(currentKey) >= 0) {
           // We don't want to allow route to enter the end point in opposite direction.

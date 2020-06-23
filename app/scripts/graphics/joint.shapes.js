@@ -1,4 +1,6 @@
-'use strict';
+/* eslint-disable new-cap */
+
+var subModuleActive = false;
 
 var os = require('os');
 var sha1 = require('sha1');
@@ -19,25 +21,23 @@ if (DARWIN) {
 
 joint.shapes.ice = {};
 joint.shapes.ice.Model = joint.shapes.basic.Generic.extend({
-  markup:
-    '<g class="rotatable">\
-             <g class="scalable">\
-               <rect class="body"/>\
-             </g>\
-             <g class="leftPorts disable-port"/>\
-             <g class="rightPorts"/>\
-             <g class="topPorts disable-port"/>\
-             <g class="bottomPorts"/>\
-           </g>',
-  portMarkup:
-    '<g class="port port<%= index %>">\
-                 <g class="port-default" id="port-default-<%= id %>-<%= port.id %>">\
-                    <path/><rect/>\
-                 </g>\
-                 <path class="port-wire" id="port-wire-<%= id %>-<%= port.id %>"/>\
-                 <text class="port-label"/>\
-                 <circle class="port-body"/>\
-               </g>',
+  markup: `<g class="rotatable">
+             <g class="scalable">
+               <rect class="body"/>
+             </g>
+             <g class="leftPorts disable-port"/>
+             <g class="rightPorts"/>
+             <g class="topPorts disable-port"/>
+             <g class="bottomPorts"/>
+           </g>`,
+  portMarkup: `<g class="port port<%= index %>">
+                 <g class="port-default" id="port-default-<%= id %>-<%= port.id %>">
+                    <path/><rect/>
+                 </g>
+                 <path class="port-wire" id="port-wire-<%= id %>-<%= port.id %>"/>
+                 <text class="port-label"/>
+                 <circle class="port-body"/>
+               </g>`,
 
   defaults: joint.util.deepSupplement(
     {
@@ -115,6 +115,7 @@ joint.shapes.ice.Model = joint.shapes.basic.Generic.extend({
   ),
 
   initialize: function () {
+    'use strict';
     this.updatePortsAttrs();
     this.processPorts();
     this.trigger('process:ports');
@@ -130,6 +131,8 @@ joint.shapes.ice.Model = joint.shapes.basic.Generic.extend({
   },
 
   updatePortsAttrs: function (/*eventName*/) {
+    'use strict';
+
     if (this._portSelectors) {
       var newAttrs = _.omit(this.get('attrs'), this._portSelectors);
       this.set('attrs', newAttrs, {silent: true});
@@ -194,6 +197,8 @@ joint.shapes.ice.Model = joint.shapes.basic.Generic.extend({
   },
 
   getPortAttrs: function (port, index, total, selector, type, length) {
+    'use strict';
+
     var attrs = {};
     var gridsize = 8;
     var gridunits = length / gridsize;
@@ -289,6 +294,8 @@ joint.shapes.ice.ModelView = joint.dia.ElementView.extend({
   template: '',
 
   initialize: function () {
+    'use strict';
+
     _.bindAll(this, 'updateBox');
     joint.dia.ElementView.prototype.initialize.apply(this, arguments);
 
@@ -303,6 +310,8 @@ joint.shapes.ice.ModelView = joint.dia.ElementView.extend({
   },
 
   setupResizer: function () {
+    'use strict';
+
     // Resizer
     if (!this.model.get('disabled')) {
       this.resizing = false;
@@ -315,6 +324,8 @@ joint.shapes.ice.ModelView = joint.dia.ElementView.extend({
   },
 
   enableResizer: function () {
+    'use strict';
+
     if (!this.model.get('disabled')) {
       this.resizerDisabled = false;
       this.resizer.css('cursor', 'se-resize');
@@ -322,15 +333,21 @@ joint.shapes.ice.ModelView = joint.dia.ElementView.extend({
   },
 
   disableResizer: function () {
+    'use strict';
+
     if (!this.model.get('disabled')) {
       this.resizerDisabled = true;
       this.resizer.css('cursor', 'move');
     }
   },
 
-  apply: function () {},
+  apply: function () {
+    'use strict';
+  },
 
   startResizing: function (event) {
+    'use strict';
+
     var self = event.data.self;
 
     if (self.resizerDisabled) {
@@ -345,6 +362,8 @@ joint.shapes.ice.ModelView = joint.dia.ElementView.extend({
   },
 
   performResizing: function (event) {
+    'use strict';
+
     var self = event.data.self;
 
     if (!self.resizing || self.resizerDisabled) {
@@ -388,6 +407,8 @@ joint.shapes.ice.ModelView = joint.dia.ElementView.extend({
   },
 
   stopResizing: function (event) {
+    'use strict';
+
     var self = event.data.self;
 
     if (!self.resizing || self.resizerDisabled) {
@@ -399,6 +420,8 @@ joint.shapes.ice.ModelView = joint.dia.ElementView.extend({
   },
 
   render: function () {
+    'use strict';
+
     joint.dia.ElementView.prototype.render.apply(this, arguments);
     this.paper.$el.append(this.$box);
     this.updateBox();
@@ -406,6 +429,8 @@ joint.shapes.ice.ModelView = joint.dia.ElementView.extend({
   },
 
   renderPorts: function () {
+    'use strict';
+
     var $leftPorts = this.$('.leftPorts').empty();
     var $rightPorts = this.$('.rightPorts').empty();
     var $topPorts = this.$('.topPorts').empty();
@@ -456,17 +481,25 @@ joint.shapes.ice.ModelView = joint.dia.ElementView.extend({
   },
 
   update: function () {
+    'use strict';
+
     this.renderPorts();
     joint.dia.ElementView.prototype.update.apply(this, arguments);
   },
 
-  updateBox: function () {},
+  updateBox: function () {
+    'use strict';
+  },
 
   removeBox: function (/*event*/) {
+    'use strict';
+
     this.$box.remove();
   },
 
   updateScrollStatus: function (status) {
+    'use strict';
+
     if (this.editor) {
       this.editor.renderer.scrollBarV.element.style.visibility = status
         ? ''
@@ -499,16 +532,13 @@ joint.shapes.ice.GenericView = joint.shapes.ice.ModelView.extend({
   //               old SVG files have no viewBox, therefore no properly resize
   //               Inkscape adds this field saving as "Optimize SVG" ("Enable viewboxing")
 
-  template:
-    '\
-  <div class="generic-block">\
-    <div class="generic-content">\
-      <div class="img-container"><img></div>\
-      <label></label>\
-      <span class="tooltiptext"></span>\
-    </div>\
-  </div>\
-  ',
+  template: `<div class="generic-block">
+    <div class="generic-content">
+      <div class="img-container"><img></div>
+      <label></label>
+      <span class="tooltiptext"></span>
+    </div>
+  </div>`,
 
   events: {
     mouseover: 'mouseovercard',
@@ -520,6 +550,8 @@ joint.shapes.ice.GenericView = joint.shapes.ice.ModelView.extend({
   enter: false,
 
   mouseovercard: function (event /*, x, y*/) {
+    'use strict';
+
     if (event && event.which === 0) {
       // Mouse button not pressed
       this.showTooltip();
@@ -527,16 +559,24 @@ joint.shapes.ice.GenericView = joint.shapes.ice.ModelView.extend({
   },
 
   mouseoutcard: function (/*event, x, y*/) {
+    'use strict';
+
     this.hideTooltip();
   },
 
-  mouseupcard: function (/*event, x, y*/) {},
+  mouseupcard: function (/*event, x, y*/) {
+    'use strict';
+  },
 
   mousedowncard: function (/*event, x, y*/) {
+    'use strict';
+
     this.hideTooltip();
   },
 
   showTooltip: function () {
+    'use strict';
+
     if (this.tooltip) {
       if (!this.openTimeout) {
         this.openTimeout = setTimeout(
@@ -550,6 +590,8 @@ joint.shapes.ice.GenericView = joint.shapes.ice.ModelView.extend({
   },
 
   hideTooltip: function () {
+    'use strict';
+
     if (this.tooltip) {
       if (this.openTimeout) {
         clearTimeout(this.openTimeout);
@@ -560,6 +602,8 @@ joint.shapes.ice.GenericView = joint.shapes.ice.ModelView.extend({
   },
 
   initialize: function () {
+    'use strict';
+
     joint.shapes.ice.ModelView.prototype.initialize.apply(this, arguments);
 
     this.tooltip = this.model.get('tooltip');
@@ -587,6 +631,8 @@ joint.shapes.ice.GenericView = joint.shapes.ice.ModelView.extend({
   },
 
   initializeContent: function () {
+    'use strict';
+
     var image = this.model.get('image');
     var label = this.model.get('label');
     var ports = this.model.get('leftPorts');
@@ -622,18 +668,15 @@ joint.shapes.ice.GenericView = joint.shapes.ice.ModelView.extend({
         var top =
           Math.round(((parseInt(i) + 0.5) * height) / n / gridsize) * gridsize -
           9;
-        contentSelector.append(
-          '\
-          <div class="clock" style="top: ' +
-            top +
-            'px;">\
-            <svg width="12" height="18"><path d="M-1 0 l10 8-10 8" fill="none" stroke="#555" stroke-width="1.2" stroke-linejoin="round"/>\
-          </div>'
-        );
+        contentSelector.append(`<div class="clock" style="top: ${top}px;">
+            <svg width="12" height="18"><path d="M-1 0 l10 8-10 8" fill="none" stroke="#555" stroke-width="1.2" stroke-linejoin="round"/>
+          </div>`);
       }
     }
   },
   updateBox: function () {
+    'use strict';
+
     var pendingTasks = [];
     var i, port;
     var bbox = this.model.getBBox();
@@ -821,25 +864,23 @@ joint.shapes.ice.Output = joint.shapes.ice.Model.extend({
 });
 
 joint.shapes.ice.InputLabel = joint.shapes.ice.Model.extend({
-  markup:
-    '<g class="rotatable">\
-             <g class="scalable">\
-               <rect class="body" />\
-             </g>\
-             <g class="leftPorts disable-port"/>\
-             <g class="rightPorts"/>\
-             <g class="topPorts disable-port"/>\
-             <g class="bottomPorts"/>\
-    </g>',
-  portMarkup:
-    '<g class="port port<%= index %>">\
-               <g class="port-default" id="port-default-<%= id %>-<%= port.id %>">\
-               <path/><rect/>\
-               </g>\
-               <path class="port-wire" id="port-wire-<%= id %>-<%= port.id %>"/>\
-                 <text class="port-label"/>\
-                 <circle class="port-body"/>\
-               </g>',
+  markup: `<g class="rotatable">
+             <g class="scalable">
+               <rect class="body" />
+             </g>
+             <g class="leftPorts disable-port"/>
+             <g class="rightPorts"/>
+             <g class="topPorts disable-port"/>
+             <g class="bottomPorts"/>
+    </g>`,
+  portMarkup: `<g class="port port<%= index %>">
+               <g class="port-default" id="port-default-<%= id %>-<%= port.id %>">
+               <path/><rect/>
+               </g>
+               <path class="port-wire" id="port-wire-<%= id %>-<%= port.id %>"/>
+                 <text class="port-label"/>
+                 <circle class="port-body"/>
+               </g>`,
 
   //<polygon  class="input-virtual-terminator" points="0 -5,0 34,20 16" style="fill:white;stroke:<%= port.fill %>;stroke-width:3" transform="translate(100 -15)"/>\
   defaults: joint.util.deepSupplement(
@@ -855,25 +896,23 @@ joint.shapes.ice.InputLabel = joint.shapes.ice.Model.extend({
 });
 
 joint.shapes.ice.OutputLabel = joint.shapes.ice.Model.extend({
-  markup:
-    '<g class="rotatable">\
-             <g class="scalable">\
-               <rect class="body"/>\
-             </g>\
-             <g class="leftPorts disable-port"/>\
-             <g class="rightPorts"/>\
-             <g class="topPorts disable-port"/>\
-             <g class="bottomPorts"/>\
-    </g>',
-  portMarkup:
-    '<g class="port port<%= index %>">\
-               <g class="port-default" id="port-default-<%= id %>-<%= port.id %>">\
-               <path/><rect/>\
-               </g>\
-               <path class="port-wire" id="port-wire-<%= id %>-<%= port.id %>"/>\
-                 <text class="port-label"/>\
-                 <circle class="port-body"/>\
-               </g>',
+  markup: `<g class="rotatable">
+             <g class="scalable">
+               <rect class="body"/>
+             </g>
+             <g class="leftPorts disable-port"/>
+             <g class="rightPorts"/>
+             <g class="topPorts disable-port"/>
+             <g class="bottomPorts"/>
+    </g>`,
+  portMarkup: `<g class="port port<%= index %>">
+               <g class="port-default" id="port-default-<%= id %>-<%= port.id %>">
+               <path/><rect/>
+               </g>
+               <path class="port-wire" id="port-wire-<%= id %>-<%= port.id %>"/>
+                 <text class="port-label"/>
+                 <circle class="port-body"/>
+               </g>`,
 
   //<polygon points="1 0,15 15,0 30,30 30,30 0" style="fill:lime;stroke-width:1" transform="translate(-122 -15)"/>\
   defaults: joint.util.deepSupplement(
@@ -890,6 +929,8 @@ joint.shapes.ice.OutputLabel = joint.shapes.ice.Model.extend({
 
 joint.shapes.ice.IOView = joint.shapes.ice.ModelView.extend({
   initialize: function () {
+    'use strict';
+
     _.bindAll(this, 'updateBox');
     joint.dia.ElementView.prototype.initialize.apply(this, arguments);
 
@@ -922,38 +963,22 @@ joint.shapes.ice.IOView = joint.shapes.ice.ModelView.extend({
     }
 
     this.$box = $(
-      joint.util.template(
-        '\
-      <div class="io-block">\
-        <div class="io-virtual-content' +
-          (virtual ? '' : ' hidden') +
-          '">\
-          <div class="header">\
-            <label>' +
-          name +
-          '</label>\
-            <svg viewBox="0 0 12 18"><path d="M-1 0 l10 8-10 8" fill="none" stroke-width="2" stroke-linejoin="round"/>\
-          </div>\
-        </div>\
-        <div class="io-fpga-content' +
-          (virtual ? ' hidden' : '') +
-          '">\
-          <div class="header">\
-            <label>' +
-          name +
-          '</label>\
-            <svg viewBox="0 0 12 18"><path d="M-1 0 l10 8-10 8" fill="none" stroke-width="2" stroke-linejoin="round"/>\
-          </div>\
-          <div>' +
-          selectCode +
-          '</div>\
-          <script>' +
-          selectScript +
-          '</script>\
-        </div>\
-      </div>\
-      '
-      )()
+      joint.util.template(`<div class="io-block">
+        <div class="io-virtual-content${virtual ? '' : ' hidden'}">
+          <div class="header">
+            <label>${name}</label>
+            <svg viewBox="0 0 12 18"><path d="M-1 0 l10 8-10 8" fill="none" stroke-width="2" stroke-linejoin="round"/>
+          </div>
+        </div>
+        <div class="io-fpga-content${virtual ? ' hidden' : ''}">
+          <div class="header">
+            <label>${name}</label>
+            <svg viewBox="0 0 12 18"><path d="M-1 0 l10 8-10 8" fill="none" stroke-width="2" stroke-linejoin="round"/>
+          </div>
+          <div>${selectCode}</div>
+          <script>${selectScript}</script>
+        </div>
+      </div>`)()
     );
 
     this.virtualContentSelector = this.$box.find('.io-virtual-content');
@@ -1008,6 +1033,8 @@ joint.shapes.ice.IOView = joint.shapes.ice.ModelView.extend({
   },
 
   applyChoices: function () {
+    'use strict';
+
     var data = this.model.get('data');
     if (data.pins) {
       for (var i in data.pins) {
@@ -1020,6 +1047,8 @@ joint.shapes.ice.IOView = joint.shapes.ice.ModelView.extend({
   },
 
   applyValues: function () {
+    'use strict';
+
     this.updating = true;
     var data = this.model.get('data');
     for (var i in data.pins) {
@@ -1043,6 +1072,8 @@ joint.shapes.ice.IOView = joint.shapes.ice.ModelView.extend({
   },
 
   applyShape: function () {
+    'use strict';
+
     var data = this.model.get('data');
     var name = data.name + (data.range || '');
     var virtual = data.virtual || this.model.get('disabled') || subModuleActive;
@@ -1075,6 +1106,8 @@ joint.shapes.ice.IOView = joint.shapes.ice.ModelView.extend({
   },
 
   applyClock: function () {
+    'use strict';
+
     if (this.model.get('data').clock) {
       this.$box.find('svg').removeClass('hidden');
     } else {
@@ -1083,6 +1116,8 @@ joint.shapes.ice.IOView = joint.shapes.ice.ModelView.extend({
   },
 
   clearValues: function () {
+    'use strict';
+
     this.updating = true;
     var name = '';
     var value = '0';
@@ -1100,6 +1135,8 @@ joint.shapes.ice.IOView = joint.shapes.ice.ModelView.extend({
   },
 
   apply: function () {
+    'use strict';
+
     this.applyChoices();
     this.applyValues();
     this.applyShape();
@@ -1108,11 +1145,15 @@ joint.shapes.ice.IOView = joint.shapes.ice.ModelView.extend({
   },
 
   update: function () {
+    'use strict';
+
     this.renderPorts();
     joint.dia.ElementView.prototype.update.apply(this, arguments);
   },
   pendingRender: false,
   updateBox: function () {
+    'use strict';
+
     var pendingTasks = [];
     var i, j, port;
     var bbox = this.model.getBBox();
@@ -1312,6 +1353,8 @@ joint.shapes.ice.IOView = joint.shapes.ice.ModelView.extend({
   },
 
   drawPendingTasks: function (tasks) {
+    'use strict';
+
     var i = tasks.length;
     for (i = 0; i < tasks.length; i++) {
       if (this.tasks[i].e !== null) {
@@ -1321,6 +1364,8 @@ joint.shapes.ice.IOView = joint.shapes.ice.ModelView.extend({
   },
 
   removeBox: function () {
+    'use strict';
+
     // Close select options on remove
     this.$box.find('select').select2('close');
     this.$box.remove();
@@ -1347,23 +1392,21 @@ joint.shapes.ice.Constant = joint.shapes.ice.Model.extend({
 
 joint.shapes.ice.ConstantView = joint.shapes.ice.ModelView.extend({
   initialize: function () {
+    'use strict';
+
     _.bindAll(this, 'updateBox');
     joint.dia.ElementView.prototype.initialize.apply(this, arguments);
 
     this.$box = $(
-      joint.util.template(
-        '\
-      <div class="constant-block">\
-        <div class="constant-content">\
-          <div class="header">\
-            <label></label>\
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 9.78"><path d="M2.22 4.44h3.56V3.11q0-.73-.52-1.26-.52-.52-1.26-.52t-1.26.52q-.52.52-.52 1.26v1.33zM8 5.11v4q0 .28-.2.47-.19.2-.47.2H.67q-.28 0-.48-.2Q0 9.38 0 9.11v-4q0-.28.2-.47.19-.2.47-.2h.22V3.11q0-1.28.92-2.2Q2.72 0 4 0q1.28 0 2.2.92.91.91.91 2.2v1.32h.22q.28 0 .48.2.19.2.19.47z"/></svg>\
-          </div>\
-          <input class="constant-input"></input>\
-        </div>\
-      </div>\
-      '
-      )()
+      joint.util.template(`<div class="constant-block">
+        <div class="constant-content">
+          <div class="header">
+            <label></label>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 9.78"><path d="M2.22 4.44h3.56V3.11q0-.73-.52-1.26-.52-.52-1.26-.52t-1.26.52q-.52.52-.52 1.26v1.33zM8 5.11v4q0 .28-.2.47-.19.2-.47.2H.67q-.28 0-.48-.2Q0 9.38 0 9.11v-4q0-.28.2-.47.19-.2.47-.2h.22V3.11q0-1.28.92-2.2Q2.72 0 4 0q1.28 0 2.2.92.91.91.91 2.2v1.32h.22q.28 0 .48.2.19.2.19.47z"/></svg>
+          </div>
+          <input class="constant-input"></input>
+        </div>
+      </div>`)()
     );
 
     this.inputSelector = this.$box.find('.constant-input');
@@ -1407,17 +1450,23 @@ joint.shapes.ice.ConstantView = joint.shapes.ice.ModelView.extend({
   },
 
   apply: function () {
+    'use strict';
+
     this.applyName();
     this.applyLocal();
     this.applyValue();
   },
 
   applyName: function () {
+    'use strict';
+
     var name = this.model.get('data').name;
     this.$box.find('label').text(name);
   },
 
   applyLocal: function () {
+    'use strict';
+
     if (this.model.get('data').local) {
       this.$box.find('svg').removeClass('hidden');
     } else {
@@ -1426,6 +1475,8 @@ joint.shapes.ice.ConstantView = joint.shapes.ice.ModelView.extend({
   },
 
   applyValue: function () {
+    'use strict';
+
     this.updating = true;
     if (this.model.get('disabled')) {
       this.inputSelector.css({'pointer-events': 'none'});
@@ -1436,11 +1487,15 @@ joint.shapes.ice.ConstantView = joint.shapes.ice.ModelView.extend({
   },
 
   update: function () {
+    'use strict';
+
     this.renderPorts();
     joint.dia.ElementView.prototype.update.apply(this, arguments);
   },
 
   updateBox: function () {
+    'use strict';
+
     var bbox = this.model.getBBox();
     var data = this.model.get('data');
     var state = this.model.get('state');
@@ -1546,62 +1601,36 @@ joint.shapes.ice.Memory = joint.shapes.ice.Model.extend({
 
 joint.shapes.ice.MemoryView = joint.shapes.ice.ModelView.extend({
   initialize: function () {
+    'use strict';
+
     _.bindAll(this, 'updateBox');
     joint.dia.ElementView.prototype.initialize.apply(this, arguments);
 
     var id = sha1(this.model.get('id')).toString().substring(0, 6);
     var editorLabel = 'editor' + id;
     this.$box = $(
-      joint.util.template(
-        '\
-      <div class="memory-block">\
-        <div class="memory-content">\
-          <div class="header">\
-            <label></label>\
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 9.78"><path d="M2.22 4.44h3.56V3.11q0-.73-.52-1.26-.52-.52-1.26-.52t-1.26.52q-.52.52-.52 1.26v1.33zM8 5.11v4q0 .28-.2.47-.19.2-.47.2H.67q-.28 0-.48-.2Q0 9.38 0 9.11v-4q0-.28.2-.47.19-.2.47-.2h.22V3.11q0-1.28.92-2.2Q2.72 0 4 0q1.28 0 2.2.92.91.91.91 2.2v1.32h.22q.28 0 .48.2.19.2.19.47z"/></svg>\
-          </div>\
-        </div>\
-        <div class="memory-editor" id="' +
-          editorLabel +
-          '"></div>\
-        <script>\
-          var ' +
-          editorLabel +
-          ' = ace.edit("' +
-          editorLabel +
-          '");\
-          ' +
-          editorLabel +
-          '.setTheme("ace/theme/chrome");\
-          ' +
-          editorLabel +
-          '.setHighlightActiveLine(false);\
-          ' +
-          editorLabel +
-          '.setHighlightGutterLine(false);\
-          ' +
-          editorLabel +
-          '.setOption("firstLineNumber", 0);\
-          ' +
-          editorLabel +
-          '.setAutoScrollEditorIntoView(true);\
-          ' +
-          editorLabel +
-          '.renderer.setShowGutter(true);\
-          ' +
-          editorLabel +
-          '.renderer.$cursorLayer.element.style.opacity = 0;\
-          ' +
-          editorLabel +
-          '.renderer.$gutter.style.background = "#F0F0F0";\
-          ' +
-          editorLabel +
-          '.session.setMode("ace/mode/verilog");\
-        </script>\
-        <div class="resizer"/></div>\
-      </div>\
-      '
-      )()
+      joint.util.template(`<div class="memory-block">
+        <div class="memory-content">
+          <div class="header">
+            <label></label>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 9.78"><path d="M2.22 4.44h3.56V3.11q0-.73-.52-1.26-.52-.52-1.26-.52t-1.26.52q-.52.52-.52 1.26v1.33zM8 5.11v4q0 .28-.2.47-.19.2-.47.2H.67q-.28 0-.48-.2Q0 9.38 0 9.11v-4q0-.28.2-.47.19-.2.47-.2h.22V3.11q0-1.28.92-2.2Q2.72 0 4 0q1.28 0 2.2.92.91.91.91 2.2v1.32h.22q.28 0 .48.2.19.2.19.47z"/></svg>
+          </div>
+        </div>
+        <div class="memory-editor" id="${editorLabel}"></div>
+        <script>
+          var ${editorLabel} = ace.edit("${editorLabel}");
+          ${editorLabel}.setTheme("ace/theme/chrome");
+          ${editorLabel}.setHighlightActiveLine(false);
+          ${editorLabel}.setHighlightGutterLine(false);
+          ${editorLabel}.setOption("firstLineNumber", 0);
+          ${editorLabel}.setAutoScrollEditorIntoView(true);
+          ${editorLabel}.renderer.setShowGutter(true);
+          ${editorLabel}.renderer.$cursorLayer.element.style.opacity = 0;
+          ${editorLabel}.renderer.$gutter.style.background = "#F0F0F0";
+          ${editorLabel}.session.setMode("ace/mode/verilog");
+        </script>
+        <div class="resizer"/></div>
+      </div>`)()
     );
 
     this.editorSelector = this.$box.find('.memory-editor');
@@ -1702,6 +1731,8 @@ joint.shapes.ice.MemoryView = joint.shapes.ice.ModelView.extend({
   },
 
   apply: function (opt) {
+    'use strict';
+
     this.applyName();
     this.applyLocal();
     this.applyValue(opt);
@@ -1712,11 +1743,15 @@ joint.shapes.ice.MemoryView = joint.shapes.ice.ModelView.extend({
   },
 
   applyName: function () {
+    'use strict';
+
     var name = this.model.get('data').name;
     this.$box.find('label').text(name);
   },
 
   applyLocal: function () {
+    'use strict';
+
     if (this.model.get('data').local) {
       this.$box.find('svg').removeClass('hidden');
     } else {
@@ -1725,6 +1760,8 @@ joint.shapes.ice.MemoryView = joint.shapes.ice.ModelView.extend({
   },
 
   applyValue: function (opt) {
+    'use strict';
+
     this.updating = true;
 
     var dontselect = false;
@@ -1770,6 +1807,8 @@ joint.shapes.ice.MemoryView = joint.shapes.ice.ModelView.extend({
   },
 
   applyFormat: function () {
+    'use strict';
+
     this.updating = true;
 
     var self = this;
@@ -1796,12 +1835,16 @@ joint.shapes.ice.MemoryView = joint.shapes.ice.ModelView.extend({
   },
 
   update: function () {
+    'use strict';
+
     this.renderPorts();
     this.editor.setReadOnly(this.model.get('disabled'));
     joint.dia.ElementView.prototype.update.apply(this, arguments);
   },
 
   updateBox: function () {
+    'use strict';
+
     var bbox = this.model.getBBox();
     var data = this.model.get('data');
     var state = this.model.get('state');
@@ -1884,51 +1927,29 @@ joint.shapes.ice.Code = joint.shapes.ice.Model.extend({
 
 joint.shapes.ice.CodeView = joint.shapes.ice.ModelView.extend({
   initialize: function () {
+    'use strict';
+
     _.bindAll(this, 'updateBox');
     joint.dia.ElementView.prototype.initialize.apply(this, arguments);
 
     var id = sha1(this.model.get('id')).toString().substring(0, 6);
     var editorLabel = 'editor' + id;
     this.$box = $(
-      joint.util.template(
-        '\
-      <div class="code-block">\
+      joint.util.template(`<div class="code-block">\
         <div class="code-content"></div>\
-        <div class="code-editor" id="' +
-          editorLabel +
-          '"></div>\
+        <div class="code-editor" id="${editorLabel}"></div>\
         <script>\
-          var ' +
-          editorLabel +
-          ' = ace.edit("' +
-          editorLabel +
-          '");\
-          ' +
-          editorLabel +
-          '.setTheme("ace/theme/chrome");\
-          ' +
-          editorLabel +
-          '.setHighlightActiveLine(false);\
-          ' +
-          editorLabel +
-          '.setHighlightGutterLine(false);\
-          ' +
-          editorLabel +
-          '.setAutoScrollEditorIntoView(true);\
-          ' +
-          editorLabel +
-          '.renderer.setShowGutter(true);\
-          ' +
-          editorLabel +
-          '.renderer.$cursorLayer.element.style.opacity = 0;\
-          ' +
-          editorLabel +
-          '.session.setMode("ace/mode/verilog");\
+          var ${editorLabel} = ace.edit("${editorLabel}");\
+          ${editorLabel}.setTheme("ace/theme/chrome");\
+          ${editorLabel}.setHighlightActiveLine(false);\
+          ${editorLabel}.setHighlightGutterLine(false);\
+          ${editorLabel}.setAutoScrollEditorIntoView(true);\
+          ${editorLabel}.renderer.setShowGutter(true);\
+          ${editorLabel}.renderer.$cursorLayer.element.style.opacity = 0;\
+          ${editorLabel}.session.setMode("ace/mode/verilog");\
         </script>\
         <div class="resizer"/></div>\
-      </div>\
-      '
-      )()
+      </div>`)()
     );
 
     this.editorSelector = this.$box.find('.code-editor');
@@ -2034,6 +2055,8 @@ joint.shapes.ice.CodeView = joint.shapes.ice.ModelView.extend({
   },
 
   applyValue: function (opt) {
+    'use strict';
+
     this.updating = true;
 
     var dontselect = false;
@@ -2079,6 +2102,8 @@ joint.shapes.ice.CodeView = joint.shapes.ice.ModelView.extend({
   },
 
   apply: function (opt) {
+    'use strict';
+
     this.applyValue(opt);
     if (this.editor) {
       this.editor.resize();
@@ -2086,6 +2111,8 @@ joint.shapes.ice.CodeView = joint.shapes.ice.ModelView.extend({
   },
 
   setAnnotation: function (codeError) {
+    'use strict';
+
     this.editor.gotoLine(codeError.line);
     var annotations = this.editor.session.getAnnotations();
     annotations.push({
@@ -2113,16 +2140,22 @@ joint.shapes.ice.CodeView = joint.shapes.ice.ModelView.extend({
   },
 
   clearAnnotations: function () {
+    'use strict';
+
     this.editor.session.clearAnnotations();
   },
 
   update: function () {
+    'use strict';
+
     this.renderPorts();
     this.editor.setReadOnly(this.model.get('disabled'));
     joint.dia.ElementView.prototype.update.apply(this, arguments);
   },
 
   updateBox: function () {
+    'use strict';
+
     var pendingTasks = [];
     var i, j, port, portDefault, tokId, paths, rects, dome, anotations;
     var bbox = this.model.getBBox();
@@ -2373,59 +2406,33 @@ joint.shapes.ice.Info = joint.shapes.ice.Model.extend({
 
 joint.shapes.ice.InfoView = joint.shapes.ice.ModelView.extend({
   initialize: function () {
+    'use strict';
+
     _.bindAll(this, 'updateBox');
     joint.dia.ElementView.prototype.initialize.apply(this, arguments);
 
     var id = sha1(this.model.get('id')).toString().substring(0, 6);
     var editorLabel = 'editor' + id;
     var readonly = this.model.get('data').readonly;
+    const c1 = readonly ? '' : ' hidden';
+    const c2 = readonly ? ' hidden' : '';
     this.$box = $(
-      joint.util.template(
-        '\
-      <div class="info-block">\
-        <div class="info-render markdown-body' +
-          (readonly ? '' : ' hidden') +
-          '"></div>\
-        <div class="info-content' +
-          (readonly ? ' hidden' : '') +
-          '"></div>\
-        <div class="info-editor' +
-          (readonly ? ' hidden' : '') +
-          '" id="' +
-          editorLabel +
-          '"></div>\
-        <script>\
-          var ' +
-          editorLabel +
-          ' = ace.edit("' +
-          editorLabel +
-          '");\
-          ' +
-          editorLabel +
-          '.setTheme("ace/theme/chrome");\
-          ' +
-          editorLabel +
-          '.setHighlightActiveLine(false);\
-          ' +
-          editorLabel +
-          '.setShowPrintMargin(false);\
-          ' +
-          editorLabel +
-          '.setAutoScrollEditorIntoView(true);\
-          ' +
-          editorLabel +
-          '.renderer.setShowGutter(false);\
-          ' +
-          editorLabel +
-          '.renderer.$cursorLayer.element.style.opacity = 0;\
-          ' +
-          editorLabel +
-          '.session.setMode("ace/mode/markdown");\
-        </script>\
-        <div class="resizer"/></div>\
-      </div>\
-      '
-      )()
+      joint.util.template(`<div class="info-block">
+        <div class="info-render markdown-body${c1}"></div>
+        <div class="info-content${c2}"></div>
+        <div class="info-editor${c2}" id="${editorLabel}"></div>
+        <script>
+          var ${editorLabel} = ace.edit("${editorLabel}");
+          ${editorLabel}.setTheme("ace/theme/chrome");
+          ${editorLabel}.setHighlightActiveLine(false);
+          ${editorLabel}.setShowPrintMargin(false);
+          ${editorLabel}.setAutoScrollEditorIntoView(true);
+          ${editorLabel}.renderer.setShowGutter(false);
+          ${editorLabel}.renderer.$cursorLayer.element.style.opacity = 0;
+          ${editorLabel}.session.setMode("ace/mode/markdown");
+        </script>
+        <div class="resizer"/></div>
+      </div>`)()
     );
 
     this.renderSelector = this.$box.find('.info-render');
@@ -2520,6 +2527,8 @@ joint.shapes.ice.InfoView = joint.shapes.ice.ModelView.extend({
   },
 
   applyValue: function (opt) {
+    'use strict';
+
     this.updating = true;
 
     var dontselect = false;
@@ -2565,6 +2574,8 @@ joint.shapes.ice.InfoView = joint.shapes.ice.ModelView.extend({
   },
 
   applyReadonly: function () {
+    'use strict';
+
     var readonly = this.model.get('data').readonly;
     if (readonly) {
       this.$box.addClass('info-block-readonly');
@@ -2588,6 +2599,8 @@ joint.shapes.ice.InfoView = joint.shapes.ice.ModelView.extend({
   },
 
   applyText: function () {
+    'use strict';
+
     var data = this.model.get('data');
     var markdown = data.text || data.info || '';
 
@@ -2650,6 +2663,8 @@ joint.shapes.ice.InfoView = joint.shapes.ice.ModelView.extend({
   },
 
   apply: function (opt) {
+    'use strict';
+
     this.applyValue(opt);
     this.applyReadonly();
     this.updateBox();
@@ -2659,6 +2674,8 @@ joint.shapes.ice.InfoView = joint.shapes.ice.ModelView.extend({
   },
 
   render: function () {
+    'use strict';
+
     joint.dia.ElementView.prototype.render.apply(this, arguments);
     this.paper.$el.append(this.$box);
     this.updateBox();
@@ -2666,11 +2683,15 @@ joint.shapes.ice.InfoView = joint.shapes.ice.ModelView.extend({
   },
 
   update: function () {
+    'use strict';
+
     this.editor.setReadOnly(this.model.get('disabled'));
     joint.dia.ElementView.prototype.update.apply(this, arguments);
   },
 
   updateBox: function () {
+    'use strict';
+
     var bbox = this.model.getBBox();
     var state = this.model.get('state');
     var data = this.model.get('data');
@@ -2722,6 +2743,8 @@ joint.shapes.ice.InfoView = joint.shapes.ice.ModelView.extend({
   },
 
   removeBox: function (/*event*/) {
+    'use strict';
+
     // Remove delta to allow Session Value restore
     delete this.model.attributes.data.delta;
     this.$box.remove();
@@ -2823,6 +2846,8 @@ joint.shapes.ice.WireView = joint.dia.LinkView.extend({
   },
 
   initialize: function () {
+    'use strict';
+
     joint.dia.LinkView.prototype.initialize.apply(this, arguments);
 
     var self = this;
@@ -2853,27 +2878,38 @@ joint.shapes.ice.WireView = joint.dia.LinkView.extend({
   },
 
   apply: function () {
+    'use strict';
+
     // No operation required
+
   },
 
   render: function () {
+    'use strict';
+
     joint.dia.LinkView.prototype.render.apply(this, arguments);
     return this;
   },
 
   remove: function () {
+    'use strict';
+
     joint.dia.LinkView.prototype.remove.apply(this, arguments);
     this.updateBifurcations();
     return this;
   },
 
   update: function () {
+    'use strict';
+
     joint.dia.LinkView.prototype.update.apply(this, arguments);
     this.updateBifurcations();
     return this;
   },
 
   renderLabels: function () {
+    'use strict';
+
     if (!this._V.labels) {
       return this;
     }
@@ -2927,6 +2963,8 @@ joint.shapes.ice.WireView = joint.dia.LinkView.extend({
   },
 
   updateToolsPosition: function () {
+    'use strict';
+
     if (!this._V.linkTools) {
       return this;
     }
@@ -2953,6 +2991,8 @@ joint.shapes.ice.WireView = joint.dia.LinkView.extend({
   },
 
   updateWireProperties: function (size) {
+    'use strict';
+
     if (size > 1) {
       this.$('.connection').css('stroke-width', WIRE_WIDTH * 3);
       this.model.label(0, {attrs: {text: {text: size}}});
@@ -2969,6 +3009,8 @@ joint.shapes.ice.WireView = joint.dia.LinkView.extend({
   },
 
   updateConnection: function (opt) {
+    'use strict';
+
     opt = opt || {};
 
     // Necessary path finding
@@ -2995,6 +3037,8 @@ joint.shapes.ice.WireView = joint.dia.LinkView.extend({
 
   // cacheUpdateBifurcations:{},
   updateBifurcations: function () {
+    'use strict';
+
     if (this._V.markerBifurcations) {
       var self = this;
       var currentWire = this.model;
@@ -3127,6 +3171,8 @@ joint.shapes.ice.WireView = joint.dia.LinkView.extend({
 });
 
 function getCSSRule(ruleName) {
+  'use strict';
+
   if (document.styleSheets) {
     for (var i = 0; i < document.styleSheets.length; i++) {
       var styleSheet = document.styleSheets[i];
