@@ -47,7 +47,7 @@
 
 .dropdown-submenu > a:after {
   display: block;
-  content: " ";
+  content: ' ';
   float: right;
   width: 0;
   height: 0;
@@ -95,7 +95,7 @@
 
 .dropdown-submenu-right > a:after {
   display: block;
-  content: " ";
+  content: ' ';
   float: left;
   width: 0;
   height: 0;
@@ -107,7 +107,7 @@
   margin-right: 10px;
 }
 
-.navbar-default .navbar-nav>li>a {
+.navbar-default .navbar-nav > li > a {
   color: #333;
 }
 
@@ -135,25 +135,26 @@
 .disabled > a {
   cursor: default !important;
 }
-.credits-rss-icon{
-  width:24px;
-  height:24px;
+.credits-rss-icon {
+  width: 24px;
+  height: 24px;
 }
 .alertify .ajs-dialog {
   max-width: 600px;
 }
 
-.credits-developers-list{
-list-style:none;margin-top:15px;padding:0;
-margin-left:15px;
-
+.credits-developers-list {
+  list-style: none;
+  margin-top: 15px;
+  padding: 0;
+  margin-left: 15px;
 }
 
-.credits-developers-list li{
-  vertical-align:middle;
-  padding-bottom:5px;
-  margin-bottom:10px;
+.credits-developers-list li {
+  vertical-align: middle;
+  padding-bottom: 5px;
+  margin-bottom: 10px;
 }
-.credits-developers-list img{
-  vertical-align:middle
+.credits-developers-list img {
+  vertical-align: middle;
 }

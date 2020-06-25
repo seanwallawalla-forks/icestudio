@@ -3,73 +3,72 @@
 /* exported ICEpm */
 var ICEpm = new IcePlugManager();
 
-
 angular
-  .module('icestudio', [
-    'ui.bootstrap',
-    'ngRoute',
-    'gettext'
-  ])
-  .config(['$routeProvider',
-    function($routeProvider) {
+  .module('icestudio', ['ui.bootstrap', 'ngRoute', 'gettext'])
+  .config([
+    '$routeProvider',
+    function ($routeProvider) {
       $routeProvider
         .when('/', {
           templateUrl: 'views/main.html',
-          controller: 'MainCtrl'
+          controller: 'MainCtrl',
         })
         .otherwise({
-          redirectTo: '/'
+          redirectTo: '/',
         });
-    } 
+    },
   ])
-  .run(function(profile,
-                project,
-                common,
-                tools,
-                utils,
-                boards,
-                collections,
-                gettextCatalog,
-                $timeout)
-   
-                {
- 
-
-    $timeout(function(){
+  .run(function (
+    profile,
+    project,
+    common,
+    tools,
+    utils,
+    boards,
+    collections,
+    gettextCatalog,
+    $timeout
+  ) {
+    $timeout(function () {
       $('body').addClass('waiting');
     }, 0);
-      // Load boards
+    // Load boards
     boards.loadBoards();
-    // Load profile 
-    utils.loadProfile(profile, function() {
-      // Load collections 
-      collections.loadAllCollections() ;
+    // Load profile
+    utils.loadProfile(profile, function () {
+      // Load collections
+      collections.loadAllCollections();
       // Load language
-      utils.loadLanguage(profile, function() {
+      utils.loadLanguage(profile, function () {
         if (profile.get('board') === '') {
           // Select board for the first time
           utils.selectBoardPrompt(function (selectedBoard) {
             // Initialize selected board
             var newBoard = boards.selectBoard(selectedBoard);
             profile.set('board', newBoard.name);
-            alertify.success(gettextCatalog.getString('Board {{name}} selected',  { name: utils.bold(newBoard.info.label) }));
+            alertify.success(
+              gettextCatalog.getString('Board {{name}} selected', {
+                name: utils.bold(newBoard.info.label),
+              })
+            );
             // Check if the toolchain is installed
             tools.checkToolchain();
-          }); 
-        }
-        else { 
+          });
+        } else {
           // Initialize selected board
           profile.set('board', boards.selectBoard(profile.get('board')).name);
           // Check if the toolchain is installed
           tools.checkToolchain();
         }
 
-
-		$('html').attr('lang', profile.get('language'));
+        $('html').attr('lang', profile.get('language'));
         // Rearrange collections
         collections.sort();
         // Initialize selected collection
-        profile.set('collection', collections.selectCollection(profile.get('collection')));
+        profile.set(
+          'collection',
+          collections.selectCollection(profile.get('collection'))
+        );
         // Initialize title
         project.updateTitle(gettextCatalog.getString('Untitled'));
         $('body').removeClass('waiting');

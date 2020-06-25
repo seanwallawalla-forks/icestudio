@@ -11,8 +11,7 @@ const DARWIN = Boolean(os.platform().indexOf('darwin') > -1);
 
 if (DARWIN) {
   var aceFontSize = '12';
-}
-else {
+} else {
   var aceFontSize = '14';
 }
 
@@ -20,8 +19,8 @@ else {
 
 joint.shapes.ice = {};
 joint.shapes.ice.Model = joint.shapes.basic.Generic.extend({
-
-  markup: '<g class="rotatable">\
+  markup:
+    '<g class="rotatable">\
              <g class="scalable">\
                <rect class="body"/>\
              </g>\
@@ -30,7 +29,8 @@ joint.shapes.ice.Model = joint.shapes.basic.Generic.extend({
              <g class="topPorts disable-port"/>\
              <g class="bottomPorts"/>\
            </g>',
-  portMarkup: '<g class="port port<%= index %>">\
+  portMarkup:
+    '<g class="port port<%= index %>">\
                  <g class="port-default" id="port-default-<%= id %>-<%= port.id %>">\
                     <path/><rect/>\
                  </g>\
@@ -39,120 +39,161 @@ joint.shapes.ice.Model = joint.shapes.basic.Generic.extend({
                  <circle class="port-body"/>\
                </g>',
 
-  defaults: joint.util.deepSupplement({
-    type: 'ice.Model',
-    size: {
-      width: 1,
-      height: 1
-    },
-    leftPorts: [],
-    rightPorts: [],
-    topPorts: [],
-    bottomPorts: [],
-    attrs: {
-      '.': {
-        magnet: false
-      },
-      '.body': {
+  defaults: joint.util.deepSupplement(
+    {
+      type: 'ice.Model',
+      size: {
         width: 1,
         height: 1,
-        stroke: 'none'
       },
-      '.port-body': {
-        r: 16,
-        opacity: 0
+      leftPorts: [],
+      rightPorts: [],
+      topPorts: [],
+      bottomPorts: [],
+      attrs: {
+        '.': {
+          magnet: false,
+        },
+        '.body': {
+          width: 1,
+          height: 1,
+          stroke: 'none',
+        },
+        '.port-body': {
+          r: 16,
+          opacity: 0,
+        },
+        '.leftPorts .port-body': {
+          pos: 'left',
+          type: 'input',
+          magnet: false,
+        },
+        '.rightPorts .port-body': {
+          pos: 'right',
+          type: 'output',
+          magnet: true,
+        },
+        '.topPorts .port-body': {
+          pos: 'top',
+          type: 'input',
+          magnet: false,
+        },
+        '.bottomPorts .port-body': {
+          pos: 'bottom',
+          type: 'output',
+          magnet: true,
+        },
+        '.port-label': {
+          fill: '#777',
+        },
+        '.port-wire': {
+          stroke: '#777',
+          'stroke-width': WIRE_WIDTH,
+        },
+        '.port-default': {
+          display: 'none',
+        },
+        '.port-default rect': {
+          x: '-32',
+          y: '-8',
+          width: '16',
+          height: '16',
+          rx: '3',
+          ry: '3',
+          stroke: '#777',
+          'stroke-width': 1,
+          fill: '#FBFBC9',
+        },
+        '.port-default path': {
+          d: 'M 0 0 L -20 0',
+          stroke: '#777',
+          'stroke-width': WIRE_WIDTH,
+        },
       },
-      '.leftPorts .port-body': {
-        pos: 'left',
-        type: 'input',
-        magnet: false
-      },
-      '.rightPorts .port-body': {
-        pos: 'right',
-        type: 'output',
-        magnet: true
-      },
-      '.topPorts .port-body': {
-        pos: 'top',
-        type: 'input',
-        magnet: false
-      },
-      '.bottomPorts .port-body': {
-        pos: 'bottom',
-        type: 'output',
-        magnet: true
-      },
-      '.port-label': {
-        fill: '#777'
-      },
-      '.port-wire': {
-        stroke: '#777',
-        'stroke-width': WIRE_WIDTH
-      },
-      '.port-default': {
-        display: 'none'
-      },
-      '.port-default rect': {
-        x: '-32',
-        y: '-8',
-        width: '16',
-        height: '16',
-        rx: '3',
-        ry: '3',
-        stroke: '#777',
-        'stroke-width': 1,
-        fill: '#FBFBC9'
-      },
-      '.port-default path': {
-        d: 'M 0 0 L -20 0',
-        stroke: '#777',
-        'stroke-width': WIRE_WIDTH
-      }
-
-    }
-  }, joint.shapes.basic.Generic.prototype.defaults),
-
+    },
+    joint.shapes.basic.Generic.prototype.defaults
+  ),
 
   initialize: function () {
     this.updatePortsAttrs();
     this.processPorts();
     this.trigger('process:ports');
-    this.on('change:size change:leftPorts change:rightPorts change:topPorts change:bottomPorts', this.updatePortsAttrs, this);
-    this.constructor.__super__.constructor.__super__.initialize.apply(this, arguments);
+    this.on(
+      'change:size change:leftPorts change:rightPorts change:topPorts change:bottomPorts',
+      this.updatePortsAttrs,
+      this
+    );
+    this.constructor.__super__.constructor.__super__.initialize.apply(
+      this,
+      arguments
+    );
   },
 
   updatePortsAttrs: function (/*eventName*/) {
     if (this._portSelectors) {
       var newAttrs = _.omit(this.get('attrs'), this._portSelectors);
-      this.set('attrs', newAttrs, { silent: true });
+      this.set('attrs', newAttrs, {silent: true});
     }
 
     var attrs = {};
     this._portSelectors = [];
 
-    _.each(['left', 'right'], function (type) {
-      var port = type + 'Ports';
-      _.each(this.get(port), function (portName, index, ports) {
-        var portAttributes = this.getPortAttrs(portName, index, ports.length, '.' + port, type, this.get('size').height);
-        this._portSelectors = this._portSelectors.concat(_.keys(portAttributes));
-        _.extend(attrs, portAttributes);
-      }, this);
-    }, this);
+    _.each(
+      ['left', 'right'],
+      function (type) {
+        var port = type + 'Ports';
+        _.each(
+          this.get(port),
+          function (portName, index, ports) {
+            var portAttributes = this.getPortAttrs(
+              portName,
+              index,
+              ports.length,
+              '.' + port,
+              type,
+              this.get('size').height
+            );
+            this._portSelectors = this._portSelectors.concat(
+              _.keys(portAttributes)
+            );
+            _.extend(attrs, portAttributes);
+          },
+          this
+        );
+      },
+      this
+    );
 
-    _.each(['top', 'bottom'], function (type) {
-      var port = type + 'Ports';
-      _.each(this.get(port), function (portName, index, ports) {
-        var portAttributes = this.getPortAttrs(portName, index, ports.length, '.' + port, type, this.get('size').width);
-        this._portSelectors = this._portSelectors.concat(_.keys(portAttributes));
-        _.extend(attrs, portAttributes);
-      }, this);
-    }, this);
+    _.each(
+      ['top', 'bottom'],
+      function (type) {
+        var port = type + 'Ports';
+        _.each(
+          this.get(port),
+          function (portName, index, ports) {
+            var portAttributes = this.getPortAttrs(
+              portName,
+              index,
+              ports.length,
+              '.' + port,
+              type,
+              this.get('size').width
+            );
+            this._portSelectors = this._portSelectors.concat(
+              _.keys(portAttributes)
+            );
+            _.extend(attrs, portAttributes);
+          },
+          this
+        );
+      },
+      this
+    );
 
-    this.attr(attrs, { silent: true });
+    this.attr(attrs, {silent: true});
   },
 
   getPortAttrs: function (port, index, total, selector, type, length) {
-
     var attrs = {};
     var gridsize = 8;
     var gridunits = length / gridsize;
@@ -164,14 +205,17 @@ joint.shapes.ice.Model = joint.shapes.basic.Generic.extend({
     var portBodySelector = portSelector + '>.port-body';
     var portDefaultSelector = portSelector + '>.port-default';
 
-    var portColor = (typeof this.attributes.data.blockColor !== 'undefined') ? this.attributes.data.blockColor : 'lime';
+    var portColor =
+      typeof this.attributes.data.blockColor !== 'undefined'
+        ? this.attributes.data.blockColor
+        : 'lime';
 
     attrs[portSelector] = {
-      ref: '.body'
+      ref: '.body',
     };
 
     attrs[portLabelSelector] = {
-      text: port.label
+      text: port.label,
     };
 
     attrs[portWireSelector] = {};
@@ -180,27 +224,24 @@ joint.shapes.ice.Model = joint.shapes.basic.Generic.extend({
       port: {
         id: port.id,
         type: type,
-        fill: portColor
-      }
+        fill: portColor,
+      },
     };
-
-
 
     attrs[portDefaultSelector] = {
-      display: (port.default && port.default.apply) ? 'inline' : 'none'
+      display: port.default && port.default.apply ? 'inline' : 'none',
     };
 
-    if ((type === 'leftPorts') || (type === 'topPorts')) {
+    if (type === 'leftPorts' || type === 'topPorts') {
       attrs[portSelector]['pointer-events'] = 'none';
       attrs[portWireSelector]['pointer-events'] = 'none';
     }
 
-    var offset = (port.size && port.size > 1) ? 4 : 1;
-    var position = Math.round((index + 0.5) / total * gridunits) / gridunits;
+    var offset = port.size && port.size > 1 ? 4 : 1;
+    var position = Math.round(((index + 0.5) / total) * gridunits) / gridunits;
 
     switch (type) {
       case 'left':
-
         attrs[portSelector]['ref-x'] = -8;
         attrs[portSelector]['ref-y'] = position;
         attrs[portLabelSelector]['dx'] = 4;
@@ -241,11 +282,10 @@ joint.shapes.ice.Model = joint.shapes.basic.Generic.extend({
     }
 
     return attrs;
-  }
+  },
 });
 
 joint.shapes.ice.ModelView = joint.dia.ElementView.extend({
-
   template: '',
 
   initialize: function () {
@@ -268,9 +308,9 @@ joint.shapes.ice.ModelView = joint.dia.ElementView.extend({
       this.resizing = false;
       this.resizer = this.$box.find('.resizer');
       this.resizer.css('cursor', 'se-resize');
-      this.resizer.on('mousedown', { self: this }, this.startResizing);
-      $(document).on('mousemove', { self: this }, this.performResizing);
-      $(document).on('mouseup', { self: this }, this.stopResizing);
+      this.resizer.on('mousedown', {self: this}, this.startResizing);
+      $(document).on('mousemove', {self: this}, this.performResizing);
+      $(document).on('mouseup', {self: this}, this.stopResizing);
     }
   },
 
@@ -288,8 +328,7 @@ joint.shapes.ice.ModelView = joint.dia.ElementView.extend({
     }
   },
 
-  apply: function () {
-  },
+  apply: function () {},
 
   startResizing: function (event) {
     var self = event.data.self;
@@ -316,13 +355,13 @@ joint.shapes.ice.ModelView = joint.dia.ElementView.extend({
     var size = self.model.get('size');
     var state = self.model.get('state');
     var gridstep = 8;
-    var minSize = { width: 64, height: 32 };
+    var minSize = {width: 64, height: 32};
     if (type === 'ice.Code' || type === 'ice.Memory') {
-      minSize = { width: 96, height: 64 };
+      minSize = {width: 96, height: 64};
     }
 
-    var clientCoords = snapToGrid({ x: event.clientX, y: event.clientY });
-    var oldClientCoords = snapToGrid({ x: self._clientX, y: self._clientY });
+    var clientCoords = snapToGrid({x: event.clientX, y: event.clientY});
+    var oldClientCoords = snapToGrid({x: self._clientX, y: self._clientY});
 
     var dx = clientCoords.x - oldClientCoords.x;
     var dy = clientCoords.y - oldClientCoords.y;
@@ -343,7 +382,7 @@ joint.shapes.ice.ModelView = joint.dia.ElementView.extend({
     function snapToGrid(coords) {
       return {
         x: Math.round(coords.x / state.zoom / gridstep) * gridstep,
-        y: Math.round(coords.y / state.zoom / gridstep) * gridstep
+        y: Math.round(coords.y / state.zoom / gridstep) * gridstep,
       };
     }
   },
@@ -374,18 +413,46 @@ joint.shapes.ice.ModelView = joint.dia.ElementView.extend({
     var portTemplate = _.template(this.model.portMarkup);
     var modelId = this.model.id;
 
-    _.each(_.filter(this.model.ports, function (p) { return p.type === 'left'; }), function (port, index) {
-      $leftPorts.append(V(portTemplate({ id: modelId, index: index, port: port })).node);
-    });
-    _.each(_.filter(this.model.ports, function (p) { return p.type === 'right'; }), function (port, index) {
-      $rightPorts.append(V(portTemplate({ id: modelId, index: index, port: port })).node);
-    });
-    _.each(_.filter(this.model.ports, function (p) { return p.type === 'top'; }), function (port, index) {
-      $topPorts.append(V(portTemplate({ id: modelId, index: index, port: port })).node);
-    });
-    _.each(_.filter(this.model.ports, function (p) { return p.type === 'bottom'; }), function (port, index) {
-      $bottomPorts.append(V(portTemplate({ id: modelId, index: index, port: port })).node);
-    });
+    _.each(
+      _.filter(this.model.ports, function (p) {
+        return p.type === 'left';
+      }),
+      function (port, index) {
+        $leftPorts.append(
+          V(portTemplate({id: modelId, index: index, port: port})).node
+        );
+      }
+    );
+    _.each(
+      _.filter(this.model.ports, function (p) {
+        return p.type === 'right';
+      }),
+      function (port, index) {
+        $rightPorts.append(
+          V(portTemplate({id: modelId, index: index, port: port})).node
+        );
+      }
+    );
+    _.each(
+      _.filter(this.model.ports, function (p) {
+        return p.type === 'top';
+      }),
+      function (port, index) {
+        $topPorts.append(
+          V(portTemplate({id: modelId, index: index, port: port})).node
+        );
+      }
+    );
+    _.each(
+      _.filter(this.model.ports, function (p) {
+        return p.type === 'bottom';
+      }),
+      function (port, index) {
+        $bottomPorts.append(
+          V(portTemplate({id: modelId, index: index, port: port})).node
+        );
+      }
+    );
   },
 
   update: function () {
@@ -393,8 +460,7 @@ joint.shapes.ice.ModelView = joint.dia.ElementView.extend({
     joint.dia.ElementView.prototype.update.apply(this, arguments);
   },
 
-  updateBox: function () {
-  },
+  updateBox: function () {},
 
   removeBox: function (/*event*/) {
     this.$box.remove();
@@ -402,25 +468,30 @@ joint.shapes.ice.ModelView = joint.dia.ElementView.extend({
 
   updateScrollStatus: function (status) {
     if (this.editor) {
-      this.editor.renderer.scrollBarV.element.style.visibility = status ? '' : 'hidden';
-      this.editor.renderer.scrollBarH.element.style.visibility = status ? '' : 'hidden';
+      this.editor.renderer.scrollBarV.element.style.visibility = status
+        ? ''
+        : 'hidden';
+      this.editor.renderer.scrollBarH.element.style.visibility = status
+        ? ''
+        : 'hidden';
       this.editor.renderer.scroller.style.right = 0;
       this.editor.renderer.scroller.style.bottom = 0;
     }
-  }
+  },
 });
-
 
 // Generic block
 
 joint.shapes.ice.Generic = joint.shapes.ice.Model.extend({
-  defaults: joint.util.deepSupplement({
-    type: 'ice.Generic'
-  }, joint.shapes.ice.Model.prototype.defaults)
+  defaults: joint.util.deepSupplement(
+    {
+      type: 'ice.Generic',
+    },
+    joint.shapes.ice.Model.prototype.defaults
+  ),
 });
 
 joint.shapes.ice.GenericView = joint.shapes.ice.ModelView.extend({
-
   // Image comments:
   // - img: fast load, no interactive
   // - object: slow load, interactive
@@ -428,7 +499,8 @@ joint.shapes.ice.GenericView = joint.shapes.ice.ModelView.extend({
   //               old SVG files have no viewBox, therefore no properly resize
   //               Inkscape adds this field saving as "Optimize SVG" ("Enable viewboxing")
 
-  template: '\
+  template:
+    '\
   <div class="generic-block">\
     <div class="generic-content">\
       <div class="img-container"><img></div>\
@@ -439,15 +511,15 @@ joint.shapes.ice.GenericView = joint.shapes.ice.ModelView.extend({
   ',
 
   events: {
-    'mouseover': 'mouseovercard',
-    'mouseout': 'mouseoutcard',
-    'mouseup': 'mouseupcard',
-    'mousedown': 'mousedowncard'
+    mouseover: 'mouseovercard',
+    mouseout: 'mouseoutcard',
+    mouseup: 'mouseupcard',
+    mousedown: 'mousedowncard',
   },
 
   enter: false,
 
-  mouseovercard: function (event/*, x, y*/) {
+  mouseovercard: function (event /*, x, y*/) {
     if (event && event.which === 0) {
       // Mouse button not pressed
       this.showTooltip();
@@ -458,8 +530,7 @@ joint.shapes.ice.GenericView = joint.shapes.ice.ModelView.extend({
     this.hideTooltip();
   },
 
-  mouseupcard: function (/*event, x, y*/) {
-  },
+  mouseupcard: function (/*event, x, y*/) {},
 
   mousedowncard: function (/*event, x, y*/) {
     this.hideTooltip();
@@ -468,9 +539,12 @@ joint.shapes.ice.GenericView = joint.shapes.ice.ModelView.extend({
   showTooltip: function () {
     if (this.tooltip) {
       if (!this.openTimeout) {
-        this.openTimeout = setTimeout(function () {
-          this.tooltiptext.css('visibility', 'visible');
-        }.bind(this), 2000);
+        this.openTimeout = setTimeout(
+          function () {
+            this.tooltiptext.css('visibility', 'visible');
+          }.bind(this),
+          2000
+        );
       }
     }
   },
@@ -496,12 +570,10 @@ joint.shapes.ice.GenericView = joint.shapes.ice.ModelView.extend({
     if (this.tooltip.length > 13) {
       this.tooltiptext.addClass('tooltip-medium');
       this.tooltiptext.removeClass('tooltip-large');
-    }
-    else if (this.tooltip.length > 20) {
+    } else if (this.tooltip.length > 20) {
       this.tooltiptext.addClass('tooltip-large');
       this.tooltiptext.removeClass('tooltip-medium');
-    }
-    else {
+    } else {
       this.tooltiptext.removeClass('tooltip-medium');
       this.tooltiptext.removeClass('tooltip-large');
     }
@@ -531,8 +603,7 @@ joint.shapes.ice.GenericView = joint.shapes.ice.ModelView.extend({
 
       imageSelector.removeClass('hidden');
       labelSelector.addClass('hidden');
-    }
-    else {
+    } else {
       // Render label
       labelSelector.html(label);
       labelSelector.removeClass('hidden');
@@ -548,11 +619,17 @@ joint.shapes.ice.GenericView = joint.shapes.ice.ModelView.extend({
     for (var i in ports) {
       var port = ports[i];
       if (port.clock) {
-        var top = Math.round((parseInt(i) + 0.5) * height / n / gridsize) * gridsize - 9;
-        contentSelector.append('\
-          <div class="clock" style="top: ' + top + 'px;">\
+        var top =
+          Math.round(((parseInt(i) + 0.5) * height) / n / gridsize) * gridsize -
+          9;
+        contentSelector.append(
+          '\
+          <div class="clock" style="top: ' +
+            top +
+            'px;">\
             <svg width="12" height="18"><path d="M-1 0 l10 8-10 8" fill="none" stroke="#555" stroke-width="1.2" stroke-linejoin="round"/>\
-          </div>');
+          </div>'
+        );
       }
     }
   },
@@ -571,7 +648,11 @@ joint.shapes.ice.GenericView = joint.shapes.ice.ModelView.extend({
     var width = WIRE_WIDTH * state.zoom;
     var pwires = this.$el[0].getElementsByClassName('port-wire');
     for (i = 0; i < pwires.length; i++) {
-      pendingTasks.push({ e: pwires[i], property: 'stroke-width', value: width + 'px' });
+      pendingTasks.push({
+        e: pwires[i],
+        property: 'stroke-width',
+        value: width + 'px',
+      });
     }
     var nwidth = width * 3;
     var tokId = 'port-wire-' + modelId + '-';
@@ -579,23 +660,26 @@ joint.shapes.ice.GenericView = joint.shapes.ice.ModelView.extend({
     for (i = 0; i < leftPorts.length; i++) {
       port = leftPorts[i];
       if (port.size > 1) {
-
         dome = document.getElementById(tokId + port.id);
 
-        pendingTasks.push({ e: dome, property: 'stroke-width', value: nwidth + 'px' });
-
+        pendingTasks.push({
+          e: dome,
+          property: 'stroke-width',
+          value: nwidth + 'px',
+        });
       }
     }
 
     for (i = 0; i < rightPorts.length; i++) {
       port = rightPorts[i];
       if (port.size > 1) {
-
         dome = document.getElementById(tokId + port.id);
 
-        pendingTasks.push({ e: dome, property: 'stroke-width', value: nwidth + 'px' });
-
-
+        pendingTasks.push({
+          e: dome,
+          property: 'stroke-width',
+          value: nwidth + 'px',
+        });
       }
     }
 
@@ -607,83 +691,138 @@ joint.shapes.ice.GenericView = joint.shapes.ice.ModelView.extend({
       for (i = 0; i < data.ports.in.length; i++) {
         port = data.ports.in[i];
         portDefault = document.getElementById(tokId + port.name);
-        if (portDefault !== null && rules && port.default && port.default.apply) {
-
-          pendingTasks.push({ e: portDefault, property: 'display', value: 'inline' });
+        if (
+          portDefault !== null &&
+          rules &&
+          port.default &&
+          port.default.apply
+        ) {
+          pendingTasks.push({
+            e: portDefault,
+            property: 'display',
+            value: 'inline',
+          });
 
           paths = portDefault.querySelectorAll('path');
           for (j = 0; j < paths.length; j++) {
-            pendingTasks.push({ e: paths[j], property: 'stroke-width', value: width + 'px' });
+            pendingTasks.push({
+              e: paths[j],
+              property: 'stroke-width',
+              value: width + 'px',
+            });
           }
 
           rects = portDefault.querySelectorAll('rect');
           for (j = 0; j < rects.length; j++) {
-            pendingTasks.push({ e: rects[j], property: 'stroke-width', value: state.zoom + 'px' });
+            pendingTasks.push({
+              e: rects[j],
+              property: 'stroke-width',
+              value: state.zoom + 'px',
+            });
           }
-
-
-        }
-        else {
-
-          pendingTasks.push({ e: portDefault, property: 'display', value: 'none' });
+        } else {
+          pendingTasks.push({
+            e: portDefault,
+            property: 'display',
+            value: 'none',
+          });
         }
       }
     }
 
     var gcontent = this.$box[0].querySelectorAll('.generic-content');
 
-
     for (i = 0; i < gcontent.length; i++) {
-      pendingTasks.push({ e: gcontent[i], property: 'left', value: Math.round(bbox.width / 2.0 * (state.zoom - 1)) + 'px' });
-      pendingTasks.push({ e: gcontent[i], property: 'top', value: Math.round(bbox.height / 2.0 * (state.zoom - 1)) + 'px' });
-      pendingTasks.push({ e: gcontent[i], property: 'width', value: Math.round(bbox.width) + 'px' });
-      pendingTasks.push({ e: gcontent[i], property: 'height', value: Math.round(bbox.height) + 'px' });
-      pendingTasks.push({ e: gcontent[i], property: 'transform', value: 'scale(' + state.zoom + ')' });
+      pendingTasks.push({
+        e: gcontent[i],
+        property: 'left',
+        value: Math.round((bbox.width / 2.0) * (state.zoom - 1)) + 'px',
+      });
+      pendingTasks.push({
+        e: gcontent[i],
+        property: 'top',
+        value: Math.round((bbox.height / 2.0) * (state.zoom - 1)) + 'px',
+      });
+      pendingTasks.push({
+        e: gcontent[i],
+        property: 'width',
+        value: Math.round(bbox.width) + 'px',
+      });
+      pendingTasks.push({
+        e: gcontent[i],
+        property: 'height',
+        value: Math.round(bbox.height) + 'px',
+      });
+      pendingTasks.push({
+        e: gcontent[i],
+        property: 'transform',
+        value: 'scale(' + state.zoom + ')',
+      });
     }
 
-
-    pendingTasks.push({ e: this.$box[0], property: 'left', value: Math.round(bbox.x * state.zoom + state.pan.x) + 'px' });
-    pendingTasks.push({ e: this.$box[0], property: 'top', value: Math.round(bbox.y * state.zoom + state.pan.y) + 'px' });
-    pendingTasks.push({ e: this.$box[0], property: 'width', value: Math.round(bbox.width * state.zoom) + 'px' });
-    pendingTasks.push({ e: this.$box[0], property: 'height', value: Math.round(bbox.height * state.zoom) + 'px' });
+    pendingTasks.push({
+      e: this.$box[0],
+      property: 'left',
+      value: Math.round(bbox.x * state.zoom + state.pan.x) + 'px',
+    });
+    pendingTasks.push({
+      e: this.$box[0],
+      property: 'top',
+      value: Math.round(bbox.y * state.zoom + state.pan.y) + 'px',
+    });
+    pendingTasks.push({
+      e: this.$box[0],
+      property: 'width',
+      value: Math.round(bbox.width * state.zoom) + 'px',
+    });
+    pendingTasks.push({
+      e: this.$box[0],
+      property: 'height',
+      value: Math.round(bbox.height * state.zoom) + 'px',
+    });
 
     i = pendingTasks.length;
     for (i = 0; i < pendingTasks.length; i++) {
-
       if (pendingTasks[i].e !== null) {
-
-        pendingTasks[i].e.style[pendingTasks[i].property] = pendingTasks[i].value;
+        pendingTasks[i].e.style[pendingTasks[i].property] =
+          pendingTasks[i].value;
       }
     }
     return pendingTasks;
-
-  }
+  },
 });
 
 // I/O blocks
 
 joint.shapes.ice.Input = joint.shapes.ice.Model.extend({
-  defaults: joint.util.deepSupplement({
-    type: 'ice.Input',
-    size: {
-      width: 96,
-      height: 64
-    }
-  }, joint.shapes.ice.Model.prototype.defaults)
+  defaults: joint.util.deepSupplement(
+    {
+      type: 'ice.Input',
+      size: {
+        width: 96,
+        height: 64,
+      },
+    },
+    joint.shapes.ice.Model.prototype.defaults
+  ),
 });
 
 joint.shapes.ice.Output = joint.shapes.ice.Model.extend({
-  defaults: joint.util.deepSupplement({
-    type: 'ice.Output',
-    size: {
-      width: 96,
-      height: 64
-    }
-  }, joint.shapes.ice.Model.prototype.defaults)
+  defaults: joint.util.deepSupplement(
+    {
+      type: 'ice.Output',
+      size: {
+        width: 96,
+        height: 64,
+      },
+    },
+    joint.shapes.ice.Model.prototype.defaults
+  ),
 });
 
 joint.shapes.ice.InputLabel = joint.shapes.ice.Model.extend({
-  markup: '<g class="rotatable">\
+  markup:
+    '<g class="rotatable">\
              <g class="scalable">\
                <rect class="body" />\
              </g>\
@@ -692,7 +831,8 @@ joint.shapes.ice.InputLabel = joint.shapes.ice.Model.extend({
              <g class="topPorts disable-port"/>\
              <g class="bottomPorts"/>\
     </g>',
-  portMarkup: '<g class="port port<%= index %>">\
+  portMarkup:
+    '<g class="port port<%= index %>">\
                <g class="port-default" id="port-default-<%= id %>-<%= port.id %>">\
                <path/><rect/>\
                </g>\
@@ -702,18 +842,21 @@ joint.shapes.ice.InputLabel = joint.shapes.ice.Model.extend({
                </g>',
 
   //<polygon  class="input-virtual-terminator" points="0 -5,0 34,20 16" style="fill:white;stroke:<%= port.fill %>;stroke-width:3" transform="translate(100 -15)"/>\
-  defaults: joint.util.deepSupplement({
-    type: 'ice.Output',
-    size: {
-      width: 96,
-      height: 64
-    }
-  }, joint.shapes.ice.Model.prototype.defaults)
+  defaults: joint.util.deepSupplement(
+    {
+      type: 'ice.Output',
+      size: {
+        width: 96,
+        height: 64,
+      },
+    },
+    joint.shapes.ice.Model.prototype.defaults
+  ),
 });
 
-
 joint.shapes.ice.OutputLabel = joint.shapes.ice.Model.extend({
-  markup: '<g class="rotatable">\
+  markup:
+    '<g class="rotatable">\
              <g class="scalable">\
                <rect class="body"/>\
              </g>\
@@ -722,7 +865,8 @@ joint.shapes.ice.OutputLabel = joint.shapes.ice.Model.extend({
              <g class="topPorts disable-port"/>\
              <g class="bottomPorts"/>\
     </g>',
-  portMarkup: '<g class="port port<%= index %>">\
+  portMarkup:
+    '<g class="port port<%= index %>">\
                <g class="port-default" id="port-default-<%= id %>-<%= port.id %>">\
                <path/><rect/>\
                </g>\
@@ -732,18 +876,19 @@ joint.shapes.ice.OutputLabel = joint.shapes.ice.Model.extend({
                </g>',
 
   //<polygon points="1 0,15 15,0 30,30 30,30 0" style="fill:lime;stroke-width:1" transform="translate(-122 -15)"/>\
-  defaults: joint.util.deepSupplement({
-    type: 'ice.Input',
-    size: {
-      width: 96,
-      height: 64
-    }
-  }, joint.shapes.ice.Model.prototype.defaults)
-
+  defaults: joint.util.deepSupplement(
+    {
+      type: 'ice.Input',
+      size: {
+        width: 96,
+        height: 64,
+      },
+    },
+    joint.shapes.ice.Model.prototype.defaults
+  ),
 });
 
 joint.shapes.ice.IOView = joint.shapes.ice.ModelView.extend({
-
   initialize: function () {
     _.bindAll(this, 'updateBox');
     joint.dia.ElementView.prototype.initialize.apply(this, arguments);
@@ -764,47 +909,62 @@ joint.shapes.ice.IOView = joint.shapes.ice.ModelView.extend({
         selectCode += '</select>';
 
         selectScript += '$("#' + comboId + data.pins[i].index + '").select2(';
-        selectScript += '{placeholder: "", allowClear: true, dropdownCssClass: "bigdrop",';
+        selectScript +=
+          '{placeholder: "", allowClear: true, dropdownCssClass: "bigdrop",';
         // Match only words that start with the selected search term
         // http://stackoverflow.com/questions/31571864/select2-search-match-only-words-that-start-with-search-term
         selectScript += 'matcher: function(params, data) {';
         selectScript += '  params.term = params.term || "";';
-        selectScript += '  if (data.text.toUpperCase().indexOf(params.term.toUpperCase()) == 0) { return data; }';
+        selectScript +=
+          '  if (data.text.toUpperCase().indexOf(params.term.toUpperCase()) == 0) { return data; }';
         selectScript += '  return false; } });';
       }
     }
 
-    this.$box = $(joint.util.template(
-      '\
+    this.$box = $(
+      joint.util.template(
+        '\
       <div class="io-block">\
-        <div class="io-virtual-content' + (virtual ? '' : ' hidden') + '">\
+        <div class="io-virtual-content' +
+          (virtual ? '' : ' hidden') +
+          '">\
           <div class="header">\
-            <label>' + name + '</label>\
+            <label>' +
+          name +
+          '</label>\
             <svg viewBox="0 0 12 18"><path d="M-1 0 l10 8-10 8" fill="none" stroke-width="2" stroke-linejoin="round"/>\
           </div>\
         </div>\
-        <div class="io-fpga-content' + (virtual ? ' hidden' : '') + '">\
+        <div class="io-fpga-content' +
+          (virtual ? ' hidden' : '') +
+          '">\
           <div class="header">\
-            <label>' + name + '</label>\
+            <label>' +
+          name +
+          '</label>\
             <svg viewBox="0 0 12 18"><path d="M-1 0 l10 8-10 8" fill="none" stroke-width="2" stroke-linejoin="round"/>\
           </div>\
-          <div>' + selectCode + '</div>\
-          <script>' + selectScript + '</script>\
+          <div>' +
+          selectCode +
+          '</div>\
+          <script>' +
+          selectScript +
+          '</script>\
         </div>\
       </div>\
       '
-    )());
-
+      )()
+    );
 
     this.virtualContentSelector = this.$box.find('.io-virtual-content');
     this.fpgaContentSelector = this.$box.find('.io-fpga-content');
     this.headerSelector = this.$box.find('.header');
     this.nativeDom = {
       box: this.$box[0],
-      virtualContentSelector: this.$box[0].querySelectorAll('.io-virtual-content'),
-      fpgaContentSelector: this.$box[0].querySelectorAll('.io-fpga-content')
-
-
+      virtualContentSelector: this.$box[0].querySelectorAll(
+        '.io-virtual-content'
+      ),
+      fpgaContentSelector: this.$box[0].querySelectorAll('.io-fpga-content'),
     };
 
     this.model.on('change', this.updateBox, this);
@@ -816,7 +976,9 @@ joint.shapes.ice.IOView = joint.shapes.ice.ModelView.extend({
     // Prevent paper from handling pointerdown.
     var self = this;
     var selector = this.$box.find('.select2');
-    selector.on('mousedown click', function (event) { event.stopPropagation(); });
+    selector.on('mousedown click', function (event) {
+      event.stopPropagation();
+    });
     selector.on('change', function (event) {
       if (!self.updating) {
         var target = $(event.target);
@@ -849,7 +1011,10 @@ joint.shapes.ice.IOView = joint.shapes.ice.ModelView.extend({
     var data = this.model.get('data');
     if (data.pins) {
       for (var i in data.pins) {
-        this.$box.find('#combo' + this.id + data.pins[i].index).empty().append(this.model.get('choices'));
+        this.$box
+          .find('#combo' + this.id + data.pins[i].index)
+          .empty()
+          .append(this.model.get('choices'));
       }
     }
   },
@@ -862,7 +1027,9 @@ joint.shapes.ice.IOView = joint.shapes.ice.ModelView.extend({
       var value = data.pins[i].value;
       var name = data.pins[i].name;
       var comboId = '#combo' + this.id + index;
-      var comboSelector = this.$box.find(comboId + ' option:contains(' + name + ')');
+      var comboSelector = this.$box.find(
+        comboId + ' option:contains(' + name + ')'
+      );
       if (comboSelector) {
         // Select by pin name
         comboSelector.attr('selected', true);
@@ -890,13 +1057,14 @@ joint.shapes.ice.IOView = joint.shapes.ice.ModelView.extend({
       this.virtualContentSelector.removeClass('hidden');
       if (typeof data.blockColor !== 'undefined') {
         if (typeof data.oldBlockColor !== 'undefined') {
-          this.virtualContentSelector.removeClass('color-' + data.oldBlockColor);
+          this.virtualContentSelector.removeClass(
+            'color-' + data.oldBlockColor
+          );
         }
         this.virtualContentSelector.addClass('color-' + data.blockColor);
       }
       this.model.attributes.size.height = 64;
-    }
-    else {
+    } else {
       // FPGA I/O port (yellow)
       this.virtualContentSelector.addClass('hidden');
       this.fpgaContentSelector.removeClass('hidden');
@@ -945,7 +1113,6 @@ joint.shapes.ice.IOView = joint.shapes.ice.ModelView.extend({
   },
   pendingRender: false,
   updateBox: function () {
-
     var pendingTasks = [];
     var i, j, port;
     var bbox = this.model.getBBox();
@@ -961,7 +1128,11 @@ joint.shapes.ice.IOView = joint.shapes.ice.ModelView.extend({
 
     var pwires = this.$el[0].getElementsByClassName('port-wire');
     for (i = 0; i < pwires.length; i++) {
-      pendingTasks.push({ e: pwires[i], property: 'stroke-width', value: width + 'px' });
+      pendingTasks.push({
+        e: pwires[i],
+        property: 'stroke-width',
+        value: width + 'px',
+      });
     }
     // Set buses
     var nwidth = width * 3;
@@ -969,23 +1140,26 @@ joint.shapes.ice.IOView = joint.shapes.ice.ModelView.extend({
     for (i = 0; i < leftPorts.length; i++) {
       port = leftPorts[i];
       if (port.size > 1) {
-
         dome = document.getElementById(tokId + port.id);
 
-        pendingTasks.push({ e: dome, property: 'stroke-width', value: nwidth + 'px' });
-
+        pendingTasks.push({
+          e: dome,
+          property: 'stroke-width',
+          value: nwidth + 'px',
+        });
       }
     }
 
     for (i = 0; i < rightPorts.length; i++) {
       port = rightPorts[i];
       if (port.size > 1) {
-
         dome = document.getElementById(tokId + port.id);
 
-        pendingTasks.push({ e: dome, property: 'stroke-width', value: nwidth + 'px' });
-
-
+        pendingTasks.push({
+          e: dome,
+          property: 'stroke-width',
+          value: nwidth + 'px',
+        });
       }
     }
     // Render rules
@@ -994,50 +1168,110 @@ joint.shapes.ice.IOView = joint.shapes.ice.ModelView.extend({
       for (i = 0; i < data.ports.in.length; i++) {
         port = data.ports.in[i];
         portDefault = document.getElementById(tokId + port.name);
-        if (portDefault !== null && rules && port.default && port.default.apply) {
-
-          pendingTasks.push({ e: portDefault, property: 'display', value: 'inline' });
+        if (
+          portDefault !== null &&
+          rules &&
+          port.default &&
+          port.default.apply
+        ) {
+          pendingTasks.push({
+            e: portDefault,
+            property: 'display',
+            value: 'inline',
+          });
 
           paths = portDefault.querySelectorAll('path');
           for (j = 0; j < paths.length; j++) {
-            pendingTasks.push({ e: paths[j], property: 'stroke-width', value: width + 'px' });
+            pendingTasks.push({
+              e: paths[j],
+              property: 'stroke-width',
+              value: width + 'px',
+            });
           }
 
           rects = portDefault.querySelectorAll('rect');
           for (j = 0; j < rects.length; j++) {
-            pendingTasks.push({ e: rects[j], property: 'stroke-width', value: state.zoom + 'px' });
+            pendingTasks.push({
+              e: rects[j],
+              property: 'stroke-width',
+              value: state.zoom + 'px',
+            });
           }
-
-
-        }
-        else {
-
-          pendingTasks.push({ e: portDefault, property: 'display', value: 'none' });
+        } else {
+          pendingTasks.push({
+            e: portDefault,
+            property: 'display',
+            value: 'none',
+          });
         }
       }
     }
     var virtualtopOffset = 24;
 
     for (i = 0; i < this.nativeDom.virtualContentSelector.length; i++) {
-
-      pendingTasks.push({ e: this.nativeDom.virtualContentSelector[i], property: 'left', value: Math.round(bbox.width / 2.0 * (state.zoom - 1)) + 'px' });
-      pendingTasks.push({ e: this.nativeDom.virtualContentSelector[i], property: 'top', value: Math.round((bbox.height - virtualtopOffset) / 2.0 * (state.zoom - 1) + virtualtopOffset / 2.0 * state.zoom) + 'px' });
-      pendingTasks.push({ e: this.nativeDom.virtualContentSelector[i], property: 'width', value: Math.round(bbox.width) + 'px' });
-      pendingTasks.push({ e: this.nativeDom.virtualContentSelector[i], property: 'height', value: Math.round(bbox.height - virtualtopOffset) + 'px' });
-      pendingTasks.push({ e: this.nativeDom.virtualContentSelector[i], property: 'transform', value: 'scale(' + state.zoom + ')' });
-
+      pendingTasks.push({
+        e: this.nativeDom.virtualContentSelector[i],
+        property: 'left',
+        value: Math.round((bbox.width / 2.0) * (state.zoom - 1)) + 'px',
+      });
+      pendingTasks.push({
+        e: this.nativeDom.virtualContentSelector[i],
+        property: 'top',
+        value:
+          Math.round(
+            ((bbox.height - virtualtopOffset) / 2.0) * (state.zoom - 1) +
+              (virtualtopOffset / 2.0) * state.zoom
+          ) + 'px',
+      });
+      pendingTasks.push({
+        e: this.nativeDom.virtualContentSelector[i],
+        property: 'width',
+        value: Math.round(bbox.width) + 'px',
+      });
+      pendingTasks.push({
+        e: this.nativeDom.virtualContentSelector[i],
+        property: 'height',
+        value: Math.round(bbox.height - virtualtopOffset) + 'px',
+      });
+      pendingTasks.push({
+        e: this.nativeDom.virtualContentSelector[i],
+        property: 'transform',
+        value: 'scale(' + state.zoom + ')',
+      });
     }
     // Render io FPGA content
-    var fpgaTopOffset = (data.name || data.range || data.clock) ? 0 : 24;
+    var fpgaTopOffset = data.name || data.range || data.clock ? 0 : 24;
 
     for (i = 0; i < this.nativeDom.fpgaContentSelector.length; i++) {
-
-
-      pendingTasks.push({ e: this.nativeDom.fpgaContentSelector[i], property: 'left', value: Math.round(bbox.width / 2.0 * (state.zoom - 1)) + 'px' });
-      pendingTasks.push({ e: this.nativeDom.fpgaContentSelector[i], property: 'top', value: Math.round((bbox.height - fpgaTopOffset) / 2.0 * (state.zoom - 1) + fpgaTopOffset / 2.0 * state.zoom) + 'px' });
-      pendingTasks.push({ e: this.nativeDom.fpgaContentSelector[i], property: 'width', value: Math.round(bbox.width) + 'px' });
-      pendingTasks.push({ e: this.nativeDom.fpgaContentSelector[i], property: 'height', value: Math.round(bbox.height - fpgaTopOffset) + 'px' });
-      pendingTasks.push({ e: this.nativeDom.fpgaContentSelector[i], property: 'transform', value: 'scale(' + state.zoom + ')' });
+      pendingTasks.push({
+        e: this.nativeDom.fpgaContentSelector[i],
+        property: 'left',
+        value: Math.round((bbox.width / 2.0) * (state.zoom - 1)) + 'px',
+      });
+      pendingTasks.push({
+        e: this.nativeDom.fpgaContentSelector[i],
+        property: 'top',
+        value:
+          Math.round(
+            ((bbox.height - fpgaTopOffset) / 2.0) * (state.zoom - 1) +
+              (fpgaTopOffset / 2.0) * state.zoom
+          ) + 'px',
+      });
+      pendingTasks.push({
+        e: this.nativeDom.fpgaContentSelector[i],
+        property: 'width',
+        value: Math.round(bbox.width) + 'px',
+      });
+      pendingTasks.push({
+        e: this.nativeDom.fpgaContentSelector[i],
+        property: 'height',
+        value: Math.round(bbox.height - fpgaTopOffset) + 'px',
+      });
+      pendingTasks.push({
+        e: this.nativeDom.fpgaContentSelector[i],
+        property: 'transform',
+        value: 'scale(' + state.zoom + ')',
+      });
     }
     if (data.name || data.range || data.clock) {
       this.headerSelector.removeClass('hidden');
@@ -1046,17 +1280,32 @@ joint.shapes.ice.IOView = joint.shapes.ice.ModelView.extend({
     }
 
     // Render block
-    pendingTasks.push({ e: this.nativeDom.box, property: 'left', value: Math.round(bbox.x * state.zoom + state.pan.x) + 'px' });
-    pendingTasks.push({ e: this.nativeDom.box, property: 'top', value: Math.round(bbox.y * state.zoom + state.pan.y) + 'px' });
-    pendingTasks.push({ e: this.nativeDom.box, property: 'width', value: Math.round(bbox.width * state.zoom) + 'px' });
-    pendingTasks.push({ e: this.nativeDom.box, property: 'height', value: Math.round(bbox.height * state.zoom) + 'px' });
-
+    pendingTasks.push({
+      e: this.nativeDom.box,
+      property: 'left',
+      value: Math.round(bbox.x * state.zoom + state.pan.x) + 'px',
+    });
+    pendingTasks.push({
+      e: this.nativeDom.box,
+      property: 'top',
+      value: Math.round(bbox.y * state.zoom + state.pan.y) + 'px',
+    });
+    pendingTasks.push({
+      e: this.nativeDom.box,
+      property: 'width',
+      value: Math.round(bbox.width * state.zoom) + 'px',
+    });
+    pendingTasks.push({
+      e: this.nativeDom.box,
+      property: 'height',
+      value: Math.round(bbox.height * state.zoom) + 'px',
+    });
 
     i = pendingTasks.length;
     for (i = 0; i < pendingTasks.length; i++) {
-
       if (pendingTasks[i].e !== null) {
-        pendingTasks[i].e.style[pendingTasks[i].property] = pendingTasks[i].value;
+        pendingTasks[i].e.style[pendingTasks[i].property] =
+          pendingTasks[i].value;
       }
     }
     return pendingTasks;
@@ -1069,41 +1318,41 @@ joint.shapes.ice.IOView = joint.shapes.ice.ModelView.extend({
         tasks[i].e.style[tasks[i].property] = tasks[i].value;
       }
     }
-
   },
 
   removeBox: function () {
     // Close select options on remove
     this.$box.find('select').select2('close');
     this.$box.remove();
-  }
+  },
 });
 
 joint.shapes.ice.InputView = joint.shapes.ice.IOView;
 joint.shapes.ice.OutputView = joint.shapes.ice.IOView;
 
-
 // Constant block
 
 joint.shapes.ice.Constant = joint.shapes.ice.Model.extend({
-  defaults: joint.util.deepSupplement({
-    type: 'ice.Constant',
-    size: {
-      width: 96,
-      height: 64
-    }
-  }, joint.shapes.ice.Model.prototype.defaults)
+  defaults: joint.util.deepSupplement(
+    {
+      type: 'ice.Constant',
+      size: {
+        width: 96,
+        height: 64,
+      },
+    },
+    joint.shapes.ice.Model.prototype.defaults
+  ),
 });
 
-
 joint.shapes.ice.ConstantView = joint.shapes.ice.ModelView.extend({
-
   initialize: function () {
     _.bindAll(this, 'updateBox');
     joint.dia.ElementView.prototype.initialize.apply(this, arguments);
 
-    this.$box = $(joint.util.template(
-      '\
+    this.$box = $(
+      joint.util.template(
+        '\
       <div class="constant-block">\
         <div class="constant-content">\
           <div class="header">\
@@ -1114,7 +1363,8 @@ joint.shapes.ice.ConstantView = joint.shapes.ice.ModelView.extend({
         </div>\
       </div>\
       '
-    )());
+      )()
+    );
 
     this.inputSelector = this.$box.find('.constant-input');
     this.contentSelector = this.$box.find('.constant-content');
@@ -1127,7 +1377,9 @@ joint.shapes.ice.ConstantView = joint.shapes.ice.ModelView.extend({
     joint.dia.ElementView.prototype.initialize.apply(this, arguments);
 
     // Prevent paper from handling pointerdown.
-    this.inputSelector.on('mousedown click', function (event) { event.stopPropagation(); });
+    this.inputSelector.on('mousedown click', function (event) {
+      event.stopPropagation();
+    });
 
     this.updateBox();
 
@@ -1176,7 +1428,7 @@ joint.shapes.ice.ConstantView = joint.shapes.ice.ModelView.extend({
   applyValue: function () {
     this.updating = true;
     if (this.model.get('disabled')) {
-      this.inputSelector.css({ 'pointer-events': 'none' });
+      this.inputSelector.css({'pointer-events': 'none'});
     }
     var value = this.model.get('data').value;
     this.inputSelector.val(value);
@@ -1198,17 +1450,44 @@ joint.shapes.ice.ConstantView = joint.shapes.ice.ModelView.extend({
     var pwires = this.$el[0].getElementsByClassName('port-wire');
     var i;
     for (i = 0; i < pwires.length; i++) {
-      pendingTasks.push({ e: pwires[i], property: 'stroke-width', value: width + 'px' });
+      pendingTasks.push({
+        e: pwires[i],
+        property: 'stroke-width',
+        value: width + 'px',
+      });
     }
     // Render content
-    var topOffset = (data.name || data.local) ? 0 : 24;
+    var topOffset = data.name || data.local ? 0 : 24;
     var contentSel = this.$box[0].querySelectorAll('.constant-content');
     for (i = 0; i < contentSel.length; i++) {
-      pendingTasks.push({ e: contentSel[i], property: 'left', value: Math.round(bbox.width / 2.0 * (state.zoom - 1)) + 'px' });
-      pendingTasks.push({ e: contentSel[i], property: 'top', value: Math.round((bbox.height + topOffset) / 2.0 * (state.zoom - 1) + topOffset) + 'px' });
-      pendingTasks.push({ e: contentSel[i], property: 'width', value: Math.round(bbox.width) + 'px' });
-      pendingTasks.push({ e: contentSel[i], property: 'height', value: Math.round(bbox.height - topOffset) + 'px' });
-      pendingTasks.push({ e: contentSel[i], property: 'transform', value: 'scale(' + state.zoom + ')' });
+      pendingTasks.push({
+        e: contentSel[i],
+        property: 'left',
+        value: Math.round((bbox.width / 2.0) * (state.zoom - 1)) + 'px',
+      });
+      pendingTasks.push({
+        e: contentSel[i],
+        property: 'top',
+        value:
+          Math.round(
+            ((bbox.height + topOffset) / 2.0) * (state.zoom - 1) + topOffset
+          ) + 'px',
+      });
+      pendingTasks.push({
+        e: contentSel[i],
+        property: 'width',
+        value: Math.round(bbox.width) + 'px',
+      });
+      pendingTasks.push({
+        e: contentSel[i],
+        property: 'height',
+        value: Math.round(bbox.height - topOffset) + 'px',
+      });
+      pendingTasks.push({
+        e: contentSel[i],
+        property: 'transform',
+        value: 'scale(' + state.zoom + ')',
+      });
     }
     if (data.name || data.local) {
       this.headerSelector.removeClass('hidden');
@@ -1217,49 +1496,64 @@ joint.shapes.ice.ConstantView = joint.shapes.ice.ModelView.extend({
     }
 
     // Render block
-    pendingTasks.push({ e: this.$box[0], property: 'left', value: Math.round(bbox.x * state.zoom + state.pan.x) + 'px' });
-    pendingTasks.push({ e: this.$box[0], property: 'top', value: Math.round(bbox.y * state.zoom + state.pan.y) + 'px' });
-    pendingTasks.push({ e: this.$box[0], property: 'width', value: Math.round(bbox.width * state.zoom) + 'px' });
-    pendingTasks.push({ e: this.$box[0], property: 'height', value: Math.round(bbox.height * state.zoom) + 'px' });
-
+    pendingTasks.push({
+      e: this.$box[0],
+      property: 'left',
+      value: Math.round(bbox.x * state.zoom + state.pan.x) + 'px',
+    });
+    pendingTasks.push({
+      e: this.$box[0],
+      property: 'top',
+      value: Math.round(bbox.y * state.zoom + state.pan.y) + 'px',
+    });
+    pendingTasks.push({
+      e: this.$box[0],
+      property: 'width',
+      value: Math.round(bbox.width * state.zoom) + 'px',
+    });
+    pendingTasks.push({
+      e: this.$box[0],
+      property: 'height',
+      value: Math.round(bbox.height * state.zoom) + 'px',
+    });
 
     i = pendingTasks.length;
     //  pendingTasks= pendingTasks.reverse();
     for (i = 0; i < pendingTasks.length; i++) {
-
       if (pendingTasks[i].e !== null) {
-
-        pendingTasks[i].e.style[pendingTasks[i].property] = pendingTasks[i].value;
+        pendingTasks[i].e.style[pendingTasks[i].property] =
+          pendingTasks[i].value;
       }
     }
     return pendingTasks;
-
-  }
+  },
 });
-
 
 // Memory block
 
 joint.shapes.ice.Memory = joint.shapes.ice.Model.extend({
-  defaults: joint.util.deepSupplement({
-    type: 'ice.Memory',
-    size: {
-      width: 96,
-      height: 104
-    }
-  }, joint.shapes.ice.Model.prototype.defaults)
+  defaults: joint.util.deepSupplement(
+    {
+      type: 'ice.Memory',
+      size: {
+        width: 96,
+        height: 104,
+      },
+    },
+    joint.shapes.ice.Model.prototype.defaults
+  ),
 });
 
 joint.shapes.ice.MemoryView = joint.shapes.ice.ModelView.extend({
-
   initialize: function () {
     _.bindAll(this, 'updateBox');
     joint.dia.ElementView.prototype.initialize.apply(this, arguments);
 
     var id = sha1(this.model.get('id')).toString().substring(0, 6);
     var editorLabel = 'editor' + id;
-    this.$box = $(joint.util.template(
-      '\
+    this.$box = $(
+      joint.util.template(
+        '\
       <div class="memory-block">\
         <div class="memory-content">\
           <div class="header">\
@@ -1267,23 +1561,48 @@ joint.shapes.ice.MemoryView = joint.shapes.ice.ModelView.extend({
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 9.78"><path d="M2.22 4.44h3.56V3.11q0-.73-.52-1.26-.52-.52-1.26-.52t-1.26.52q-.52.52-.52 1.26v1.33zM8 5.11v4q0 .28-.2.47-.19.2-.47.2H.67q-.28 0-.48-.2Q0 9.38 0 9.11v-4q0-.28.2-.47.19-.2.47-.2h.22V3.11q0-1.28.92-2.2Q2.72 0 4 0q1.28 0 2.2.92.91.91.91 2.2v1.32h.22q.28 0 .48.2.19.2.19.47z"/></svg>\
           </div>\
         </div>\
-        <div class="memory-editor" id="' + editorLabel + '"></div>\
+        <div class="memory-editor" id="' +
+          editorLabel +
+          '"></div>\
         <script>\
-          var ' + editorLabel + ' = ace.edit("' + editorLabel + '");\
-          ' + editorLabel + '.setTheme("ace/theme/chrome");\
-          ' + editorLabel + '.setHighlightActiveLine(false);\
-          ' + editorLabel + '.setHighlightGutterLine(false);\
-          ' + editorLabel + '.setOption("firstLineNumber", 0);\
-          ' + editorLabel + '.setAutoScrollEditorIntoView(true);\
-          ' + editorLabel + '.renderer.setShowGutter(true);\
-          ' + editorLabel + '.renderer.$cursorLayer.element.style.opacity = 0;\
-          ' + editorLabel + '.renderer.$gutter.style.background = "#F0F0F0";\
-          ' + editorLabel + '.session.setMode("ace/mode/verilog");\
+          var ' +
+          editorLabel +
+          ' = ace.edit("' +
+          editorLabel +
+          '");\
+          ' +
+          editorLabel +
+          '.setTheme("ace/theme/chrome");\
+          ' +
+          editorLabel +
+          '.setHighlightActiveLine(false);\
+          ' +
+          editorLabel +
+          '.setHighlightGutterLine(false);\
+          ' +
+          editorLabel +
+          '.setOption("firstLineNumber", 0);\
+          ' +
+          editorLabel +
+          '.setAutoScrollEditorIntoView(true);\
+          ' +
+          editorLabel +
+          '.renderer.setShowGutter(true);\
+          ' +
+          editorLabel +
+          '.renderer.$cursorLayer.element.style.opacity = 0;\
+          ' +
+          editorLabel +
+          '.renderer.$gutter.style.background = "#F0F0F0";\
+          ' +
+          editorLabel +
+          '.session.setMode("ace/mode/verilog");\
         </script>\
         <div class="resizer"/></div>\
       </div>\
       '
-    )());
+      )()
+    );
 
     this.editorSelector = this.$box.find('.memory-editor');
     this.contentSelector = this.$box.find('.memory-content');
@@ -1296,7 +1615,9 @@ joint.shapes.ice.MemoryView = joint.shapes.ice.ModelView.extend({
     joint.dia.ElementView.prototype.initialize.apply(this, arguments);
 
     // Prevent paper from handling pointerdown.
-    this.editorSelector.on('mousedown click', function (event) { event.stopPropagation(); });
+    this.editorSelector.on('mousedown click', function (event) {
+      event.stopPropagation();
+    });
 
     this.updateBox();
 
@@ -1363,11 +1684,12 @@ joint.shapes.ice.MemoryView = joint.shapes.ice.ModelView.extend({
     });
     this.editor.on('mousewheel', function (event) {
       // Stop mousewheel event propagation when target is active
-      if (document.activeElement.parentNode.id === self.editorSelector.attr('id')) {
+      if (
+        document.activeElement.parentNode.id === self.editorSelector.attr('id')
+      ) {
         // Enable only scroll
         event.stopPropagation();
-      }
-      else {
+      } else {
         // Enable only zoom
         event.preventDefault();
       }
@@ -1376,7 +1698,7 @@ joint.shapes.ice.MemoryView = joint.shapes.ice.ModelView.extend({
     this.setupResizer();
 
     // Apply data
-    this.apply({ ini: true });
+    this.apply({ini: true});
   },
 
   apply: function (opt) {
@@ -1414,14 +1736,15 @@ joint.shapes.ice.MemoryView = joint.shapes.ice.ModelView.extend({
     switch (opt.attribute) {
       case 'deltas':
         if (deltas) {
-          var changes = [{
-            group: 'doc',
-            deltas: deltas
-          }];
+          var changes = [
+            {
+              group: 'doc',
+              deltas: deltas,
+            },
+          ];
           if (opt.undo) {
             this.editor.session.undoChanges(changes, dontselect);
-          }
-          else {
+          } else {
             this.editor.session.redoChanges(changes, dontselect);
           }
         }
@@ -1433,14 +1756,17 @@ joint.shapes.ice.MemoryView = joint.shapes.ice.ModelView.extend({
     }
     if (opt.ini) {
       this.editor.session.setValue(data.list);
-    }
-    else {
+    } else {
       // Set data.list
       this.model.attributes.data.list = this.editor.session.getValue();
     }
-    setTimeout(function (self) {
-      self.updating = false;
-    }, 10, this);
+    setTimeout(
+      function (self) {
+        self.updating = false;
+      },
+      10,
+      this
+    );
   },
 
   applyFormat: function () {
@@ -1457,9 +1783,11 @@ joint.shapes.ice.MemoryView = joint.shapes.ice.ModelView.extend({
         var text = row.toString(radix).toUpperCase();
         var config = self.editor.renderer.layerConfig;
         var size = config.lastRow.toString(radix).length;
-        while (text.length < size) { text = '0' + text; }
+        while (text.length < size) {
+          text = '0' + text;
+        }
         return (radix === 16 ? '0x' : '') + text;
-      }
+      },
     };
     this.editor.renderer.setShowGutter(false);
     this.editor.renderer.setShowGutter(true);
@@ -1487,10 +1815,12 @@ joint.shapes.ice.MemoryView = joint.shapes.ice.ModelView.extend({
           top: 24 * state.zoom,
           margin: 7 * state.zoom,
           'border-radius': 5 * state.zoom,
-          'border-width': state.zoom + 0.5
+          'border-width': state.zoom + 0.5,
         });
         // Scale padding
-        this.$box.find('.ace_text-layer').css('padding', '0px ' + Math.round(4 * state.zoom) + 'px');
+        this.$box
+          .find('.ace_text-layer')
+          .css('padding', '0px ' + Math.round(4 * state.zoom) + 'px');
         // Scale gutters
         var rule = getCSSRule('.ace_folding-enabled > .ace_gutter-cell');
         if (rule) {
@@ -1510,13 +1840,15 @@ joint.shapes.ice.MemoryView = joint.shapes.ice.ModelView.extend({
     this.$('.port-wire').css('stroke-width', width);
 
     // Render content
-    var topOffset = (data.name || data.local) ? 0 : 24;
+    var topOffset = data.name || data.local ? 0 : 24;
     this.contentSelector.css({
-      left: Math.round(bbox.width / 2.0 * (state.zoom - 1)),
-      top: Math.round((bbox.height + topOffset) / 2.0 * (state.zoom - 1) + topOffset),
+      left: Math.round((bbox.width / 2.0) * (state.zoom - 1)),
+      top: Math.round(
+        ((bbox.height + topOffset) / 2.0) * (state.zoom - 1) + topOffset
+      ),
       width: Math.round(bbox.width),
       height: Math.round(bbox.height - topOffset),
-      transform: 'scale(' + state.zoom + ')'
+      transform: 'scale(' + state.zoom + ')',
     });
 
     if (data.name || data.local) {
@@ -1530,51 +1862,74 @@ joint.shapes.ice.MemoryView = joint.shapes.ice.ModelView.extend({
       left: bbox.x * state.zoom + state.pan.x,
       top: bbox.y * state.zoom + state.pan.y,
       width: bbox.width * state.zoom,
-      height: bbox.height * state.zoom
+      height: bbox.height * state.zoom,
     });
-  }
+  },
 });
-
 
 // Code block
 
 joint.shapes.ice.Code = joint.shapes.ice.Model.extend({
-  defaults: joint.util.deepSupplement({
-    type: 'ice.Code',
-    size: {
-      width: 384,
-      height: 256
-    }
-  }, joint.shapes.ice.Model.prototype.defaults)
+  defaults: joint.util.deepSupplement(
+    {
+      type: 'ice.Code',
+      size: {
+        width: 384,
+        height: 256,
+      },
+    },
+    joint.shapes.ice.Model.prototype.defaults
+  ),
 });
 
 joint.shapes.ice.CodeView = joint.shapes.ice.ModelView.extend({
-
   initialize: function () {
     _.bindAll(this, 'updateBox');
     joint.dia.ElementView.prototype.initialize.apply(this, arguments);
 
     var id = sha1(this.model.get('id')).toString().substring(0, 6);
     var editorLabel = 'editor' + id;
-    this.$box = $(joint.util.template(
-      '\
+    this.$box = $(
+      joint.util.template(
+        '\
       <div class="code-block">\
         <div class="code-content"></div>\
-        <div class="code-editor" id="' + editorLabel + '"></div>\
+        <div class="code-editor" id="' +
+          editorLabel +
+          '"></div>\
         <script>\
-          var ' + editorLabel + ' = ace.edit("' + editorLabel + '");\
-          ' + editorLabel + '.setTheme("ace/theme/chrome");\
-          ' + editorLabel + '.setHighlightActiveLine(false);\
-          ' + editorLabel + '.setHighlightGutterLine(false);\
-          ' + editorLabel + '.setAutoScrollEditorIntoView(true);\
-          ' + editorLabel + '.renderer.setShowGutter(true);\
-          ' + editorLabel + '.renderer.$cursorLayer.element.style.opacity = 0;\
-          ' + editorLabel + '.session.setMode("ace/mode/verilog");\
+          var ' +
+          editorLabel +
+          ' = ace.edit("' +
+          editorLabel +
+          '");\
+          ' +
+          editorLabel +
+          '.setTheme("ace/theme/chrome");\
+          ' +
+          editorLabel +
+          '.setHighlightActiveLine(false);\
+          ' +
+          editorLabel +
+          '.setHighlightGutterLine(false);\
+          ' +
+          editorLabel +
+          '.setAutoScrollEditorIntoView(true);\
+          ' +
+          editorLabel +
+          '.renderer.setShowGutter(true);\
+          ' +
+          editorLabel +
+          '.renderer.$cursorLayer.element.style.opacity = 0;\
+          ' +
+          editorLabel +
+          '.session.setMode("ace/mode/verilog");\
         </script>\
         <div class="resizer"/></div>\
       </div>\
       '
-    )());
+      )()
+    );
 
     this.editorSelector = this.$box.find('.code-editor');
     this.contentSelector = this.$box.find('.code-content');
@@ -1582,9 +1937,7 @@ joint.shapes.ice.CodeView = joint.shapes.ice.ModelView.extend({
       box: this.$box[0],
       // rule: getCSSRule('.ace_folding-enabled > .ace_gutter-cell'),
       editorSelector: this.$box[0].querySelectorAll('.code-editor'),
-      contentSelector: this.$box[0].querySelectorAll('.code-content')
-
-
+      contentSelector: this.$box[0].querySelectorAll('.code-content'),
     };
 
     this.model.on('change', this.updateBox, this);
@@ -1594,7 +1947,9 @@ joint.shapes.ice.CodeView = joint.shapes.ice.ModelView.extend({
     joint.dia.ElementView.prototype.initialize.apply(this, arguments);
 
     // Prevent paper from handling pointerdown.
-    this.editorSelector.on('mousedown click', function (event) { event.stopPropagation(); });
+    this.editorSelector.on('mousedown click', function (event) {
+      event.stopPropagation();
+    });
 
     this.updateBox();
 
@@ -1629,7 +1984,6 @@ joint.shapes.ice.CodeView = joint.shapes.ice.ModelView.extend({
           self.deltas = [];
           // Set data.code
           self.model.attributes.data.code = self.editor.session.getValue();
-
         }, undoGroupingInterval);
         // Reset counter
         self.counter = Date.now();
@@ -1662,11 +2016,12 @@ joint.shapes.ice.CodeView = joint.shapes.ice.ModelView.extend({
     });
     this.editor.on('mousewheel', function (event) {
       // Stop mousewheel event propagation when target is active
-      if (document.activeElement.parentNode.id === self.editorSelector.attr('id')) {
+      if (
+        document.activeElement.parentNode.id === self.editorSelector.attr('id')
+      ) {
         // Enable only scroll
         event.stopPropagation();
-      }
-      else {
+      } else {
         // Enable only zoom
         event.preventDefault();
       }
@@ -1675,7 +2030,7 @@ joint.shapes.ice.CodeView = joint.shapes.ice.ModelView.extend({
     this.setupResizer();
 
     // Apply data
-    this.apply({ ini: true });
+    this.apply({ini: true});
   },
 
   applyValue: function (opt) {
@@ -1690,14 +2045,15 @@ joint.shapes.ice.CodeView = joint.shapes.ice.ModelView.extend({
     switch (opt.attribute) {
       case 'deltas':
         if (deltas) {
-          var changes = [{
-            group: 'doc',
-            deltas: deltas
-          }];
+          var changes = [
+            {
+              group: 'doc',
+              deltas: deltas,
+            },
+          ];
           if (opt.undo) {
             this.editor.session.undoChanges(changes, dontselect);
-          }
-          else {
+          } else {
             this.editor.session.redoChanges(changes, dontselect);
           }
         }
@@ -1709,14 +2065,17 @@ joint.shapes.ice.CodeView = joint.shapes.ice.ModelView.extend({
     }
     if (opt.ini) {
       this.editor.session.setValue(data.code);
-    }
-    else {
+    } else {
       // Set data.code
       this.model.attributes.data.code = this.editor.session.getValue();
     }
-    setTimeout(function (self) {
-      self.updating = false;
-    }, 10, this);
+    setTimeout(
+      function (self) {
+        self.updating = false;
+      },
+      10,
+      this
+    );
   },
 
   apply: function (opt) {
@@ -1733,7 +2092,7 @@ joint.shapes.ice.CodeView = joint.shapes.ice.ModelView.extend({
       row: codeError.line - 1,
       column: 0,
       text: codeError.msg,
-      type: codeError.type
+      type: codeError.type,
     });
     this.editor.session.setAnnotations(annotations);
 
@@ -1741,9 +2100,15 @@ joint.shapes.ice.CodeView = joint.shapes.ice.ModelView.extend({
     var state = this.model.get('state');
     var annotationSize = Math.round(15 * state.zoom) + 'px';
     setTimeout(function () {
-      self.$box.find('.ace_error').css('background-size', annotationSize + ' ' + annotationSize);
-      self.$box.find('.ace_warning').css('background-size', annotationSize + ' ' + annotationSize);
-      self.$box.find('.ace_info').css('background-size', annotationSize + ' ' + annotationSize);
+      self.$box
+        .find('.ace_error')
+        .css('background-size', annotationSize + ' ' + annotationSize);
+      self.$box
+        .find('.ace_warning')
+        .css('background-size', annotationSize + ' ' + annotationSize);
+      self.$box
+        .find('.ace_info')
+        .css('background-size', annotationSize + ' ' + annotationSize);
     }, 0);
   },
 
@@ -1775,9 +2140,21 @@ joint.shapes.ice.CodeView = joint.shapes.ice.ModelView.extend({
         this.prevZoom = state.zoom;
         // Scale editor
         for (i = 0; i < this.nativeDom.editorSelector.length; i++) {
-          pendingTasks.push({ e: this.nativeDom.editorSelector[i], property: 'margin', value: (7 * state.zoom) + 'px' });
-          pendingTasks.push({ e: this.nativeDom.editorSelector[i], property: 'border-radius', value: (5 * state.zoom) + 'px' });
-          pendingTasks.push({ e: this.nativeDom.editorSelector[i], property: 'border-width', value: (state.zoom + 0.5) });
+          pendingTasks.push({
+            e: this.nativeDom.editorSelector[i],
+            property: 'margin',
+            value: 7 * state.zoom + 'px',
+          });
+          pendingTasks.push({
+            e: this.nativeDom.editorSelector[i],
+            property: 'border-radius',
+            value: 5 * state.zoom + 'px',
+          });
+          pendingTasks.push({
+            e: this.nativeDom.editorSelector[i],
+            property: 'border-width',
+            value: state.zoom + 0.5,
+          });
         }
 
         // Scale annotations
@@ -1785,31 +2162,43 @@ joint.shapes.ice.CodeView = joint.shapes.ice.ModelView.extend({
 
         anotations = this.$box[0].querySelectorAll('.ace_error');
         for (i = 0; i < anotations.length; i++) {
-          pendingTasks.push({ e: anotations[i], property: 'background-size', value: annotationSize + ' ' + annotationSize });
+          pendingTasks.push({
+            e: anotations[i],
+            property: 'background-size',
+            value: annotationSize + ' ' + annotationSize,
+          });
         }
         anotations = this.$box[0].querySelectorAll('.ace_warning');
         for (i = 0; i < anotations.length; i++) {
-          pendingTasks.push({ e: anotations[i], property: 'background-size', value: annotationSize + ' ' + annotationSize });
+          pendingTasks.push({
+            e: anotations[i],
+            property: 'background-size',
+            value: annotationSize + ' ' + annotationSize,
+          });
         }
 
         anotations = this.$box[0].querySelectorAll('.ace_info');
         for (i = 0; i < anotations.length; i++) {
-          pendingTasks.push({ e: anotations[i], property: 'background-size', value: annotationSize + ' ' + annotationSize });
+          pendingTasks.push({
+            e: anotations[i],
+            property: 'background-size',
+            value: annotationSize + ' ' + annotationSize,
+          });
         }
-
 
         // Scale padding
         anotations = this.$box[0].querySelectorAll('.ace_text-layer');
         for (i = 0; i < anotations.length; i++) {
-          pendingTasks.push({ e: anotations[i], property: 'padding', value: '0px ' + Math.round(4 * state.zoom) + 'px' });
+          pendingTasks.push({
+            e: anotations[i],
+            property: 'padding',
+            value: '0px ' + Math.round(4 * state.zoom) + 'px',
+          });
         }
 
         //var rule = getCSSRule('.ace_folding-enabled > .ace_gutter-cell');
-
-
       }
       //    this.editor.resize();
-    
     }
 
     // Set ports width
@@ -1817,7 +2206,11 @@ joint.shapes.ice.CodeView = joint.shapes.ice.ModelView.extend({
 
     var pwires = this.$el[0].getElementsByClassName('port-wire');
     for (i = 0; i < pwires.length; i++) {
-      pendingTasks.push({ e: pwires[i], property: 'stroke-width', value: width + 'px' });
+      pendingTasks.push({
+        e: pwires[i],
+        property: 'stroke-width',
+        value: width + 'px',
+      });
     }
     // Set buses
     var nwidth = width * 3;
@@ -1825,23 +2218,26 @@ joint.shapes.ice.CodeView = joint.shapes.ice.ModelView.extend({
     for (i = 0; i < leftPorts.length; i++) {
       port = leftPorts[i];
       if (port.size > 1) {
-
         dome = document.getElementById(tokId + port.id);
 
-        pendingTasks.push({ e: dome, property: 'stroke-width', value: nwidth + 'px' });
-
+        pendingTasks.push({
+          e: dome,
+          property: 'stroke-width',
+          value: nwidth + 'px',
+        });
       }
     }
 
     for (i = 0; i < rightPorts.length; i++) {
       port = rightPorts[i];
       if (port.size > 1) {
-
         dome = document.getElementById(tokId + port.id);
 
-        pendingTasks.push({ e: dome, property: 'stroke-width', value: nwidth + 'px' });
-
-
+        pendingTasks.push({
+          e: dome,
+          property: 'stroke-width',
+          value: nwidth + 'px',
+        });
       }
     }
 
@@ -1851,51 +2247,100 @@ joint.shapes.ice.CodeView = joint.shapes.ice.ModelView.extend({
       for (i = 0; i < data.ports.in.length; i++) {
         port = data.ports.in[i];
         portDefault = document.getElementById(tokId + port.name);
-        if (portDefault !== null && rules && port.default && port.default.apply) {
-
-          pendingTasks.push({ e: portDefault, property: 'display', value: 'inline' });
+        if (
+          portDefault !== null &&
+          rules &&
+          port.default &&
+          port.default.apply
+        ) {
+          pendingTasks.push({
+            e: portDefault,
+            property: 'display',
+            value: 'inline',
+          });
 
           paths = portDefault.querySelectorAll('path');
           for (j = 0; j < paths.length; j++) {
-            pendingTasks.push({ e: paths[j], property: 'stroke-width', value: width + 'px' });
+            pendingTasks.push({
+              e: paths[j],
+              property: 'stroke-width',
+              value: width + 'px',
+            });
           }
           rects = portDefault.querySelectorAll('rect');
           for (j = 0; j < rects.length; j++) {
-            pendingTasks.push({ e: rects[j], property: 'stroke-width', value: state.zoom + 'px' });
+            pendingTasks.push({
+              e: rects[j],
+              property: 'stroke-width',
+              value: state.zoom + 'px',
+            });
           }
-
-
-        }
-        else {
-
-          pendingTasks.push({ e: portDefault, property: 'display', value: 'none' });
+        } else {
+          pendingTasks.push({
+            e: portDefault,
+            property: 'display',
+            value: 'none',
+          });
         }
       }
     }
 
     // Render content
     for (i = 0; i < this.nativeDom.contentSelector.length; i++) {
-      pendingTasks.push({ e: this.nativeDom.contentSelector[i], property: 'left', value: Math.round(bbox.width / 2.0 * (state.zoom - 1)) + 'px' });
-      pendingTasks.push({ e: this.nativeDom.contentSelector[i], property: 'top', value: Math.round(bbox.height / 2.0 * (state.zoom - 1)) + 'px' });
-      pendingTasks.push({ e: this.nativeDom.contentSelector[i], property: 'width', value: Math.round(bbox.width) + 'px' });
-      pendingTasks.push({ e: this.nativeDom.contentSelector[i], property: 'height', value: Math.round(bbox.height) + 'px' });
-      pendingTasks.push({ e: this.nativeDom.contentSelector[i], property: 'transform', value: 'scale(' + state.zoom + ')' });
+      pendingTasks.push({
+        e: this.nativeDom.contentSelector[i],
+        property: 'left',
+        value: Math.round((bbox.width / 2.0) * (state.zoom - 1)) + 'px',
+      });
+      pendingTasks.push({
+        e: this.nativeDom.contentSelector[i],
+        property: 'top',
+        value: Math.round((bbox.height / 2.0) * (state.zoom - 1)) + 'px',
+      });
+      pendingTasks.push({
+        e: this.nativeDom.contentSelector[i],
+        property: 'width',
+        value: Math.round(bbox.width) + 'px',
+      });
+      pendingTasks.push({
+        e: this.nativeDom.contentSelector[i],
+        property: 'height',
+        value: Math.round(bbox.height) + 'px',
+      });
+      pendingTasks.push({
+        e: this.nativeDom.contentSelector[i],
+        property: 'transform',
+        value: 'scale(' + state.zoom + ')',
+      });
     }
 
-
     // Render block
-    pendingTasks.push({ e: this.nativeDom.box, property: 'left', value: Math.round(bbox.x * state.zoom + state.pan.x) + 'px' });
-    pendingTasks.push({ e: this.nativeDom.box, property: 'top', value: Math.round(bbox.y * state.zoom + state.pan.y) + 'px' });
-    pendingTasks.push({ e: this.nativeDom.box, property: 'width', value: Math.round(bbox.width * state.zoom) + 'px' });
-    pendingTasks.push({ e: this.nativeDom.box, property: 'height', value: Math.round(bbox.height * state.zoom) + 'px' });
-
+    pendingTasks.push({
+      e: this.nativeDom.box,
+      property: 'left',
+      value: Math.round(bbox.x * state.zoom + state.pan.x) + 'px',
+    });
+    pendingTasks.push({
+      e: this.nativeDom.box,
+      property: 'top',
+      value: Math.round(bbox.y * state.zoom + state.pan.y) + 'px',
+    });
+    pendingTasks.push({
+      e: this.nativeDom.box,
+      property: 'width',
+      value: Math.round(bbox.width * state.zoom) + 'px',
+    });
+    pendingTasks.push({
+      e: this.nativeDom.box,
+      property: 'height',
+      value: Math.round(bbox.height * state.zoom) + 'px',
+    });
 
     i = pendingTasks.length;
     for (i = 0; i < pendingTasks.length; i++) {
-
       if (pendingTasks[i].e !== null) {
-
-        pendingTasks[i].e.style[pendingTasks[i].property] = pendingTasks[i].value;
+        pendingTasks[i].e.style[pendingTasks[i].property] =
+          pendingTasks[i].value;
       }
     }
 
@@ -1903,33 +2348,30 @@ joint.shapes.ice.CodeView = joint.shapes.ice.ModelView.extend({
       if (editorUpdated) {
         this.editor.setFontSize(Math.round(aceFontSize * state.zoom));
         this.editor.renderer.$cursorLayer.$padding = Math.round(4 * state.zoom);
-
       }
       this.editor.resize();
     }
 
-
     return pendingTasks;
-
-
-  }
+  },
 });
-
 
 // Info block
 
 joint.shapes.ice.Info = joint.shapes.ice.Model.extend({
-  defaults: joint.util.deepSupplement({
-    type: 'ice.Info',
-    size: {
-      width: 400,
-      height: 256
-    }
-  }, joint.shapes.ice.Model.prototype.defaults)
+  defaults: joint.util.deepSupplement(
+    {
+      type: 'ice.Info',
+      size: {
+        width: 400,
+        height: 256,
+      },
+    },
+    joint.shapes.ice.Model.prototype.defaults
+  ),
 });
 
 joint.shapes.ice.InfoView = joint.shapes.ice.ModelView.extend({
-
   initialize: function () {
     _.bindAll(this, 'updateBox');
     joint.dia.ElementView.prototype.initialize.apply(this, arguments);
@@ -1937,26 +2379,54 @@ joint.shapes.ice.InfoView = joint.shapes.ice.ModelView.extend({
     var id = sha1(this.model.get('id')).toString().substring(0, 6);
     var editorLabel = 'editor' + id;
     var readonly = this.model.get('data').readonly;
-    this.$box = $(joint.util.template(
-      '\
+    this.$box = $(
+      joint.util.template(
+        '\
       <div class="info-block">\
-        <div class="info-render markdown-body' + (readonly ? '' : ' hidden') + '"></div>\
-        <div class="info-content' + (readonly ? ' hidden' : '') + '"></div>\
-        <div class="info-editor' + (readonly ? ' hidden' : '') + '" id="' + editorLabel + '"></div>\
+        <div class="info-render markdown-body' +
+          (readonly ? '' : ' hidden') +
+          '"></div>\
+        <div class="info-content' +
+          (readonly ? ' hidden' : '') +
+          '"></div>\
+        <div class="info-editor' +
+          (readonly ? ' hidden' : '') +
+          '" id="' +
+          editorLabel +
+          '"></div>\
         <script>\
-          var ' + editorLabel + ' = ace.edit("' + editorLabel + '");\
-          ' + editorLabel + '.setTheme("ace/theme/chrome");\
-          ' + editorLabel + '.setHighlightActiveLine(false);\
-          ' + editorLabel + '.setShowPrintMargin(false);\
-          ' + editorLabel + '.setAutoScrollEditorIntoView(true);\
-          ' + editorLabel + '.renderer.setShowGutter(false);\
-          ' + editorLabel + '.renderer.$cursorLayer.element.style.opacity = 0;\
-          ' + editorLabel + '.session.setMode("ace/mode/markdown");\
+          var ' +
+          editorLabel +
+          ' = ace.edit("' +
+          editorLabel +
+          '");\
+          ' +
+          editorLabel +
+          '.setTheme("ace/theme/chrome");\
+          ' +
+          editorLabel +
+          '.setHighlightActiveLine(false);\
+          ' +
+          editorLabel +
+          '.setShowPrintMargin(false);\
+          ' +
+          editorLabel +
+          '.setAutoScrollEditorIntoView(true);\
+          ' +
+          editorLabel +
+          '.renderer.setShowGutter(false);\
+          ' +
+          editorLabel +
+          '.renderer.$cursorLayer.element.style.opacity = 0;\
+          ' +
+          editorLabel +
+          '.session.setMode("ace/mode/markdown");\
         </script>\
         <div class="resizer"/></div>\
       </div>\
       '
-    )());
+      )()
+    );
 
     this.renderSelector = this.$box.find('.info-render');
     this.editorSelector = this.$box.find('.info-editor');
@@ -1966,7 +2436,9 @@ joint.shapes.ice.InfoView = joint.shapes.ice.ModelView.extend({
     this.model.on('remove', this.removeBox, this);
 
     // Prevent paper from handling pointerdown.
-    this.editorSelector.on('mousedown click', function (event) { event.stopPropagation(); });
+    this.editorSelector.on('mousedown click', function (event) {
+      event.stopPropagation();
+    });
 
     this.updateBox();
 
@@ -2030,11 +2502,12 @@ joint.shapes.ice.InfoView = joint.shapes.ice.ModelView.extend({
     });
     this.editor.on('mousewheel', function (event) {
       // Stop mousewheel event propagation when target is active
-      if (document.activeElement.parentNode.id === self.editorSelector.attr('id')) {
+      if (
+        document.activeElement.parentNode.id === self.editorSelector.attr('id')
+      ) {
         // Enable only scroll
         event.stopPropagation();
-      }
-      else {
+      } else {
         // Enable only zoom
         event.preventDefault();
       }
@@ -2043,7 +2516,7 @@ joint.shapes.ice.InfoView = joint.shapes.ice.ModelView.extend({
     this.setupResizer();
 
     // Apply data
-    this.apply({ ini: true });
+    this.apply({ini: true});
   },
 
   applyValue: function (opt) {
@@ -2058,14 +2531,15 @@ joint.shapes.ice.InfoView = joint.shapes.ice.ModelView.extend({
     switch (opt.attribute) {
       case 'deltas':
         if (deltas) {
-          var changes = [{
-            group: 'doc',
-            deltas: deltas
-          }];
+          var changes = [
+            {
+              group: 'doc',
+              deltas: deltas,
+            },
+          ];
           if (opt.undo) {
             this.editor.session.undoChanges(changes, dontselect);
-          }
-          else {
+          } else {
             this.editor.session.redoChanges(changes, dontselect);
           }
         }
@@ -2077,14 +2551,17 @@ joint.shapes.ice.InfoView = joint.shapes.ice.ModelView.extend({
     }
     if (opt.ini) {
       this.editor.session.setValue(data.info);
-    }
-    else {
+    } else {
       // Set data.info
       this.model.attributes.data.info = this.editor.session.getValue();
     }
-    setTimeout(function (self) {
-      self.updating = false;
-    }, 10, this);
+    setTimeout(
+      function (self) {
+        self.updating = false;
+      },
+      10,
+      this
+    );
   },
 
   applyReadonly: function () {
@@ -2101,8 +2578,7 @@ joint.shapes.ice.InfoView = joint.shapes.ice.ModelView.extend({
         selection.clearSelection();
       }
       this.applyText();
-    }
-    else {
+    } else {
       this.$box.removeClass('info-block-readonly');
       this.renderSelector.addClass('hidden');
       this.editorSelector.removeClass('hidden');
@@ -2118,8 +2594,17 @@ joint.shapes.ice.InfoView = joint.shapes.ice.ModelView.extend({
     // Replace emojis
     markdown = markdown.replace(/(:.*:)/g, function (match) {
       return emoji.emojify(match, null, function (code, name) {
-        var source = 'https://github.global.ssl.fastly.net/images/icons/emoji/' + name + '.png';
-        return ' <object data="' + source + '" type="image/png" width="20" height="20">' + code + '</object>';
+        var source =
+          'https://github.global.ssl.fastly.net/images/icons/emoji/' +
+          name +
+          '.png';
+        return (
+          ' <object data="' +
+          source +
+          '" type="image/png" width="20" height="20">' +
+          code +
+          '</object>'
+        );
       });
     });
 
@@ -2146,8 +2631,7 @@ joint.shapes.ice.InfoView = joint.shapes.ice.ModelView.extend({
 
       if (/^\[\s\]/.test(label)) {
         $el.html(renderItemCheckbox(label, '')).append(detached);
-      }
-      else if (/^\[x\]/.test(label)) {
+      } else if (/^\[x\]/.test(label)) {
         $el.html(renderItemCheckbox(label, 'checked')).append(detached);
       }
     }
@@ -2194,23 +2678,24 @@ joint.shapes.ice.InfoView = joint.shapes.ice.ModelView.extend({
     if (data.readonly) {
       // Scale render
       this.renderSelector.css({
-        left: Math.round(bbox.width / 2.0 * (state.zoom - 1)),
-        top: Math.round(bbox.height / 2.0 * (state.zoom - 1)),
+        left: Math.round((bbox.width / 2.0) * (state.zoom - 1)),
+        top: Math.round((bbox.height / 2.0) * (state.zoom - 1)),
         width: Math.round(bbox.width),
         height: Math.round(bbox.height),
         transform: 'scale(' + state.zoom + ')',
-        'font-size': aceFontSize + 'px'
+        'font-size': aceFontSize + 'px',
       });
-    }
-    else if (this.editor) {
+    } else if (this.editor) {
       // Scale editor
       this.editorSelector.css({
         margin: 7 * state.zoom,
         'border-radius': 5 * state.zoom,
-        'border-width': state.zoom + 0.5
+        'border-width': state.zoom + 0.5,
       });
       // Scale padding
-      this.$box.find('.ace_text-layer').css('padding', '0px ' + Math.round(4 * state.zoom) + 'px');
+      this.$box
+        .find('.ace_text-layer')
+        .css('padding', '0px ' + Math.round(4 * state.zoom) + 'px');
       // Scale font size
       this.editor.setFontSize(Math.round(aceFontSize * state.zoom));
       // Scale cursor
@@ -2220,11 +2705,11 @@ joint.shapes.ice.InfoView = joint.shapes.ice.ModelView.extend({
 
     // Render content
     this.contentSelector.css({
-      left: Math.round(bbox.width / 2.0 * (state.zoom - 1)),
-      top: Math.round(bbox.height / 2.0 * (state.zoom - 1)),
+      left: Math.round((bbox.width / 2.0) * (state.zoom - 1)),
+      top: Math.round((bbox.height / 2.0) * (state.zoom - 1)),
       width: Math.round(bbox.width),
       height: Math.round(bbox.height),
-      transform: 'scale(' + state.zoom + ')'
+      transform: 'scale(' + state.zoom + ')',
     });
 
     // Render block
@@ -2232,7 +2717,7 @@ joint.shapes.ice.InfoView = joint.shapes.ice.ModelView.extend({
       left: bbox.x * state.zoom + state.pan.x,
       top: bbox.y * state.zoom + state.pan.y,
       width: bbox.width * state.zoom,
-      height: bbox.height * state.zoom
+      height: bbox.height * state.zoom,
     });
   },
 
@@ -2240,14 +2725,12 @@ joint.shapes.ice.InfoView = joint.shapes.ice.ModelView.extend({
     // Remove delta to allow Session Value restore
     delete this.model.attributes.data.delta;
     this.$box.remove();
-  }
+  },
 });
-
 
 // Custom wire
 
 joint.shapes.ice.Wire = joint.dia.Link.extend({
-
   markup: [
     '<path class="connection" d="M 0 0 0 0"/>',
     '<path class="connection-wrap" d="M 0 0 0 0"/>',
@@ -2257,26 +2740,26 @@ joint.shapes.ice.Wire = joint.dia.Link.extend({
     '<g class="marker-vertices"/>',
     '<g class="marker-bifurcations"/>',
     '<g class="marker-arrowheads"/>',
-    '<g class="link-tools"/>'
+    '<g class="link-tools"/>',
   ].join(''),
 
   labelMarkup: [
     '<g class="label hidden">',
     '<rect x="-8" y="-6" width="16" height="12" rx="2" ry="2" fill="white" stroke="#777"/>',
     '<text fill="#555"/>',
-    '</g>'
+    '</g>',
   ].join(''),
 
   bifurcationMarkup: [
     '<g class="marker-bifurcation-group" transform="translate(<%= x %>, <%= y %>)">',
     '<circle class="marker-bifurcation" idx="<%= idx %>" r="<%= r %>" fill="#777"/>',
-    '</g>'
+    '</g>',
   ].join(''),
 
   arrowheadMarkup: [
     '<g class="marker-arrowhead-group marker-arrowhead-group-<%= end %>">',
     '<circle class="marker-arrowhead" end="<%= end %>" r="8"/>',
-    '</g>'
+    '</g>',
   ].join(''),
 
   toolMarkup: [
@@ -2286,7 +2769,7 @@ joint.shapes.ice.Wire = joint.dia.Link.extend({
     '<path transform="scale(.6) translate(-16, -16)" d="M24.778,21.419 19.276,15.917 24.777,10.415 21.949,7.585 16.447,13.087 10.945,7.585 8.117,10.415 13.618,15.917 8.116,21.419 10.946,24.248 16.447,18.746 21.948,24.248z" />',
     '<title>Remove link</title>',
     '</g>',
-    '</g>'
+    '</g>',
   ].join(''),
 
   vertexMarkup: [
@@ -2296,46 +2779,47 @@ joint.shapes.ice.Wire = joint.dia.Link.extend({
     '<path class="marker-vertex-remove" idx="<%= idx %>" transform="scale(.6) translate(11.5, -39)" d="M24.778,21.419 19.276,15.917 24.777,10.415 21.949,7.585 16.447,13.087 10.945,7.585 8.117,10.415 13.618,15.917 8.116,21.419 10.946,24.248 16.447,18.746 21.948,24.248z">',
     '<title>Remove vertex</title>',
     '</path>',
-    '</g>'
+    '</g>',
   ].join(''),
 
-  defaults: joint.util.deepSupplement({
+  defaults: joint.util.deepSupplement(
+    {
+      type: 'ice.Wire',
 
-    type: 'ice.Wire',
+      labels: [
+        {
+          position: 0.5,
+          attrs: {
+            text: {
+              text: '',
+              y: '4px',
+              'font-weight': 'bold',
+              'font-size': '11px',
+              'text-anchor': 'middle',
+            },
+          },
+        },
+      ],
 
-    labels: [{
-      position: 0.5,
       attrs: {
-        text: {
-          text: '',
-          y: '4px',
-          'font-weight': 'bold',
-          'font-size': '11px',
-          'text-anchor': 'middle'
-        }
-      }
-    }],
+        '.connection': {
+          'stroke-width': WIRE_WIDTH,
+          stroke: '#777',
+        },
+      },
 
-    attrs: {
-      '.connection': {
-        'stroke-width': WIRE_WIDTH,
-        stroke: '#777'
-      }
+      router: {name: 'ice'},
+      connector: {name: 'ice'},
     },
-
-    router: { name: 'ice' },
-    connector: { name: 'ice' }
-
-  }, joint.dia.Link.prototype.defaults)
-
+    joint.dia.Link.prototype.defaults
+  ),
 });
 
 joint.shapes.ice.WireView = joint.dia.LinkView.extend({
-
   options: {
     shortLinkLength: 64,
     longLinkLength: 160,
-    linkToolsOffset: 40
+    linkToolsOffset: 40,
   },
 
   initialize: function () {
@@ -2345,8 +2829,11 @@ joint.shapes.ice.WireView = joint.dia.LinkView.extend({
     setTimeout(function () {
       var size = self.model.get('size');
 
-      if (!size) { // New wire
-        var i, port, portName = self.model.get('source').port;
+      if (!size) {
+        // New wire
+        var i,
+          port,
+          portName = self.model.get('source').port;
         var rightPorts = self.sourceView.model.get('rightPorts');
         // Initialize wire properties
         for (i in rightPorts) {
@@ -2399,33 +2886,42 @@ joint.shapes.ice.WireView = joint.dia.LinkView.extend({
       return this;
     }
 
-    var labelTemplate = joint.util.template(this.model.get('labelMarkup') || this.model.labelMarkup);
+    var labelTemplate = joint.util.template(
+      this.model.get('labelMarkup') || this.model.labelMarkup
+    );
     // This is a prepared instance of a vectorized SVGDOM node for the label element resulting from
     // compilation of the labelTemplate. The purpose is that all labels will just `clone()` this
     // node to create a duplicate.
     var labelNodeInstance = V(labelTemplate());
 
-    _.each(labels, function (label, idx) {
+    _.each(
+      labels,
+      function (label, idx) {
+        var labelNode = labelNodeInstance.clone().node;
+        V(labelNode).attr('label-idx', idx);
+        this._labelCache[idx] = V(labelNode);
 
-      var labelNode = labelNodeInstance.clone().node;
-      V(labelNode).attr('label-idx', idx);
-      this._labelCache[idx] = V(labelNode);
+        var $text = $(labelNode).find('text');
+        var textAttributes = _.extend(
+          {'text-anchor': 'middle', 'font-size': 13},
+          joint.util.getByPath(label, 'attrs/text', '/')
+        );
 
-      var $text = $(labelNode).find('text');
-      var textAttributes = _.extend({ 'text-anchor': 'middle', 'font-size': 13 }, joint.util.getByPath(label, 'attrs/text', '/'));
+        $text.attr(_.omit(textAttributes, 'text'));
 
-      $text.attr(_.omit(textAttributes, 'text'));
+        if (label.attrs.text.text) {
+          $(labelNode).removeClass('hidden');
+        }
 
-      if (label.attrs.text.text) {
-        $(labelNode).removeClass('hidden');
-      }
-
-      if (!_.isUndefined(textAttributes.text)) {
-        V($text[0]).text(textAttributes.text + '', { annotations: textAttributes.annotations });
-      }
-      $labels.append(labelNode);
-
-    }, this);
+        if (!_.isUndefined(textAttributes.text)) {
+          V($text[0]).text(textAttributes.text + '', {
+            annotations: textAttributes.annotations,
+          });
+        }
+        $labels.append(labelNode);
+      },
+      this
+    );
 
     return this;
   },
@@ -2447,7 +2943,10 @@ joint.shapes.ice.WireView = joint.dia.LinkView.extend({
       }
 
       var toolPosition = this.getPointAtLength(connectionLength - offset);
-      this._toolCache.attr('transform', 'translate(' + toolPosition.x + ', ' + toolPosition.y + ') ' + scale);
+      this._toolCache.attr(
+        'transform',
+        'translate(' + toolPosition.x + ', ' + toolPosition.y + ') ' + scale
+      );
     }
 
     return this;
@@ -2456,20 +2955,27 @@ joint.shapes.ice.WireView = joint.dia.LinkView.extend({
   updateWireProperties: function (size) {
     if (size > 1) {
       this.$('.connection').css('stroke-width', WIRE_WIDTH * 3);
-      this.model.label(0, { attrs: { text: { text: size } } });
-      this.model.bifurcationMarkup = this.model.bifurcationMarkup.replace(/<%= r %>/g, WIRE_WIDTH * 4);
-    }
-    else {
-      this.model.bifurcationMarkup = this.model.bifurcationMarkup.replace(/<%= r %>/g, WIRE_WIDTH * 2);
+      this.model.label(0, {attrs: {text: {text: size}}});
+      this.model.bifurcationMarkup = this.model.bifurcationMarkup.replace(
+        /<%= r %>/g,
+        WIRE_WIDTH * 4
+      );
+    } else {
+      this.model.bifurcationMarkup = this.model.bifurcationMarkup.replace(
+        /<%= r %>/g,
+        WIRE_WIDTH * 2
+      );
     }
   },
 
   updateConnection: function (opt) {
-    
     opt = opt || {};
 
     // Necessary path finding
-    var route = this.route = this.findRoute(this.model.get('vertices') || [], opt);
+    var route = (this.route = this.findRoute(
+      this.model.get('vertices') || [],
+      opt
+    ));
     // finds all the connection points taking new vertices into account
 
     this._findConnectionPoints(route);
@@ -2481,10 +2987,13 @@ joint.shapes.ice.WireView = joint.dia.LinkView.extend({
       this._V.connectionWrap.attr('d', pathData.wrap);
     }
 
-    this._translateAndAutoOrientArrows(this._V.markerSource, this._V.markerTarget);
+    this._translateAndAutoOrientArrows(
+      this._V.markerSource,
+      this._V.markerTarget
+    );
   },
 
-// cacheUpdateBifurcations:{},
+  // cacheUpdateBifurcations:{},
   updateBifurcations: function () {
     if (this._V.markerBifurcations) {
       var self = this;
@@ -2493,46 +3002,49 @@ joint.shapes.ice.WireView = joint.dia.LinkView.extend({
 
       // Find all the wires in the same port
       var portWires = [];
-      var wireSource=false;
-      var cwireSource=false;
-      var wireView=false;
-      var markerBifurcations=false;
+      var wireSource = false;
+      var cwireSource = false;
+      var wireView = false;
+      var markerBifurcations = false;
 
-      for(var i=0,n=allWires.length;i<n;i++){
-     
+      for (var i = 0, n = allWires.length; i < n; i++) {
         wireSource = allWires[i].get('source');
         cwireSource = currentWire.get('source');
-        if ((wireSource.id === cwireSource.id) &&
-          (wireSource.port === cwireSource.port)) {
+        if (
+          wireSource.id === cwireSource.id &&
+          wireSource.port === cwireSource.port
+        ) {
           // Wire with the same source of currentWire
           wireView = self.paper.findViewByModel(allWires[i]);
           // Clean the wire bifurcations
-          markerBifurcations=$(wireView._V.markerBifurcations.node).empty();
+          markerBifurcations = $(wireView._V.markerBifurcations.node).empty();
           portWires.push({
             id: allWires[i].get('id'),
             view: wireView,
-            markers: markerBifurcations
+            markers: markerBifurcations,
           });
         }
-     
-    }
+      }
 
       var points = [];
 
       // Update all the portWires combinations
       if (portWires.length > 0) {
         var markupTemplate = joint.util.template(
-          this.model.get('bifurcationMarkup') ||
-          this.model.bifurcationMarkup
+          this.model.get('bifurcationMarkup') || this.model.bifurcationMarkup
         );
-        var A,B,nW;
-          for(A=0,nW=portWires.length;A<nW;A++){
-//        _.each(portWires, function (wireA) {
-          for(B=0;B<nW;B++){
- //         _.each(portWires, function (wireB) {
+        var A, B, nW;
+        for (A = 0, nW = portWires.length; A < nW; A++) {
+          //        _.each(portWires, function (wireA) {
+          for (B = 0; B < nW; B++) {
+            //         _.each(portWires, function (wireB) {
             if (portWires[A].id !== portWires[B].id) {
               // Not the same wire
-              findBifurcations(portWires[A].view, portWires[B].view, portWires[A].markers);
+              findBifurcations(
+                portWires[A].view,
+                portWires[B].view,
+                portWires[A].markers
+              );
             }
           }
         }
@@ -2547,7 +3059,7 @@ joint.shapes.ice.WireView = joint.dia.LinkView.extend({
 
         if (vA.length > 2) {
           for (var i = 1; i < vA.length - 1; i++) {
-            if ((vA[i - 1].x !== vA[i + 1].x) && (vA[i - 1].y !== vA[i + 1].y)) {
+            if (vA[i - 1].x !== vA[i + 1].x && vA[i - 1].y !== vA[i + 1].y) {
               // vA[i] is a corner
               for (var j = 0; j < vB.length - 1; j++) {
                 // Eval if intersects any segment of wire vB
@@ -2567,9 +3079,9 @@ joint.shapes.ice.WireView = joint.dia.LinkView.extend({
 
       function contains(point, points) {
         var found = false;
-        var np=points.length;
+        var np = points.length;
 
-        for(var i=0;i<np;i++) {
+        for (var i = 0; i < np; i++) {
           if (points[i].x === point.x && points[i].y === point.y) {
             found = true;
             return;
@@ -2584,7 +3096,7 @@ joint.shapes.ice.WireView = joint.dia.LinkView.extend({
         v = v.concat(wire.route);
         v.push({
           x: wire.targetPoint.x + 9,
-          y: wire.targetPoint.y
+          y: wire.targetPoint.y,
         });
         return v;
       }
@@ -2592,15 +3104,18 @@ joint.shapes.ice.WireView = joint.dia.LinkView.extend({
       function evalIntersection(point, segment) {
         if (segment[0].x === segment[1].x) {
           // Vertical
-          return ((point.x === segment[0].x) &&
-            (point.y > Math.min(segment[0].y, segment[1].y)) &&
-            (point.y < Math.max(segment[0].y, segment[1].y)));
-        }
-        else {
+          return (
+            point.x === segment[0].x &&
+            point.y > Math.min(segment[0].y, segment[1].y) &&
+            point.y < Math.max(segment[0].y, segment[1].y)
+          );
+        } else {
           // Horizontal
-          return ((point.y === segment[0].y) &&
-            (point.x > Math.min(segment[0].x, segment[1].x)) &&
-            (point.x < Math.max(segment[0].x, segment[1].x)));
+          return (
+            point.y === segment[0].y &&
+            point.x > Math.min(segment[0].x, segment[1].x) &&
+            point.x < Math.max(segment[0].x, segment[1].x)
+          );
         }
       }
     }
@@ -2608,8 +3123,7 @@ joint.shapes.ice.WireView = joint.dia.LinkView.extend({
     /* jshint +W082 */
 
     return this;
-  }
-
+  },
 });
 
 function getCSSRule(ruleName) {

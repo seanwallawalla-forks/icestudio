@@ -1,11 +1,7 @@
 [
   {
     "type": "HX1K",
-    "boards": [
-      "icezum",
-      "go-board",
-      "icestick"
-    ]
+    "boards": ["icezum", "go-board", "icestick"]
   },
   {
     "type": "HX8K",
@@ -23,10 +19,7 @@
   },
   {
     "type": "LP8K",
-    "boards": [
-      "TinyFPGA-B2",
-      "TinyFPGA-BX"
-    ]
+    "boards": ["TinyFPGA-B2", "TinyFPGA-BX"]
   },
   {
     "type": "UP5K",

@@ -1,8 +1,11 @@
 # Changelog
+
 All notable changes to this project will be documented in this file.
 
 ## [0.5.0] - 2019-10-31
+
 ### General
+
 - Submodule edition
 - Copy & Paste OR Copy & Clone blocks
 - Generic blocks
@@ -10,7 +13,9 @@ All notable changes to this project will be documented in this file.
 - Automatic check for new versions
 
 ## [0.4.0] - 2019-08-30
+
 ### Support UP5K boards (#281)
+
 - [iCEBreaker](https://github.com/icebreaker-fpga/icebreaker)
 - [iCEBreaker bitsy](https://github.com/icebreaker-fpga/icebreaker)
 - [UPDuino v1.0](http://gnarlygrey.atspace.cc/development-platform.html#upduino)
@@ -19,6 +24,7 @@ All notable changes to this project will be documented in this file.
 - [iCE40 UltraPlus Breakout Board](http://www.latticesemi.com/en/Products/DevelopmentBoardsAndKits/iCE40UltraPlusBreakoutBoard)
 
 ### Bugfixes
+
 - Fix FTDI issue in Windows (toolchain-icestorm 1.11.1)
 - Fix low resolution retina and improve performance (#303)
 - Fix clossing app with multiple windows (#304)
@@ -26,6 +32,7 @@ All notable changes to this project will be documented in this file.
 - Fix regular expressions to parse error messages (#308)
 
 ### General
+
 - Add cs_CZ translation (by nerakino)
 - Add nl_NL translation (by @elektor-labs)
 - Add el_GR translation (by @ratmole)
@@ -36,7 +43,9 @@ All notable changes to this project will be documented in this file.
 - Improve project conversions
 
 ## [0.3.3] - 2018-09-16
+
 ### General
+
 - Check apio debug settings for dist
 - Update fr_FR translation (#254, #272 by @pcotret)
 - Add Alhambra II pinout SVG (#257 by @EladioDM)
@@ -56,26 +65,31 @@ All notable changes to this project will be documented in this file.
 - Update gl_ES translation (#273 by @xoan)
 
 ## [0.3.3-rc] - 2018-08-17
+
 ### Memory address (#250)
+
 - Add `Address format` combo (bin, dec, hex)
 - Refactor forms
 - Improve forms style
 
 ### External collections (#251)
+
 - Add `Edit > Preferences > External collections` form
 - Refactor `Select > Collections`:
-    - Default collection
-    - Internal collections
-    - External collections
+  - Default collection
+  - Internal collections
+  - External collections
 - Reload collection when a block/example is saved
 - Improve collections load speed
 - Allow symbolic linked dirs as collections
 
 ### Support for TinyFPGA BX
+
 - Add TinyFPGA BX information (#232 by @tinyfpga)
 - Auto install `tinyprog` programmer
 
 ### General
+
 - Update fr_FR translation (#240 by @pcotret)
 - Update gl_ES translation (#245 by @xoan)
 - Update es_ES translation
@@ -92,18 +106,22 @@ All notable changes to this project will be documented in this file.
 - Update documentation
 
 ## [0.3.3-beta] - 2018-05-24
+
 ### Support Alhambra II (#227)
+
 - Add PCF
 - Add pinout
 - Use Apio 0.3.3
 
 ### File format!
+
 - New version 1.2
 - Add Memory block
 - No state (zoom, pan) information
 - Improve version check. Add update message
 
 ### Memory block (#233)
+
 - Add Basic > Memory block
 - Contains: name + local flag + editor
 - Exportable as a parameter
@@ -112,12 +130,14 @@ All notable changes to this project will be documented in this file.
 - Generate an internal "list" file
 
 ### Improve Info block (#235)
+
 - Add syntax highlight
 - Render checkbox task list
 - Improve render font size
 - Improve rendering: fix tables
 
 ### General
+
 - Fix installation bug Mac (#237)
 - Improve block connectors (#223)
 - Update eu_ES translation (#221 by @Lorea-Aldabaldetreku)
@@ -138,6 +158,7 @@ All notable changes to this project will be documented in this file.
   - Improve blocks replacement
 
 ## [0.3.2] - 2018-04-14
+
 - Fix drivers configuration for Windows
 - Fix "profile not found" message
 - Add Python packages management
@@ -153,8 +174,8 @@ All notable changes to this project will be documented in this file.
 - Center replaced blocks
 - Fix undo/redo bug with ace-builds v1.2.9
 
-
 ## [0.3.2-beta] - 2018-02-03
+
 - Update fr_FR translation (#181 by @pcotret)
 - Add Kefir I SVG pinout (#182, #183 by @set-soft)
 - Update Icezum Alhambre SVG pinout (by @obijuan)
@@ -174,32 +195,34 @@ All notable changes to this project will be documented in this file.
 - Style improvements
 
 ### Support for TinyFPGA B2 (#193)
+
 - Add TinyFPGA B2 information (#185 by @tinyfpga)
 - Detect `bootloader` and `disconnected` errors
 - Auto install `tinyfpgab` programmer
 
 ### Support for BlackIce (#195)
+
 - Add BlackIce I information
 - Add BlackIce II information
 - Auto install `blackiceprog` programmer
 
-
 ## [0.3.1] - 2017-11-01
-- Add *iCE40-HX8K Breakout Board* SVG pinout (#173 by @yomboprime)
+
+- Add _iCE40-HX8K Breakout Board_ SVG pinout (#173 by @yomboprime)
 - Add `FPGA resources` section (#177)
   - View > FPGA resources
   - Show used/total resources for each board
 - Update modals' style
-- Add more *Kéfir I iCE40-HX4K* pins (#178 by @set-soft)
+- Add more _Kéfir I iCE40-HX4K_ pins (#178 by @set-soft)
 - Update Basque translation (#179 by @Lorea-Aldabaldetreku)
-- Add *Olimex iCE40HX8K-EVB* pinout (#180 by @brianredbeard)
+- Add _Olimex iCE40HX8K-EVB_ pinout (#180 by @brianredbeard)
 - Improve `Basic menu` style (fix for Mac OS)
 - Detect yosys libffi error
 - Fix cursor padding on zoom
 - Improve menu auto show/hide behavior
 
-
 ## [0.3.1-rc] - 2017-10-15
+
 - Use zip instead of tar.gz (internal toolchain)
 - Add `Project information` changes to undo stack
 - Add clickable notification to install the toolchain
@@ -226,8 +249,8 @@ All notable changes to this project will be documented in this file.
 - Improve menu show/hide/click behavior
 - Update spanish translations
 
-
 ## [0.3.0] - 2017-06-04
+
 - Fix v/vh/list files installation from a collection
 - Fix Python 32-bit in win32 installer (#153)
 - Update eu_ES translations (#156 by @1138-4EB)
@@ -256,9 +279,10 @@ All notable changes to this project will be documented in this file.
 - Improve code/info blocks zoom
 - Update Icestudio logo
 
-
 ## [0.3.0-rc] - 2017-03-30
+
 #### Collections
+
 - Fix adding multiple collections files
 - Install README.md, .v, .vh and .list files from a collection
 - Save included files when a project is saved
@@ -267,6 +291,7 @@ All notable changes to this project will be documented in this file.
 - Add View > Collection info: README viewer
 
 #### Verilog error detection: [video](https://www.youtube.com/watch?v=Cv_ZxP_pJvs)
+
 - Detect and parse iverilog errors
 - Detect and parse yosys errors
 - Mark Generic block errors
@@ -274,6 +299,7 @@ All notable changes to this project will be documented in this file.
 - Add warning/error annotations to Code blocks
 
 #### General
+
 - Fix Project Information SVG management
 - Windows installer: separate 32/64 bit installation
 - Add linux [un]installer scripts
@@ -286,7 +312,7 @@ All notable changes to this project will be documented in this file.
 - Improve Mac OS drivers management ([More information](https://github.com/FPGAwars/apio/wiki/FTDI-Drivers-flowchart-Mac-OS))
 - Open Homebrew website when the notification is clicked
 - Draw "Remove wire tool" at the end of the wire
-- Package windows_(x86|amd64) toolchains
+- Package windows\_(x86|amd64) toolchains
 - Refactor mouse interaction ([More information](https://github.com/FPGAwars/icestudio/wiki))
 - Improve blocks creation (move and click)
 - Update french translation (#148 #149 #150 #151 by @pcotret)
@@ -299,9 +325,10 @@ All notable changes to this project will be documented in this file.
 - Add "language change" to the undo stack
 - Update es_ES translation
 
-
 ## [0.3.0-beta3] - 2017-02-14
+
 #### Create Windows installer
+
 - Uninstall previous version if required
 - Install Python 2.7 if required
 - Install Icestudio app
@@ -310,6 +337,7 @@ All notable changes to this project will be documented in this file.
 - Uninstaller: remove toolchain, profile or collections
 
 #### Add Board rules
+
 - Output rules:
   - Initialize not used ports contained in the rules
 - Input rules:
@@ -321,6 +349,7 @@ All notable changes to this project will be documented in this file.
 - Update rules on board change
 
 #### Update Collections
+
 - New structure:
   - blocks
   - examples
@@ -332,6 +361,7 @@ All notable changes to this project will be documented in this file.
 - Manage translations for installed collections
 
 #### General
+
 - Update eu_ES translation (#129 by @Lorea-Aldabaldetreku)
 - Store current board in the profile
 - Filter Input & Output pins in the I/O blocks options
@@ -354,9 +384,10 @@ All notable changes to this project will be documented in this file.
 
 Thanks to **Patripi** for the feedback and suggestions!
 
-
 ## [0.3.0-beta2] - 2017-01-20
+
 ### Upgrade Edit menu
+
 - Add Edit > Undo/Redo. Detect the following actions:
   - Add or remove a block
   - Add or remove a wire
@@ -373,6 +404,7 @@ Thanks to **Patripi** for the feedback and suggestions!
 - Add Edit > Fit content
 
 ### Multiple windows
+
 - File > New: launch a new window
 - File > Open: launch a new window if required
 - File > Examples: launch a new window if required
@@ -380,17 +412,20 @@ Thanks to **Patripi** for the feedback and suggestions!
 - Show project changed state
 
 ### New project format 1.1
+
 - Improve dependency management
 - Update compiler to 1.1
 - Add backwards compatibility (1.0, 0)
 
 ### Add collections
+
 - Add Tools > Collections > Add
 - Add Tools > Collections > Remove
 - Add Tools > Collections > Remove all
 - Add View > Collections
 
 ### General
+
 - Update eu_ES translation (#121 by @Lorea-Aldabaldetreku)
 - Add block tooltips (package.description)
 - Add more _shortcuts_ (https://github.com/FPGAwars/icestudio/wiki)
@@ -405,15 +440,17 @@ Thanks to **Patripi** for the feedback and suggestions!
 - Remove unnecessary .so and .dll files from packaging
 - Update POT file and es_ES translation
 
-
 ## [0.3.0-beta] - 2016-12-23
+
 ### Constant block
+
 - Add constant blocks
 - Add local parameter flag
 - Add parameters to Code blocks
 - Add parameters to Generic blocks
 
 ### Project format
+
 - New project format: version 1.0
 - Insert compresed SVG in the project (using [SVGO](https://github.com/svg/svgo))
 - Refactor project management: new project.service
@@ -423,6 +460,7 @@ Thanks to **Patripi** for the feedback and suggestions!
 - Backwards compatibility: notify and update "Old projects"
 
 ### Bus wires support
+
 - Add Input/Output bus: using [x:y] notation
 - Add Code block ports bus: using [x:y] notation
 - Refactor blocks management: blocks service
@@ -431,6 +469,7 @@ Thanks to **Patripi** for the feedback and suggestions!
 - Add bus wires to Generic blocks
 
 ### General
+
 - Update french translation (#110 by @Martoni)
 - Add debouncer block (by @Obijuan)
 - Add invalid connection notifications
@@ -448,8 +487,8 @@ Thanks to **Patripi** for the feedback and suggestions!
 - Add project samples
 - Update POT file and es_ES translation
 
-
 ## [0.2.3] - 2016-12-01
+
 - Detect system language
 - Add iCE40-HX8K PCF pinout (#103 by @Democrito)
 - Add multiple input prompt in Code block dialog
@@ -473,8 +512,8 @@ Thanks to **Patripi** for the feedback and suggestions!
 
 Thanks to **AlexTC** for the feedback and suggestions!
 
-
 ## [0.2.3-beta] - 2016-11-21
+
 - Improve development mode
 - Add osx32 package
 - Add Config > Tri-state block (#91 by @set-soft)
@@ -497,8 +536,8 @@ Thanks to **AlexTC** for the feedback and suggestions!
 - Improve Drivers > Enable in Mac (thanks **AlexTC**)
 - Improve translation system: using PO files
 
-
 ## [0.2.2] - 2016-11-10
+
 - Add Hex 7 Segments CC (#80 by @C47D)
 - Add Hex 7 Segments CA (#81 by @C47D)
 - Support [Kefir I](http://fpgalibre.sourceforge.net/Kefir/index.html) board (@set-soft)
@@ -516,8 +555,8 @@ Thanks to **AlexTC** for the feedback and suggestions!
 - Minor fixes Windows and Mac OSX
 - Use apio version [0.1.9, 0.2.0)
 
-
 ## [0.2.1] - 2016-09-12
+
 - Add mux/demux blocks (#66 by @C47D)
 - Add pull-up/pull-up-inv blocks (#67 by @C47D)
 - Add FF blocks (#75 by @C47D)
@@ -531,8 +570,8 @@ Thanks to **AlexTC** for the feedback and suggestions!
 - Support [iCE40-HX8K board](http://www.latticesemi.com/Products/DevelopmentBoardsAndKits/iCE40HX8KBreakoutBoard.aspx) (#68 by @C47D)
 - Support [icoBOARD 1.0](http://icoboard.org/icoboard-1-0.html)
 
-
 ## [0.2.0] - 2016-08-11
+
 - Edit > Language: English, Spanish
 - Add more logic gates
 - Add logo
@@ -544,8 +583,8 @@ Thanks to **AlexTC** for the feedback and suggestions!
 - Minor GUI improvements
 - Increase apio exec maxBuffer
 
-
 ## [0.2.0-beta2] - 2016-07-20
+
 - Add grid, pan (left-click) and zoom (wheel).
 - Add selection tool (right-click).
 - Improve blocks and wires appearance.
@@ -561,8 +600,8 @@ Thanks to **AlexTC** for the feedback and suggestions!
 - Tools menu: improve toolchain installation.
 - Add config block: input-config (pullup).
 
-
 ## [0.2.0-beta1] - 2016-06-29
+
 - Rewrite all the application using:
   - nodejs
   - angularjs
@@ -611,6 +650,6 @@ Thanks to **AlexTC** for the feedback and suggestions!
 - Add breadcrumbs to allow navigation
 - Add multiplatform packaging using grunt
 
-
 ## [0.1.0] - 2016-03-09
+
 - Prototype release
