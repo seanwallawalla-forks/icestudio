@@ -1,18 +1,10 @@
-.paper {
-  position: relative;
-  display: inline-block;
+body {
   background: transparent;
-  overflow: hidden;
-  cursor: default;
 }
 
 .joint-paper.joint-theme-default {
   overflow: hidden;
-}
-.paper svg {
   background: transparent;
-  position: relative;
-  z-index: 0;
 }
 
 .disable-graph {
