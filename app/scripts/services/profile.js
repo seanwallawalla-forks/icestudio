@@ -1,6 +1,7 @@
 angular
   .module('icestudio')
   .service('profile', function (
+    $log,
     utils,
     common,
     gettextCatalog,
@@ -9,40 +10,42 @@ angular
   ) {
     'use strict';
 
-    this.data = {
+    this.load = _load;
+    this.set = _set;
+    this.get = _get;
+    this.save = _save;
+    this.setBoard = _setBoard;
+
+    const _defData = {
       board: '',
       boardRules: true,
-      collection: '',
-      externalCollections: '',
+      collectionsPaths: '',
       externalPlugins: '',
       language: '',
-      uiTheme: 'light',
       remoteHostname: '',
+      uiTheme: 'dark',
     };
+
+    this.data = _defData;
 
     if (common.DARWIN) {
       this.data['macosFTDIDrivers'] = false;
     }
 
-    this.load = function (callback) {
+    function _load(callback) {
       var self = this;
       utils
         .readFile(common.PROFILE_PATH)
         .then(function (data) {
-          self.data = {
-            board: data.board || '',
-            boardRules: data.boardRules !== false,
-            collection: data.collection || '',
-            language: data.language || '',
-            uiTheme: data.uiTheme || 'dark',
-            externalCollections: data.externalCollections || '',
-            externalPlugins: data.externalPlugins || '',
-            remoteHostname: data.remoteHostname || '',
-          };
+          for (var i in data) {
+            if (data[i]) {
+              self.data[i] = data[i];
+            }
+          }
           //-- Custom Theme support
           if (self.data.uiTheme !== 'light') {
             let cssFile =
-              '<link  rel="stylesheet" href="resources/uiThemes/dark/dark.css">';
+              '<link rel="stylesheet" href="resources/uiThemes/dark/dark.css">';
             let pHead = document.getElementsByTagName('head')[0];
             pHead.innerHTML = pHead.innerHTML + cssFile;
           }
@@ -55,44 +58,41 @@ angular
           }
         })
         .catch(function (error) {
-          console.warn(error);
+          $log.warn(error);
           if (callback) {
             callback();
           }
         });
-    };
+    }
 
-    this.set = function (key, value) {
-      if (this.data.hasOwnProperty(key)) {
-        this.data[key] = value;
-        this.save();
+    function _set(key, value) {
+      if (!_defData.hasOwnProperty(key)) {
+        $log.error('[srv.profile.set] unknown key:', key, value);
+        return;
       }
-    };
+      this.data[key] = JSON.parse(JSON.stringify(value));
+      this.save();
+    }
 
-    this.get = function (key) {
-      return this.data[key];
-    };
+    function _get(key) {
+      return JSON.parse(JSON.stringify(this.data[key]));
+    }
 
-    this.save = function () {
+    function _save() {
       if (!nodeFs.existsSync(common.ICESTUDIO_DIR)) {
         nodeFs.mkdirSync(common.ICESTUDIO_DIR);
       }
-      utils
-        .saveFile(common.PROFILE_PATH, this.data)
-        .then(function () {
-          // Success
-        })
-        .catch(function (error) {
-          alertify.error(error, 30);
-        });
-    };
+      utils.saveFile(common.PROFILE_PATH, this.data).catch(function (error) {
+        alertify.error(error, 30);
+      });
+    }
 
-    this.setBoard = function (board) {
+    function _setBoard(board) {
       this.set('board', board.name);
       alertify.success(
         gettextCatalog.getString('Board {{name}} selected', {
           name: utils.bold(board.info.label),
         })
       );
-    };
+    }
   });

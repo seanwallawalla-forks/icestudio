@@ -32,6 +32,7 @@ angular
     $('html').attr('lang', profile.get('language'));
     utils.startWait();
     utils.loadProfile(profile, function () {
+      collections.profileGet();
       collections.loadAllCollections();
       utils.loadLanguage(profile, function () {
         if (profile.get('board') === '') {

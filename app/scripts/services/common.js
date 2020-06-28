@@ -25,11 +25,6 @@ angular
     this.pinoutInputHTML = '';
     this.pinoutOutputHTML = '';
 
-    // Collections
-    this.defaultCollection = null;
-    this.internalCollections = [];
-    this.externalCollections = [];
-
     // FPGA resources
     this.FPGAResources = {
       ffs: '-',
@@ -58,7 +53,7 @@ angular
     this.LOCALE_DIR = nodePath.join('resources', 'locale');
     this.SAMPLE_DIR = nodePath.join('resources', 'sample');
     this.DEFAULT_COLLECTION_DIR = nodePath.resolve(
-      nodePath.join('resources', 'collection')
+      nodePath.join('resources', 'collections')
     );
     this.DEFAULT_PLUGIN_DIR = nodePath.resolve(
       nodePath.join('resources', 'plugins')
@@ -221,5 +216,17 @@ angular
     this.boardLabel = function (name) {
       const label = this.boards.find((board) => board.name === name).info.label;
       return label ? label : name;
+    };
+
+    // Collections
+    this.collections = {};
+
+    this.numberofCollections = () => {
+      var colnum = 0;
+      for (var key in this.collections) {
+        var g = this.collections[key];
+        colnum += g.cols.length;
+      }
+      return colnum;
     };
   });

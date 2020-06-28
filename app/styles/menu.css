@@ -309,6 +309,10 @@
   background-color: #f5f5f5;
 }
 
+.table > tbody + tbody {
+  border: 0;
+}
+
 .modal-dialog {
   margin: 35px auto;
 }

@@ -1,43 +1,134 @@
 <!DOCTYPE html>
 <table class="table">
   <tbody>
-    <tr
-      ng-repeat="collection in [common.defaultCollection].concat(common.internalCollections)"
-    >
+    <tr ng-repeat="(key, val) in common.collections">
       <td>
+        <span ng-if="key === 'Internal'" style="white-space: nowrap;"
+          ><i class="fa fa-fw fa-square" aria-hidden="true"></i> {{ key }}</span
+        >
         <span
+          ng-if="key !== 'Internal'"
           href
-          ng-click="collection.disabled = !collection.disabled && collection.name!='Basic'"
-          ng-class="{'pointer':collection.name !== 'Basic'}"
+          ng-click="val.disabled = !val.disabled"
+          class="pointer"
           style="white-space: nowrap;"
           ><i
             class="fa fa-fw"
             ng-class="{
-            'fa-square': collection.name === 'Basic',
-            'fa-square-o': collection.name !=='Basic' && collection.disabled,
-            'fa-check-square-o': collection.name !=='Basic' && !collection.disabled
+          'fa-square-o': val.disabled,
+          'fa-check-square-o': !val.disabled
+        }"
+            aria-hidden="true"
+          ></i>
+          {{ key }}</span
+        >
+      </td>
+      <td>{{ val.path }}</td>
+      <td>
+        <div class="btn-group btn-group-xs" role="group">
+          <button
+            type="button"
+            class="btn btn-default"
+            ng-click="addColFromRepo(key)"
+            uib-tooltip="{{ 'Add collection from GitHub repository...' | translate }}"
+            tooltip-append-to-body="true"
+          >
+            <i class="fa fa-fw fa-plus" aria-hidden="true"></i>
+            <i class="fa fa-fw fa-plus fa-github" aria-hidden="true"></i>
+          </button>
+        </div>
+
+        <div class="btn-group btn-group-xs" role="group">
+          <button
+            type="button"
+            class="btn btn-default"
+            ng-click="reloadCollections(key)"
+            uib-tooltip="{{ 'Reload all collections in' |
+          translate }} '{{key}}'"
+            tooltip-append-to-body="true"
+          >
+            <i class="fa fa-fw fa-refresh" aria-hidden="true"></i>
+          </button>
+          <span
+            class="btn btn-default no-btn disabled"
+            uib-tooltip="{{ 'Collections in' | translate }} '{{key}}'"
+            tooltip-append-to-body="true"
+            >{{ val.cols.length }}</span
+          >
+
+          <button
+            type="button"
+            class="btn btn-danger"
+            ng-click="removeColPath(key)"
+            uib-tooltip="{{ 'Remove' | translate }} '{{key}}'"
+            tooltip-append-to-body="true"
+          >
+            <i class="fa fa-fw fa-remove" aria-hidden="true"></i>
+          </button>
+        </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<table class="table">
+  <tbody ng-repeat="(key, val) in common.collections">
+    <tr ng-repeat="(id, col) in val.cols">
+      <td style="overflow: hidden;" title="{{ col.path }}">
+        {{ key }}
+      </td>
+      <td>
+        <span
+          href
+          ng-click="col.disabled = !col.disabled && col.name!='Basic'"
+          ng-class="{'pointer':col.name !== 'Basic'}"
+          style="white-space: nowrap;"
+          ><i
+            class="fa fa-fw"
+            ng-class="{
+            'fa-square-o': col.disabled,
+            'fa-check-square-o': !col.disabled
           }"
             aria-hidden="true"
           ></i>
-          {{ collection.name }}</span
+          {{ col.name }}</span
         >
       </td>
-      <td>-</td>
-      <td style="overflow: hidden;" title="{{ collection.path }}">
-        {{collection.path.slice(0,32)}}...
+      <td>
+        <span
+          style="white-space: nowrap;"
+          uib-tooltip="{{ col.package.description }}"
+          tooltip-append-to-body="true"
+          >{{ col.package.name }}</span
+        >
       </td>
+      <td>{{ col.package.version }}</td>
       <td>
         <span style="max-width: 175px; overflow: hidden; display: inline;"
-          >{{collection.origin?collection.origin:'zipfile'}}</span
+          >{{col.package.repository?col.package.repository:'-'}}</span
         >
       </td>
       <td>
         <div class="btn-toolbar" role="toolbar" aria-label="...">
           <div class="btn-group btn-group-xs" role="group">
             <button
+              type="button"
+              class="btn btn-default"
+              ng-click="reloadCollection(key, id)"
+              uib-tooltip="{{ 'Reload' |
+          translate }} '{{ col.name | translate }}'"
+              tooltip-append-to-body="true"
+            >
+              <i class="fa fa-fw fa-refresh" aria-hidden="true"></i>
+            </button>
+          </div>
+          <div class="btn-group btn-group-xs" role="group">
+            <button
               class="btn btn-xs btn-default"
-              ng-click="showCollectionData(collection)"
-              uib-tooltip="{{ 'Show' | translate }} {{ collection.name | translate }} {{ 'collection info' | translate }}"
+              ng-click="showCollectionData(col)"
+              uib-tooltip="{{ 'Show' | translate }} '{{ col.name | translate }}' {{ 'info' | translate }}"
               tooltip-append-to-body="true"
             >
               <i class="fa fa-fw fa-info-circle" aria-hidden="true"></i>
@@ -46,10 +137,10 @@
           <div class="btn-group btn-group-xs" role="group">
             <button
               class="btn btn-xs btn-danger"
-              ng-click="removeCollection(collection)"
-              uib-tooltip="{{ 'Remove' | translate }} {{ collection.name | translate }}"
+              ng-click="removeCollection(key, id)"
+              uib-tooltip="{{ 'Remove' | translate }} '{{ col.name | translate }}'"
               tooltip-append-to-body="true"
-              ng-show="collection.name != 'Basic'"
+              ng-show="col.name != 'Basic'"
             >
               <i class="fa fa-fw fa-remove" aria-hidden="true"></i>
             </button>

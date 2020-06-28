@@ -61,8 +61,6 @@ angular
       $scope.profile = profile;
       $scope.tools = tools;
 
-      $scope.externalPath = profile.get('externalCollections');
-
       $scope.languages = {
         ca_ES: 'Catalan',
         cs_CZ: 'Czech',
@@ -85,93 +83,126 @@ angular
         ['light', 'Light'],
       ];
 
-      $scope.addCollections = () => {
-        utils.openDialog('#input-add-collection', '.zip', (filepaths) => {
-          filepaths = filepaths.split(';');
-          tools.addCollections(filepaths);
-        });
-      };
-
-      $scope.reloadCollections = () => {
-        collections.loadAllCollections();
-      };
-
-      $scope.removeCollection = (collection) => {
-        alerts.confirm({
-          title: _tcStr('Do you want to remove the {{name}} collection?', {
-            name: utils.bold(collection.name),
-          }),
-          body: _tcStr(
-            'All the (modified) projects in the collection will be deleted.'
-          ),
-          onok: () => {
-            tools.removeCollection(collection);
-            utils.rootScopeSafeApply();
-          },
-        });
-      };
-
-      $scope.removeAllCollections = () => {
-        if (common.internalCollections.length > 0) {
-          alerts.confirm({
-            title: _tcStr('Do you want to remove all the collections?'),
-            body: _tcStr(
-              'All the (modified) projects stored in them will be deleted.'
-            ),
-            onok: () => {
-              tools.removeAllCollections();
-              utils.rootScopeSafeApply();
-            },
-          });
-        } else {
-          alertify.warning(_tcStr('No collections stored'), 5);
-        }
-      };
-
-      $scope.setExternalCollections = () => {
-        var externalCollections = profile.get('externalCollections');
+      $scope.addColPath = () => {
         utils.renderForm(
-          [
-            {
-              type: 'text',
-              title: _tcStr('Enter the external collections path'),
-              value: externalCollections || '',
-            },
-          ],
+          {
+            icon: 'folder-open',
+            title: _tcStr('Add group of collections'),
+            fields: [
+              {
+                type: 'text',
+                title: _tcStr('Name'),
+              },
+              {
+                type: 'text',
+                title: _tcStr('Path/location'),
+              },
+            ],
+          },
           (evt, values) => {
-            var newExternalCollections = values[0];
-            if (resultAlert) {
-              resultAlert.dismiss(false);
-            }
-            if (newExternalCollections !== externalCollections) {
-              if (
-                newExternalCollections === '' ||
-                nodeFs.existsSync(newExternalCollections)
-              ) {
-                profile.set('externalCollections', newExternalCollections);
-                collections.loadExternalCollections();
-                utils.rootScopeSafeApply();
-                alertify.success(_tcStr('External collections updated'));
-              } else {
-                evt.cancel = true;
-                resultAlert = alertify.error(
+            if (!evt.cancel) {
+              const name = values[0];
+              const gpath = values[1];
+              if (common.collections[name] !== undefined) {
+                alertify.error(
                   _tcStr(
-                    'Path {{path}} does not exist',
-                    {path: newExternalCollections},
-                    5
+                    "Collection group/path with name '{{path}}' exists already! Select a different name",
+                    {path: name},
+                    10
                   )
                 );
+                return;
               }
+              if (!nodeFs.existsSync(gpath)) {
+                alertify.error(
+                  _tcStr('Path {{path}} does not exist', {path: gpath}, 5)
+                );
+                return;
+              }
+              common.collections[name] = {
+                disabled: false,
+                path: gpath,
+                cols: collections.loadCollections(gpath),
+              };
+              collections.profileSet();
+              alertify.success(_tcStr('Collection group/path added!'));
             }
           }
         );
       };
 
+      $scope.addColFromRepo = (key) => {
+        utils.renderForm(
+          {
+            icon: 'github',
+            title: _tcStr('Add collection from GitHub repository'),
+            fields: [
+              {
+                type: 'text',
+                title: _tcStr('Organization/user name'),
+              },
+              {
+                type: 'text',
+                title: _tcStr('Repository name'),
+              },
+              {
+                type: 'text',
+                title: _tcStr('Local path/location (relative to the group)'),
+              },
+            ],
+          },
+          (evt, values) => {
+            if (!evt.cancel) {
+              collections.add(key, values[0], values[1], values[2]);
+            }
+          }
+        );
+      };
+
+      $scope.reloadCollections = (key) => {
+        collections.loadAllCollections(key);
+      };
+
+      $scope.removeColPath = (key) => {
+        alerts.confirm({
+          title: _tcStr(
+            "Do you want to remove the collections path/group '{{name}}'?",
+            {
+              name: key,
+            }
+          ),
+          body: _tcStr('Data will NOT be removed from disk.'),
+          onok: () => {
+            delete common.collections[key];
+            collections.profileSet();
+          },
+        });
+      };
+
+      $scope.reloadCollection = (key, id) => {
+        common.collections[key].cols[id] = collections.loadCollection(
+          common.collections[key].cols[id].path
+        );
+      };
+
+      $scope.removeCollection = (key, id) => {
+        alerts.confirm({
+          title: _tcStr("Do you want to remove the '{{name}}' collection?", {
+            name: common.collections[key].cols[id].name,
+          }),
+          body: _tcStr(
+            'All the (modified) projects in the collection will be deleted.'
+          ),
+          onok: () => {
+            collections.removeCollection(key, id);
+          },
+        });
+      };
+
       $scope.showCollectionData = (collection) => {
         const cname = collection.name;
-        $log.debug('[menu.showCollectionData] cname:', cname);
-        var readme = collection.content.readme;
-        $log.debug('[menu.showCollectionData] content:', collection.content);
+        var readme = collection.readme;
+        $log.debug('[menu.showCollectionData] collection:', collection);
         if (!readme) {
           alertify.error(
             _tcStr('Info of collection &lt;{{collection}}&gt; is undefined', {

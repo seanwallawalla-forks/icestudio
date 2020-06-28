@@ -89,16 +89,12 @@
         </ul>
 
         <ul class="nav navbar-nav navbar-right">
-          <li
-            uib-dropdown
-            ng-repeat="collection in common.internalCollections.concat(common.externalCollections)"
-            ng-show="!collection.disabled"
-          >
+          <li uib-dropdown ng-repeat="collection in activeCollections()">
             <a href uib-dropdown-toggle
               >{{ collection.name }} <span class="caret"></span
             ></a>
             <menutree
-              data="collection.content.blocks"
+              data="collection.blocks"
               callback="project.addBlockFile(path)"
               right="true"
             ></menutree>

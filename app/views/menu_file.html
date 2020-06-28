@@ -30,7 +30,7 @@
     >
     <ul uib-dropdown-menu>
       <li
-        ng-repeat="collection in [common.defaultCollection].concat(common.internalCollections).concat(common.externalCollections)"
+        ng-repeat="collection in activeCollections()"
         class="dropdown-submenu"
         uib-dropdown
       >
@@ -43,7 +43,7 @@
             >
           </li>
           <child
-            ng-repeat="item in collection.content.examples"
+            ng-repeat="item in collection.examples"
             cdata="item"
             callback="openProject(path)"
           ></child>
@@ -54,7 +54,7 @@
               translate }}</a
             >
             <menutree
-              data="collection.content.blocks"
+              data="collection.blocks"
               callback="openProject(path)"
             ></menutree>
           </li>

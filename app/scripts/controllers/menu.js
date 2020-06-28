@@ -219,10 +219,6 @@ angular
       return _isInCollection(fpath, name, common.INTERNAL_COLLECTIONS_DIR);
     }
 
-    function _isInExternal(fpath) {
-      return _isInCollection(fpath, name, profile.get('externalCollections'));
-    }
-
     //-- File
 
     $scope.export = _export;
@@ -274,7 +270,7 @@ angular
       var filepath = project.path;
       if (filepath) {
         project.save(filepath, function () {
-          reloadCollectionsIfRequired(filepath);
+          // FIMXE reload collection
         });
         resetChangedStack();
       } else {
@@ -287,7 +283,7 @@ angular
         utils.saveDialog('#input-save-project', '.ice', function (filepath) {
           updateWorkingdir(filepath);
           project.save(filepath, function () {
-            reloadCollectionsIfRequired(filepath);
+            // FIMXE reload collection
           });
           resetChangedStack();
         });
@@ -307,15 +303,6 @@ angular
         });
       } else {
         _saveProjectAsDialog();
-      }
-    }
-
-    function reloadCollectionsIfRequired(filepath) {
-      if (_isInInternal(filepath, false)) {
-        collections.loadInternalCollections();
-      }
-      if (_isInExternal(filepath, false)) {
-        collections.loadExternalCollections();
       }
     }
 
@@ -965,4 +952,19 @@ angular
     });
 
     shortcuts.method('takeSnapshot', takeSnapshot);
+
+    $scope.activeCollections = () => {
+      var cols = [];
+      for (var key in common.collections) {
+        var g = common.collections[key];
+        if (!g.disabled) {
+          g.cols.forEach((c) => {
+            if (!c.disabled) {
+              cols.push(c);
+            }
+          });
+        }
+      }
+      return cols;
+    };
   });

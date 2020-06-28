@@ -1,12 +1,8 @@
 <!DOCTYPE html>
-<a href uib-dropdown-toggle>Basic <span class="caret"></span></a>
+<a href uib-dropdown-toggle
+  ><i class="fa fa-fw fa-cube"></i> <span class="caret"></span
+></a>
 <ul uib-dropdown-menu>
-  <child
-    ng-repeat="item in common.defaultCollection.content.blocks"
-    cdata="item"
-    callback="project.addBlockFile(path)"
-    right="true"
-  ></child>
   <li>
     <a href ng-click="project.addBasicBlock('basic.input')"
       ><div class="marker marker-yellow"></div>

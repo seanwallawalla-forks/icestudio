@@ -5,20 +5,17 @@ angular
     project,
     compiler,
     profile,
-    collections,
     drivers,
     graph,
     utils,
     common,
     gettextCatalog,
-    nodeGettext,
     nodeFs,
     nodeFse,
     nodePath,
     nodeChildProcess,
     nodeSSHexec,
     nodeRSync,
-    nodeAdmZip,
     _package,
     $rootScope
   ) {
@@ -1291,210 +1288,6 @@ angular
       utils.enableClickEvents();
       utils.endWait();
     }
-
-    // Collections management
-
-    this.addCollections = function (filepaths) {
-      // Load zip file
-      async.eachSeries(filepaths, function (filepath, nextzip) {
-        //alertify.message(_tcStr('Load {{name}} ...', { name: utils.bold(utils.basename(filepath)) }));
-        var zipData = nodeAdmZip(filepath);
-        var _collections = getCollections(zipData);
-
-        async.eachSeries(
-          _collections,
-          function (collection, next) {
-            setTimeout(function () {
-              if (
-                collection.package &&
-                (collection.blocks || collection.examples)
-              ) {
-                alertify.prompt(
-                  _tcStr('Add collection'),
-                  _tcStr('Enter name for the collection:'),
-                  collection.origName,
-                  function (evt, name) {
-                    if (!name) {
-                      return false;
-                    }
-                    collection.name = name;
-
-                    var destPath = nodePath.join(
-                      common.INTERNAL_COLLECTIONS_DIR,
-                      name
-                    );
-                    if (nodeFs.existsSync(destPath)) {
-                      alerts.confirm({
-                        title: _tcStr(
-                          'The collection {{name}} already exists.',
-                          {name: utils.bold(name)}
-                        ),
-                        body: _tcStr('Do you want to replace it?'),
-                        onok: () => {
-                          utils.deleteFolderRecursive(destPath);
-                          installCollection(collection, zipData);
-                          alertify.success(
-                            _tcStr('Collection {{name}} replaced', {
-                              name: utils.bold(name),
-                            })
-                          );
-                          next(name);
-                        },
-                        oncancel: () => {
-                          alertify.warning(
-                            _tcStr('Collection {{name}} not replaced', {
-                              name: utils.bold(name),
-                            })
-                          );
-                          next(name);
-                        },
-                      });
-                    } else {
-                      installCollection(collection, zipData);
-                      alertify.success(
-                        _tcStr('Collection {{name}} added', {
-                          name: utils.bold(name),
-                        })
-                      );
-                      next(name);
-                    }
-                  },
-                  function () {}
-                );
-              } else {
-                alertify.warning(
-                  _tcStr('Invalid collection {{name}}', {
-                    name: utils.bold(name),
-                  })
-                );
-              }
-            }, 0);
-          },
-          function () {
-            collections.loadInternalCollections();
-            utils.rootScopeSafeApply();
-            nextzip();
-          }
-        );
-      });
-    };
-
-    function getCollections(zipData) {
-      var data = '';
-      var _collections = {};
-      var zipEntries = zipData.getEntries();
-
-      // Validate collections
-      zipEntries.forEach(function (zipEntry) {
-        data = zipEntry.entryName.match(/^([^\/]+)\/$/);
-        if (data) {
-          _collections[data[1]] = {
-            origName: data[1],
-            blocks: [],
-            examples: [],
-            locale: [],
-            package: '',
-          };
-        }
-
-        addCollectionItem('blocks', 'ice', _collections, zipEntry);
-        addCollectionItem('blocks', 'v', _collections, zipEntry);
-        addCollectionItem('blocks', 'vh', _collections, zipEntry);
-        addCollectionItem('blocks', 'list', _collections, zipEntry);
-        addCollectionItem('examples', 'ice', _collections, zipEntry);
-        addCollectionItem('examples', 'v', _collections, zipEntry);
-        addCollectionItem('examples', 'vh', _collections, zipEntry);
-        addCollectionItem('examples', 'list', _collections, zipEntry);
-        addCollectionItem('locale', 'po', _collections, zipEntry);
-
-        data = zipEntry.entryName.match(/^([^\/]+)\/package\.json$/);
-        if (data) {
-          _collections[data[1]].package = zipEntry.entryName;
-        }
-        data = zipEntry.entryName.match(/^([^\/]+)\/README\.md$/);
-        if (data) {
-          _collections[data[1]].readme = zipEntry.entryName;
-        }
-      });
-
-      return _collections;
-    }
-
-    function addCollectionItem(key, ext, collections, zipEntry) {
-      var data = zipEntry.entryName.match(
-        RegExp('^([^/]+)/' + key + '/.*.' + ext + '$')
-      );
-      if (data) {
-        collections[data[1]][key].push(zipEntry.entryName);
-      }
-    }
-
-    function installCollection(collection, zip) {
-      var i,
-        dest = '';
-      var pattern = RegExp('^' + collection.origName);
-      for (i in collection.blocks) {
-        dest = collection.blocks[i].replace(pattern, collection.name);
-        safeExtract(collection.blocks[i], dest, zip);
-      }
-      for (i in collection.examples) {
-        dest = collection.examples[i].replace(pattern, collection.name);
-        safeExtract(collection.examples[i], dest, zip);
-      }
-      for (i in collection.locale) {
-        dest = collection.locale[i].replace(pattern, collection.name);
-        safeExtract(collection.locale[i], dest, zip);
-        // Generate locale JSON files
-        var compiler = new nodeGettext.Compiler({
-          format: 'json',
-        });
-        var sourcePath = nodePath.join(common.INTERNAL_COLLECTIONS_DIR, dest);
-        var targetPath = nodePath.join(
-          common.INTERNAL_COLLECTIONS_DIR,
-          dest.replace(/\.po$/, '.json')
-        );
-        var content = nodeFs.readFileSync(sourcePath).toString();
-        var json = compiler.convertPo([content]);
-        nodeFs.writeFileSync(targetPath, json);
-        // Add strings to gettext
-        gettextCatalog.loadRemote(targetPath);
-      }
-      if (collection.package) {
-        dest = collection.package.replace(pattern, collection.name);
-        safeExtract(collection.package, dest, zip);
-      }
-      if (collection.readme) {
-        dest = collection.readme.replace(pattern, collection.name);
-        safeExtract(collection.readme, dest, zip);
-      }
-    }
-
-    function safeExtract(entry, dest, zip) {
-      try {
-        var newPath = nodePath.join(common.INTERNAL_COLLECTIONS_DIR, dest);
-        zip.extractEntryTo(
-          entry,
-          utils.dirname(newPath),
-          /*maintainEntryPath*/ false
-        );
-      } catch (e) {}
-    }
-
-    this.removeCollection = function (collection) {
-      utils.deleteFolderRecursive(collection.path);
-      collections.loadInternalCollections();
-      alertify.success(
-        _tcStr('Collection {{name}} removed', {
-          name: utils.bold(collection.name),
-        })
-      );
-    };
-
-    this.removeAllCollections = function () {
-      utils.removeCollections();
-      collections.loadInternalCollections();
-      alertify.success(_tcStr('All collections removed'));
-    };
 
     this.canCheckVersion =
       _package.repository !== undefined && _package.sha !== undefined;

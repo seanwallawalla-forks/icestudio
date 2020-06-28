@@ -12,7 +12,6 @@ angular
     nodePath,
     nodeChildProcess,
     nodeExtract,
-    nodeZlib,
     nodeOnline,
     nodeGlob,
     nodeSha1,
@@ -81,6 +80,12 @@ angular
       }
       return _pythonExecutableCached;
     };
+
+    this.isDirectory = _isDirectory;
+
+    function _isDirectory(path) {
+      return nodeFs.lstatSync(path).isDirectory();
+    }
 
     function isPython3(executable) {
       console.log('Python test', executable);
@@ -322,16 +327,12 @@ angular
       this.deleteFolderRecursive(common.APIO_HOME_DIR);
     };
 
-    this.removeCollections = function () {
-      this.deleteFolderRecursive(common.INTERNAL_COLLECTIONS_DIR);
-    };
-
     this.deleteFolderRecursive = function (path) {
       if (nodeFs.existsSync(path)) {
         nodeFs.readdirSync(path).forEach(
           function (file /*, index*/) {
             var curPath = nodePath.join(path, file);
-            if (nodeFs.lstatSync(curPath).isDirectory()) {
+            if (_isDirectory(curPath)) {
               // recursive
               this.deleteFolderRecursive(curPath);
             } else {
@@ -359,43 +360,37 @@ angular
 
     this.readFile = function (filepath) {
       return new Promise(function (resolve, reject) {
-        if (nodeFs.existsSync(common.PROFILE_PATH)) {
-          nodeFs.readFile(filepath, 'utf8', function (err, content) {
-            if (err) {
-              reject(err.toString());
-            } else {
-              var data = false;
-
-              let name = basename(filepath);
-              let test = true;
-              if (
-                test &&
-                typeof ICEpm !== 'undefined' &&
-                ICEpm.isFactory(name)
-              ) {
-                ICEpm.factory(name, content, function (data) {
-                  if (data) {
-                    // JSON data
-                    resolve(data);
-                  } else {
-                    reject();
-                  }
-                });
-              } else {
-                data = isJSON(content);
-
+        if (!nodeFs.existsSync(common.PROFILE_PATH)) {
+          resolve();
+          return;
+        }
+        nodeFs.readFile(filepath, 'utf8', function (err, content) {
+          if (err) {
+            reject(err.toString());
+          } else {
+            var data = false;
+            let name = basename(filepath);
+            let test = true;
+            if (test && typeof ICEpm !== 'undefined' && ICEpm.isFactory(name)) {
+              ICEpm.factory(name, content, function (data) {
                 if (data) {
                   // JSON data
                   resolve(data);
                 } else {
                   reject();
                 }
+              });
+            } else {
+              data = isJSON(content);
+              if (data) {
+                // JSON data
+                resolve(data);
+              } else {
+                reject();
               }
             }
-          });
-        } else {
-          resolve({});
-        }
+          }
+        });
       });
     };
 
@@ -441,96 +436,6 @@ angular
       }
     }
 
-    this.findCollections = function (folder) {
-      var collectionsPaths = [];
-      try {
-        if (folder) {
-          collectionsPaths = nodeFs
-            .readdirSync(folder)
-            .map(function (name) {
-              return nodePath.join(folder, name);
-            })
-            .filter(function (path) {
-              return (
-                (isDirectory(path) || isSymbolicLink(path)) &&
-                isCollectionPath(path)
-              );
-            });
-        }
-      } catch (e) {
-        console.warn(e);
-      }
-      return collectionsPaths;
-    };
-
-    function isCollectionPath(path) {
-      var result = false;
-      try {
-        var content = nodeFs.readdirSync(path);
-        result =
-          content &&
-          contains(content, 'package.json') &&
-          isFile(nodePath.join(path, 'package.json')) &&
-          ((contains(content, 'blocks') &&
-            isDirectory(nodePath.join(path, 'blocks'))) ||
-            (contains(content, 'examples') &&
-              isDirectory(nodePath.join(path, 'examples'))));
-      } catch (e) {
-        console.warn(e);
-      }
-      return result;
-    }
-
-    function isFile(path) {
-      return nodeFs.lstatSync(path).isFile();
-    }
-
-    function isDirectory(path) {
-      return nodeFs.lstatSync(path).isDirectory();
-    }
-
-    function isSymbolicLink(path) {
-      return nodeFs.lstatSync(path).isSymbolicLink();
-    }
-
-    function contains(array, item) {
-      return array.indexOf(item) !== -1;
-    }
-
-    function getFilesRecursive(folder, level) {
-      var fileTree = [];
-      var validator = /.*\.(ice|json|md)$/;
-
-      try {
-        var content = nodeFs.readdirSync(folder);
-
-        level--;
-
-        content.forEach(function (name) {
-          var path = nodePath.join(folder, name);
-
-          if (isDirectory(path)) {
-            fileTree.push({
-              name: name,
-              path: path,
-              children: level >= 0 ? getFilesRecursive(path, level) : [],
-            });
-          } else if (validator.test(name)) {
-            fileTree.push({
-              name: basename(name),
-              path: path,
-            });
-          }
-        });
-      } catch (e) {
-        console.warn(e);
-      }
-
-      return fileTree;
-    }
-
-    this.getFilesRecursive = getFilesRecursive;
-
     this.setLocale = function (locale, callback) {
       // Update current locale format
       locale = splitLocale(locale);
@@ -544,9 +449,9 @@ angular
         nodePath.join(common.LOCALE_DIR, bestLang, bestLang + '.json')
       );
       // Collections strings
-      var collections = [common.defaultCollection]
-        .concat(common.internalCollections)
-        .concat(common.externalCollections);
+      // FIXME process all collections here
+      /*
+      var collections = ;
       for (var c in collections) {
         var collection = collections[c];
         var filepath = nodePath.join(
@@ -559,6 +464,7 @@ angular
           gettextCatalog.loadRemote('file://' + filepath);
         }
       }
+      */
       if (callback) {
         callback();
       }
@@ -583,8 +489,7 @@ angular
       nodeFs
         .readdirSync(common.LOCALE_DIR)
         .forEach(function (element /*, index*/) {
-          var curPath = nodePath.join(common.LOCALE_DIR, element);
-          if (nodeFs.lstatSync(curPath).isDirectory()) {
+          if (_isDirectory(nodePath.join(common.LOCALE_DIR, element))) {
             supported.push(splitLocale(element));
           }
         });
@@ -620,12 +525,22 @@ angular
     this.renderForm = function (specs, callback) {
       var content = [];
       content.push('<div>');
+      var icon = 'question-circle';
+      var title = 'Form';
+      if (specs.title) {
+        var title = specs.title;
+        if (specs.icon) {
+          icon = specs.icon;
+        }
+        specs = specs.fields;
+      }
       for (var i in specs) {
         var spec = specs[i];
         switch (spec.type) {
           case 'text':
             content.push(
-              `<input class="ajs-input" type="text" id="form${i}"/>`
+              `<p>${spec.title}</p>
+              <input class="ajs-input" type="text" id="form${i}"/>`
             );
             break;
           case 'checkbox':
@@ -654,8 +569,8 @@ angular
       }
       content.push('</div>');
       alerts.confirm({
-        icon: 'question-circle',
-        title: specs[0].type === 'text' ? specs[0].title : 'Form',
+        icon: icon,
+        title: title,
         body: content.join('\n'),
         onok: (evt) => {
           var values = [];

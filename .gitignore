@@ -15,7 +15,7 @@ app/icerok.capture.raw
 .tmp
 .vscode
 app/docs
-app/resources/collection
+app/resources/collections
 app/resources/locale/**/*.json
 bower_components
 cache

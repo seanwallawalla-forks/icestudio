@@ -197,7 +197,7 @@ module.exports = function (grunt) {
       options: {overwrite: false},
       src:
         'https://github.com/FPGAwars/collection-default/archive/v<%=pkg.collection%>.zip',
-      dest: 'cache/collection/collection-default-v<%=pkg.collection%>.zip',
+      dest: 'cache/collections/collection-default-v<%=pkg.collection%>.zip',
     },
   };
 
@@ -267,9 +267,12 @@ module.exports = function (grunt) {
     unzip: {
       'using-router': {
         router: function (filepath) {
-          return filepath.replace(/^collection-default-.*?\//g, 'collection/');
+          return filepath.replace(
+            /^collection-default-.*?\//g,
+            'collections/basic/'
+          );
         },
-        src: 'cache/collection/collection-default-v<%=pkg.collection%>.zip',
+        src: 'cache/collections/collection-default-v<%=pkg.collection%>.zip',
         dest: 'app/resources/',
       },
     },
@@ -283,7 +286,7 @@ module.exports = function (grunt) {
         'cache/toolchain/default-apio',
         'cache/toolchain/*.zip',
       ],
-      collection: ['app/resources/collection'],
+      collection: ['app/resources/collections'],
       // node: ['node_modules'],
       // appnode: ['app/node_modules'],
       // appbower: ['app/bower_components'],
@@ -316,8 +319,8 @@ module.exports = function (grunt) {
           },
           {
             expand: true,
-            cwd: 'app/resources/collection/locale',
-            dest: 'app/resources/collection/locale',
+            cwd: 'app/resources/collections/basic/locale',
+            dest: 'app/resources/collections/basic/locale',
             src: ['**/*.po'],
             ext: '.json',
           },
