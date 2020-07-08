@@ -33,7 +33,6 @@ angular
     var startAlert = null;
     var infoAlert = null;
     var resultAlert = null;
-    var toolchainAlert = null;
     var toolchain = {
       apio: '-',
       installed: false,
@@ -1071,7 +1070,7 @@ angular
 
     function installDefaultToolchain() {
       installationStatus();
-      toolchainAlert = alerts.alert({
+      alerts.alert({
         title: _tcStr('Installing toolchain'),
         body: `<div>
           <div class="progress">
@@ -1079,10 +1078,9 @@ angular
             aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width:0%">
             </div>
           </div>
-        </div>`,
-        onok: () => {
-          initProgress();
-        },
+          <div id="progress-message" class="progress-message"></div>
+      </div>`,
+        onok: utils.endWait,
       });
       toolchain.installed = false;
 
@@ -1100,7 +1098,7 @@ angular
 
     function installOnlineToolchain() {
       installationStatus();
-      toolchainAlert = alerts.alert({
+      alerts.alert({
         title: _tcStr('Installing toolchain'),
         body: `<div>
           <div class="progress">
@@ -1108,10 +1106,9 @@ angular
             aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width:0%">
             </div>
           </div>
+          <div id="progress-message" class="progress-message"></div>
         </div>`,
-        onok: () => {
-          initProgress();
-        },
+        onok: utils.endWait,
       });
       toolchain.installed = false;
 
@@ -1136,7 +1133,6 @@ angular
     function checkInternetConnection(callback) {
       updateProgress(_tcStr('Check Internet connection...'), 0);
       utils.isOnline(callback, function () {
-        closeToolchainAlert();
         restoreStatus();
         resultAlert = alertify.error(
           _tcStr('Internet connection required'),
@@ -1147,11 +1143,10 @@ angular
     }
 
     function ensurePythonIsAvailable(callback) {
-      updateProgress(_tcStr('Check Python...'), 0);
+      updateProgress(_tcStr('Check Python...'), 1);
       if (utils.getPythonExecutable()) {
         callback();
       } else {
-        closeToolchainAlert();
         restoreStatus();
         resultAlert = alertify.error(
           _tcStr('At least Python 3.5 is required'),
@@ -1243,7 +1238,6 @@ angular
     function installationCompleted(callback) {
       checkToolchain(function () {
         if (toolchain.installed) {
-          closeToolchainAlert();
           updateProgress(_tcStr('Installation completed'), 100);
           alertify.success(_tcStr('Toolchain installed'));
           setupDriversAlert();
@@ -1282,21 +1276,6 @@ angular
       bar.text(value + '%');
       bar.attr('aria-valuenow', value);
       bar.css('width', value + '%');
-    }
-
-    function initProgress() {
-      $('#progress-bar')
-        .addClass('notransition progress-bar-info progress-bar-striped active')
-        .removeClass('progress-bar-danger')
-        .text('0%')
-        .attr('aria-valuenow', 0)
-        .css('width', '0%')
-        .removeClass('notransition');
-    }
-
-    function closeToolchainAlert() {
-      toolchainAlert.callback();
-      toolchainAlert.close();
     }
 
     function installationStatus() {
