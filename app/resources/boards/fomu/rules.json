@@ -1,8 +1,8 @@
 {
-  "input": [
-    {
-      "port": "clk",
-      "pin": "F4"
-    }
+  "input": [{"port": "clk", "pin": "F4"}],
+  "output": [
+    {"pin": "A2", "bit": "0"},
+    {"pin": "A1", "bit": "0"},
+    {"pin": "A4", "bit": "0"}
   ]
 }
