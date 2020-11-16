@@ -1,14 +1,14 @@
 .toggle .header {
-    display: block;
-    clear: both;
-    cursor: pointer;
-    cursor: hand;
+  display: block;
+  clear: both;
+  cursor: pointer;
+  cursor: hand;
 }
 
 .toggle .header:after {
-    content: " ▼";
+  content: ' ▼';
 }
 
 .toggle .header.open:after {
-    content: " ▲";
+  content: ' ▲';
 }

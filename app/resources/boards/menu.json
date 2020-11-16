@@ -1,16 +1,12 @@
 [
   {
     "type": "HX1K",
-    "boards": [
-      "icezum",
-      "go-board",
-      "icestick"
-    ]
+    "boards": ["icezum", "go-board", "icestick"]
   },
   {
     "type": "HX8K",
     "boards": [
-	  "Alchitry-Cu",
+      "Alchitry-Cu",
       "alhambra-ii",
       "blackice",
       "blackice-ii",
@@ -24,10 +20,7 @@
   },
   {
     "type": "LP8K",
-    "boards": [
-      "TinyFPGA-B2",
-      "TinyFPGA-BX"
-    ]
+    "boards": ["TinyFPGA-B2", "TinyFPGA-BX"]
   },
   {
     "type": "UP5K",
@@ -41,7 +34,7 @@
       "fpga101",
       "iCE40-UP5K",
       "fomu",
-	  "iCESugar_1_5"
+      "iCESugar_1_5"
     ]
   },
   {

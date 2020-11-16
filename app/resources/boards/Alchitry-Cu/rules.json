@@ -1,13 +1,13 @@
 {
-  "input" : [
+  "input": [
     {
-      "port" : "clk",
+      "port": "clk",
       "pin": "P7"
     },
-	{
-		"port" : "reset",
-		"pin" : "P8"
-	}
+    {
+      "port": "reset",
+      "pin": "P8"
+    }
   ],
   "output": [
     {

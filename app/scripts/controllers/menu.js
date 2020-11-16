@@ -1,7 +1,9 @@
 'use strict';
 
-angular.module('icestudio')
-  .controller('MenuCtrl', function ($rootScope,
+angular
+  .module('icestudio')
+  .controller('MenuCtrl', function (
+    $rootScope,
     $scope,
     $timeout,
     boards,
@@ -17,8 +19,8 @@ angular.module('icestudio')
     gui,
     _package,
     nodeFs,
-    nodePath) {
-
+    nodePath
+  ) {
     //-- Initialize scope
 
     $scope.profile = profile;
@@ -40,7 +42,6 @@ angular.module('icestudio')
     var changedUndoStack = [];
     var currentUndoStack = [];
 
-
     // Window events
     var win = gui.Window.get();
     win.on('close', function () {
@@ -52,7 +53,7 @@ angular.module('icestudio')
     // Darwin fix for shortcuts
     if (process.platform === 'darwin') {
       var mb = new gui.Menu({
-        type: 'menubar'
+        type: 'menubar',
       });
       mb.createMacBuiltin('Icestudio');
       win.menu = mb;
@@ -63,7 +64,6 @@ angular.module('icestudio')
     // Load app arguments
 
     setTimeout(function () {
-
       // Parse GET url parmeters for window instance arguments
       // all arguments will be embeded in icestudio_argv param
       // that is a JSON string url encoded
@@ -71,18 +71,21 @@ angular.module('icestudio')
       // https://developer.mozilla.org/es/docs/Web/JavaScript/Referencia/Objetos_globales/unescape
       // unescape is deprecated javascript function, should use decodeURI instead
 
-
       var queryStr = '';
       if (window.location.search.indexOf('?icestudio_argv=') === 0) {
-        queryStr = '?icestudio_argv=' + atob(decodeURI(window.location.search.replace('?icestudio_argv=', ''))) + '&';
+        queryStr =
+          '?icestudio_argv=' +
+          atob(
+            decodeURI(window.location.search.replace('?icestudio_argv=', ''))
+          ) +
+          '&';
       } else {
-
         queryStr = decodeURI(window.location.search) + '&';
       }
       var regex = new RegExp('.*?[&\\?]icestudio_argv=(.*?)&.*');
       var val = queryStr.replace(regex, '$1');
 
-      var params = (val === queryStr) ? false : val;
+      var params = val === queryStr ? false : val;
       // If there are url params, compatibilize it with shell call
       if (typeof gui.App.argv === 'undefined') {
         gui.App.argv = [];
@@ -102,12 +105,10 @@ angular.module('icestudio')
         argv = [];
       }
 
-
       if (params !== false) {
         for (prop in params) {
           argv.push(params[prop]);
         }
-
       }
       var local = false;
       for (var i in argv) {
@@ -116,24 +117,23 @@ angular.module('icestudio')
         local = arg === 'local' || local;
       }
 
-
-      var editable = !project.path.startsWith(common.DEFAULT_COLLECTION_DIR) &&
+      var editable =
+        !project.path.startsWith(common.DEFAULT_COLLECTION_DIR) &&
         !project.path.startsWith(common.INTERNAL_COLLECTIONS_DIR) &&
         project.path.startsWith(common.selectedCollection.path);
 
       if (editable || !local) {
-
         updateWorkingdir(project.path);
       } else {
         project.path = '';
       }
       var versionW = $scope.profile.get('displayVersionInfoWindow');
-      let lastversionReview = $scope.profile.get('lastVersionReview');  
-      let hasNewVersion=lastversionReview===false || lastversionReview < _package.version;
-      if (versionW === 'yes' ||hasNewVersion ) {
+      let lastversionReview = $scope.profile.get('lastVersionReview');
+      let hasNewVersion =
+        lastversionReview === false || lastversionReview < _package.version;
+      if (versionW === 'yes' || hasNewVersion) {
         $scope.openVersionInfoWindow(hasNewVersion);
       }
-
     }, 500);
 
     function processArg(arg) {
@@ -146,7 +146,7 @@ angular.module('icestudio')
         var data = arg.split('x');
         var offset = {
           x: parseInt(data[0]),
-          y: parseInt(data[1])
+          y: parseInt(data[1]),
         };
         win.moveTo(offset.x, offset.y);
       }
@@ -157,7 +157,9 @@ angular.module('icestudio')
      *                                                                 */
     $scope.closeVersionInfoWindow = function () {
       $('#version-info-tab').addClass('hidden');
-      var nodisplay = $('input[name="version-info-tab--no-display"]').is(':checked');
+      var nodisplay = $('input[name="version-info-tab--no-display"]').is(
+        ':checked'
+      );
       if (nodisplay) {
         profile.set('displayVersionInfoWindow', 'no');
       } else {
@@ -166,22 +168,22 @@ angular.module('icestudio')
     };
 
     $scope.openVersionInfoWindow = function (showPopUp) {
-
       $('#version-info-tab').removeClass('hidden');
       var versionW = $scope.profile.get('displayVersionInfoWindow');
-      let noShowVersion=false;
+      let noShowVersion = false;
       if (versionW === 'no') {
-        noShowVersion=true;
+        noShowVersion = true;
       }
-      if(typeof showPopUp !== 'undefined' && showPopUp===true){
-        profile.set('displayVersionInfoWindow','yes');
-        profile.set('lastVersionReview',_package.version);
-        noShowVersion=false;
-
+      if (typeof showPopUp !== 'undefined' && showPopUp === true) {
+        profile.set('displayVersionInfoWindow', 'yes');
+        profile.set('lastVersionReview', _package.version);
+        noShowVersion = false;
       }
 
-
-      $('input[name="version-info-tab--no-display"]').prop('checked', noShowVersion);
+      $('input[name="version-info-tab--no-display"]').prop(
+        'checked',
+        noShowVersion
+      );
     };
 
     //-- File
@@ -210,7 +212,8 @@ angular.module('icestudio')
       if (zeroProject) {
         // If this is the first action, open
         // the project in the same window
-        var editable = !filepath.startsWith(common.DEFAULT_COLLECTION_DIR) &&
+        var editable =
+          !filepath.startsWith(common.DEFAULT_COLLECTION_DIR) &&
           !filepath.startsWith(common.INTERNAL_COLLECTIONS_DIR) &&
           filepath.startsWith(common.selectedCollection.path);
         updateWorkingdir(editable ? filepath : '');
@@ -224,12 +227,17 @@ angular.module('icestudio')
     };
 
     $scope.saveProject = function () {
-
-      if (typeof common.isEditingSubmodule !== 'undefined' &&
-        common.isEditingSubmodule === true) {
-        alertify.alert(gettextCatalog.getString('Save submodule'),
-          gettextCatalog.getString('To save your design you need to lock the keylock and go to top level design.<br/><br/>If you want to export this submodule to a file, execute "Save as" command to do it.'),
-          function () {});
+      if (
+        typeof common.isEditingSubmodule !== 'undefined' &&
+        common.isEditingSubmodule === true
+      ) {
+        alertify.alert(
+          gettextCatalog.getString('Save submodule'),
+          gettextCatalog.getString(
+            'To save your design you need to lock the keylock and go to top level design.<br/><br/>If you want to export this submodule to a file, execute "Save as" command to do it.'
+          ),
+          function () {}
+        );
 
         return;
       }
@@ -245,7 +253,6 @@ angular.module('icestudio')
     };
 
     $scope.doSaveProjectAs = function (localCallback) {
-
       utils.saveDialog('#input-save-project', '.ice', function (filepath) {
         updateWorkingdir(filepath);
         project.save(filepath, function () {
@@ -256,28 +263,26 @@ angular.module('icestudio')
           localCallback();
         }
       });
-
-
-
     };
 
     $scope.saveProjectAs = function (localCallback) {
-      if (typeof common.isEditingSubmodule !== 'undefined' &&
-
-        common.isEditingSubmodule === true) {
-        alertify.confirm(gettextCatalog.getString('Export submodule'), gettextCatalog.getString('You are editing a submodule, if you save it, you save only the submodule (in this situation "save as" works like "export module"), Do you like to continue?'),
+      if (
+        typeof common.isEditingSubmodule !== 'undefined' &&
+        common.isEditingSubmodule === true
+      ) {
+        alertify.confirm(
+          gettextCatalog.getString('Export submodule'),
+          gettextCatalog.getString(
+            'You are editing a submodule, if you save it, you save only the submodule (in this situation "save as" works like "export module"), Do you like to continue?'
+          ),
           function () {
             $scope.doSaveProjectAs(localCallback);
           },
-          function () {
-
-          });
-
+          function () {}
+        );
       } else {
         $scope.doSaveProjectAs(localCallback);
-
       }
-
     };
 
     function reloadCollectionsIfRequired(filepath) {
@@ -288,9 +293,15 @@ angular.module('icestudio')
       if (filepath.startsWith(profile.get('externalCollections'))) {
         collections.loadExternalCollections();
       }
-      if (selected &&
-        filepath.startsWith(nodePath.join(common.INTERNAL_COLLECTIONS_DIR, selected)) ||
-        filepath.startsWith(nodePath.join(profile.get('externalCollections'), selected))) {
+      if (
+        (selected &&
+          filepath.startsWith(
+            nodePath.join(common.INTERNAL_COLLECTIONS_DIR, selected)
+          )) ||
+        filepath.startsWith(
+          nodePath.join(profile.get('externalCollections'), selected)
+        )
+      ) {
         collections.selectCollection(common.selectedCollection.path);
       }
     }
@@ -331,7 +342,6 @@ angular.module('icestudio')
 
     $scope.exportASC = function () {
       exportFromBuilder('asc', 'ASC', '.asc');
-
     };
     $scope.exportBitstream = function () {
       exportFromBuilder('bin', 'Bitstream', '.bin');
@@ -344,11 +354,14 @@ angular.module('icestudio')
           utils.saveDialog('#input-export-' + id, ext, function (filepath) {
             // Save the compiler result
             var data = project.compile(id)[0].content;
-            utils.saveFile(filepath, data)
+            utils
+              .saveFile(filepath, data)
               .then(function () {
-                alertify.success(gettextCatalog.getString('{{name}} exported', {
-                  name: name
-                }));
+                alertify.success(
+                  gettextCatalog.getString('{{name}} exported', {
+                    name: name,
+                  })
+                );
               })
               .catch(function (error) {
                 alertify.error(error, 30);
@@ -371,10 +384,17 @@ angular.module('icestudio')
         .then(function () {
           utils.saveDialog('#input-export-' + id, ext, function (filepath) {
             // Copy the built file
-            if (utils.copySync(nodePath.join(common.BUILD_DIR, 'hardware' + ext), filepath)) {
-              alertify.success(gettextCatalog.getString('{{name}} exported', {
-                name: name
-              }));
+            if (
+              utils.copySync(
+                nodePath.join(common.BUILD_DIR, 'hardware' + ext),
+                filepath
+              )
+            ) {
+              alertify.success(
+                gettextCatalog.getString('{{name}} exported', {
+                  name: name,
+                })
+              );
             }
             // Update the working directory
             updateWorkingdir(filepath);
@@ -398,12 +418,17 @@ angular.module('icestudio')
     function exit() {
       if (project.changed) {
         alertify.set('confirm', 'labels', {
-          'ok': gettextCatalog.getString('Close')
+          ok: gettextCatalog.getString('Close'),
         });
         alertify.set('confirm', 'defaultFocus', 'cancel');
         alertify.confirm(
-          utils.bold(gettextCatalog.getString('Do you want to close the application?')) + '<br>' +
-          gettextCatalog.getString('Your changes will be lost if you don’t save them'),
+          utils.bold(
+            gettextCatalog.getString('Do you want to close the application?')
+          ) +
+            '<br>' +
+            gettextCatalog.getString(
+              'Your changes will be lost if you don’t save them'
+            ),
           function () {
             // Close
             _exit();
@@ -412,7 +437,7 @@ angular.module('icestudio')
             // Cancel
             setTimeout(function () {
               alertify.set('confirm', 'labels', {
-                'ok': gettextCatalog.getString('OK')
+                ok: gettextCatalog.getString('OK'),
               });
               alertify.set('confirm', 'defaultFocus', 'ok');
             }, 200);
@@ -427,7 +452,6 @@ angular.module('icestudio')
         win.close(true);
       }
     }
-
 
     //-- Edit
 
@@ -469,7 +493,6 @@ angular.module('icestudio')
       }
     };
 
-
     $scope.selectAll = function () {
       checkGraph()
         .then(function () {
@@ -488,25 +511,38 @@ angular.module('icestudio')
 
     $scope.setExternalPlugins = function () {
       var externalPlugins = profile.get('externalPlugins');
-      var formSpecs = [{
-        type: 'text',
-        title: gettextCatalog.getString('Enter the external plugins path'),
-        value: externalPlugins || ''
-      }];
+      var formSpecs = [
+        {
+          type: 'text',
+          title: gettextCatalog.getString('Enter the external plugins path'),
+          value: externalPlugins || '',
+        },
+      ];
       utils.renderForm(formSpecs, function (evt, values) {
         var newExternalPlugins = values[0];
         if (resultAlert) {
           resultAlert.dismiss(false);
         }
         if (newExternalPlugins !== externalPlugins) {
-          if (newExternalPlugins === '' || nodeFs.existsSync(newExternalPlugins)) {
+          if (
+            newExternalPlugins === '' ||
+            nodeFs.existsSync(newExternalPlugins)
+          ) {
             profile.set('externalPlugins', newExternalPlugins);
-            alertify.success(gettextCatalog.getString('External plugins updated'));
+            alertify.success(
+              gettextCatalog.getString('External plugins updated')
+            );
           } else {
             evt.cancel = true;
-            resultAlert = alertify.error(gettextCatalog.getString('Path {{path}} does not exist', {
-              path: newExternalPlugins
-            }, 5));
+            resultAlert = alertify.error(
+              gettextCatalog.getString(
+                'Path {{path}} does not exist',
+                {
+                  path: newExternalPlugins,
+                },
+                5
+              )
+            );
           }
         }
       });
@@ -521,11 +557,11 @@ angular.module('icestudio')
         type: 'text',
         title: gettextCatalog.getString('Enter the pip version > 3.8 path'),
         value:  pythonEnv.pip || ''
-      
+
       }
     ];
       utils.renderForm(formSpecs, function (evt, values) {
-        
+
         let newPythonPath= values[0];
         let newPipPath= values[1];
 
@@ -540,7 +576,7 @@ angular.module('icestudio')
 
                let newPythonEnv ={python: newPythonPath, pip:newPipPath};
             profile.set('pythonEnv', newPythonEnv);
-            
+
             alertify.success(gettextCatalog.getString('Python Environment updated'));
           } else {
             evt.cancel = true;
@@ -553,33 +589,49 @@ angular.module('icestudio')
     };
 
 
- 
-
     $scope.setExternalCollections = function () {
       var externalCollections = profile.get('externalCollections');
-      var formSpecs = [{
-        type: 'text',
-        title: gettextCatalog.getString('Enter the external collections path'),
-        value: externalCollections || ''
-      }];
+      var formSpecs = [
+        {
+          type: 'text',
+          title: gettextCatalog.getString(
+            'Enter the external collections path'
+          ),
+          value: externalCollections || '',
+        },
+      ];
       utils.renderForm(formSpecs, function (evt, values) {
         var newExternalCollections = values[0];
         if (resultAlert) {
           resultAlert.dismiss(false);
         }
         if (newExternalCollections !== externalCollections) {
-          if (newExternalCollections === '' || nodeFs.existsSync(newExternalCollections)) {
+          if (
+            newExternalCollections === '' ||
+            nodeFs.existsSync(newExternalCollections)
+          ) {
             profile.set('externalCollections', newExternalCollections);
             collections.loadExternalCollections();
             collections.selectCollection(); // default
             utils.rootScopeSafeApply();
-            if (common.selectedCollection.path.startsWith(newExternalCollections)) {}
-            alertify.success(gettextCatalog.getString('External collections updated'));
+            if (
+              common.selectedCollection.path.startsWith(newExternalCollections)
+            ) {
+            }
+            alertify.success(
+              gettextCatalog.getString('External collections updated')
+            );
           } else {
             evt.cancel = true;
-            resultAlert = alertify.error(gettextCatalog.getString('Path {{path}} does not exist', {
-              path: newExternalCollections
-            }, 5));
+            resultAlert = alertify.error(
+              gettextCatalog.getString(
+                'Path {{path}} does not exist',
+                {
+                  path: newExternalCollections,
+                },
+                5
+              )
+            );
           }
         }
       });
@@ -589,12 +641,16 @@ angular.module('icestudio')
       var values = getProjectInformation();
       if (!_.isEqual(values, newValues)) {
         graph.setInfo(values, newValues, project);
-        alertify.message(gettextCatalog.getString('Project information updated') + '.<br>' + gettextCatalog.getString('Click here to view'), 5)
-          .callback = function (isClicked) {
-            if (isClicked) {
-              $scope.setProjectInformation();
-            }
-          };
+        alertify.message(
+          gettextCatalog.getString('Project information updated') +
+            '.<br>' +
+            gettextCatalog.getString('Click here to view'),
+          5
+        ).callback = function (isClicked) {
+          if (isClicked) {
+            $scope.setProjectInformation();
+          }
+        };
       }
     });
 
@@ -602,39 +658,45 @@ angular.module('icestudio')
       var values = getProjectInformation();
       utils.projectinfoprompt(values, function (evt, newValues) {
         if (!_.isEqual(values, newValues)) {
-          if (subModuleActive && typeof common.submoduleId !== 'undefined' && typeof common.allDependencies[common.submoduleId] !== 'undefined') {
+          if (
+            subModuleActive &&
+            typeof common.submoduleId !== 'undefined' &&
+            typeof common.allDependencies[common.submoduleId] !== 'undefined'
+          ) {
             graph.setBlockInfo(values, newValues, common.submoduleId);
           } else {
             graph.setInfo(values, newValues, project);
           }
-          alertify.success(gettextCatalog.getString('Project information updated'));
+          alertify.success(
+            gettextCatalog.getString('Project information updated')
+          );
         }
       });
     };
 
     function getProjectInformation() {
       var p = false;
-      if (subModuleActive && typeof common.submoduleId !== 'undefined' && typeof common.allDependencies[common.submoduleId] !== 'undefined') {
+      if (
+        subModuleActive &&
+        typeof common.submoduleId !== 'undefined' &&
+        typeof common.allDependencies[common.submoduleId] !== 'undefined'
+      ) {
         p = common.allDependencies[common.submoduleId].package;
-
       } else {
         p = project.get('package');
       }
-      return [
-        p.name,
-        p.version,
-        p.description,
-        p.author,
-        p.image
-      ];
+      return [p.name, p.version, p.description, p.author, p.image];
     }
 
     $scope.setRemoteHostname = function () {
       var current = profile.get('remoteHostname');
-      alertify.prompt(gettextCatalog.getString('Enter the remote hostname user@host'), (current) ? current : '',
+      alertify.prompt(
+        gettextCatalog.getString('Enter the remote hostname user@host'),
+        current ? current : '',
         function (evt, remoteHostname) {
           profile.set('remoteHostname', remoteHostname);
-        });
+        }
+      );
     };
 
     $scope.toggleBoardRules = function () {
@@ -654,14 +716,17 @@ angular.module('icestudio')
       if (profile.get('language') !== language) {
         profile.set('language', graph.selectLanguage(language));
         // Reload the project
-        project.update({
-          deps: false
-        }, function () {
-          graph.loadDesign(project.get('design'), {
-            disabled: false
-          });
-          //alertify.success(gettextCatalog.getString('Language {{name}} selected',  { name: utils.bold(language) }));
-        });
+        project.update(
+          {
+            deps: false,
+          },
+          function () {
+            graph.loadDesign(project.get('design'), {
+              disabled: false,
+            });
+            //alertify.success(gettextCatalog.getString('Language {{name}} selected',  { name: utils.bold(language) }));
+          }
+        );
         // Rearrange the collections content
         collections.sort();
       }
@@ -671,48 +736,62 @@ angular.module('icestudio')
     $scope.selectTheme = function (theme) {
       if (profile.get('uiTheme') !== theme) {
         profile.set('uiTheme', theme);
-      alertify.warning(gettextCatalog.getString('Icestudio needs to be restarted to switch the new UI Theme.'), 15);
-
-
+        alertify.warning(
+          gettextCatalog.getString(
+            'Icestudio needs to be restarted to switch the new UI Theme.'
+          ),
+          15
+        );
       }
     };
-
-
 
     //-- View
 
     $scope.showPCF = function () {
-      gui.Window.open('resources/viewers/plain/pcf.html?board=' + common.selectedBoard.name, {
-        title: common.selectedBoard.info.label + ' - PCF',
-        focus: true,
-        //toolbar: false,
-        resizable: true,
-        width: 700,
-        height: 700,
-        'min_width': 300,
-        'min_height': 300,
-        icon: 'resources/images/icestudio-logo.png'
-      });
+      gui.Window.open(
+        'resources/viewers/plain/pcf.html?board=' + common.selectedBoard.name,
+        {
+          title: common.selectedBoard.info.label + ' - PCF',
+          focus: true,
+          //toolbar: false,
+          resizable: true,
+          width: 700,
+          height: 700,
+          min_width: 300,
+          min_height: 300,
+          icon: 'resources/images/icestudio-logo.png',
+        }
+      );
     };
 
     $scope.showPinout = function () {
       var board = common.selectedBoard;
-      if (nodeFs.existsSync(nodePath.join('resources', 'boards', board.name, 'pinout.svg'))) {
-        gui.Window.open('resources/viewers/svg/pinout.html?board=' + board.name, {
-          title: common.selectedBoard.info.label + ' - Pinout',
-          focus: true,
-          //toolbar: false,
-          resizable: true,
-          width: 500,
-          height: 700,
-          'min_width': 300,
-          'min_height': 300,
-          icon: 'resources/images/icestudio-logo.png'
-        });
+      if (
+        nodeFs.existsSync(
+          nodePath.join('resources', 'boards', board.name, 'pinout.svg')
+        )
+      ) {
+        gui.Window.open(
+          'resources/viewers/svg/pinout.html?board=' + board.name,
+          {
+            title: common.selectedBoard.info.label + ' - Pinout',
+            focus: true,
+            //toolbar: false,
+            resizable: true,
+            width: 500,
+            height: 700,
+            min_width: 300,
+            min_height: 300,
+            icon: 'resources/images/icestudio-logo.png',
+          }
+        );
       } else {
-        alertify.warning(gettextCatalog.getString('{{board}} pinout not defined', {
-          board: utils.bold(board.info.label)
-        }), 5);
+        alertify.warning(
+          gettextCatalog.getString('{{board}} pinout not defined', {
+            board: utils.bold(board.info.label),
+          }),
+          5
+        );
       }
     };
 
@@ -721,9 +800,12 @@ angular.module('icestudio')
       if (board.info.datasheet) {
         gui.Shell.openExternal(board.info.datasheet);
       } else {
-        alertify.error(gettextCatalog.getString('{{board}} datasheet not defined', {
-          board: utils.bold(board.info.label)
-        }), 5);
+        alertify.error(
+          gettextCatalog.getString('{{board}} datasheet not defined', {
+            board: utils.bold(board.info.label),
+          }),
+          5
+        );
       }
     };
 
@@ -732,21 +814,27 @@ angular.module('icestudio')
       var rules = JSON.stringify(board.rules);
       if (rules !== '{}') {
         var encRules = encodeURIComponent(rules);
-        gui.Window.open('resources/viewers/table/rules.html?rules=' + encRules, {
-          title: common.selectedBoard.info.label + ' - Rules',
-          focus: true,
-          //toolbar: false,
-          resizable: false,
-          width: 500,
-          height: 500,
-          'min_width': 300,
-          'min_height': 300,
-          icon: 'resources/images/icestudio-logo.png'
-        });
+        gui.Window.open(
+          'resources/viewers/table/rules.html?rules=' + encRules,
+          {
+            title: common.selectedBoard.info.label + ' - Rules',
+            focus: true,
+            //toolbar: false,
+            resizable: false,
+            width: 500,
+            height: 500,
+            min_width: 300,
+            min_height: 300,
+            icon: 'resources/images/icestudio-logo.png',
+          }
+        );
       } else {
-        alertify.error(gettextCatalog.getString('{{board}} rules not defined', {
-          board: utils.bold(board.info.label)
-        }), 5);
+        alertify.error(
+          gettextCatalog.getString('{{board}} rules not defined', {
+            board: utils.bold(board.info.label),
+          }),
+          5
+        );
       }
     };
 
@@ -758,42 +846,59 @@ angular.module('icestudio')
       var collection = common.selectedCollection;
       var readme = collection.content.readme;
       if (readme) {
-        gui.Window.open('resources/viewers/markdown/readme.html?readme=' + readme, {
-          title: (collection.name ? collection.name : 'Default') + ' Collection - Data',
-          focus: true,
-          //toolbar: false,
-          resizable: true,
-          width: 700,
-          height: 700,
-          'min_width': 300,
-          'min_height': 300,
-          icon: 'resources/images/icestudio-logo.png'
-        });
+        gui.Window.open(
+          'resources/viewers/markdown/readme.html?readme=' + readme,
+          {
+            title:
+              (collection.name ? collection.name : 'Default') +
+              ' Collection - Data',
+            focus: true,
+            //toolbar: false,
+            resizable: true,
+            width: 700,
+            height: 700,
+            min_width: 300,
+            min_height: 300,
+            icon: 'resources/images/icestudio-logo.png',
+          }
+        );
       } else {
-        alertify.error(gettextCatalog.getString('Collection {{collection}} info not defined', {
-          collection: utils.bold(collection.name)
-        }), 5);
+        alertify.error(
+          gettextCatalog.getString(
+            'Collection {{collection}} info not defined',
+            {
+              collection: utils.bold(collection.name),
+            }
+          ),
+          5
+        );
       }
     };
 
     $scope.showCommandOutput = function () {
-      winCommandOutput = gui.Window.open('resources/viewers/plain/output.html?content=' + encodeURIComponent(common.commandOutput), {
-        title: gettextCatalog.getString('Command output'),
-        focus: true,
-        /*        toolbar: false,*/
-        resizable: true,
-        width: 700,
-        height: 400,
-        'min_width': 300,
-        'min_height': 300,
-        icon: 'resources/images/icestudio-logo.png'
-      });
+      winCommandOutput = gui.Window.open(
+        'resources/viewers/plain/output.html?content=' +
+          encodeURIComponent(common.commandOutput),
+        {
+          title: gettextCatalog.getString('Command output'),
+          focus: true,
+          /*        toolbar: false,*/
+          resizable: true,
+          width: 700,
+          height: 400,
+          min_width: 300,
+          min_height: 300,
+          icon: 'resources/images/icestudio-logo.png',
+        }
+      );
     };
 
     $(document).on('commandOutputChanged', function (evt, commandOutput) {
       if (winCommandOutput) {
         try {
-          winCommandOutput.window.location.href = 'resources/viewers/plain/output.html?content=' + encodeURIComponent(commandOutput);
+          winCommandOutput.window.location.href =
+            'resources/viewers/plain/output.html?content=' +
+            encodeURIComponent(commandOutput);
         } catch (e) {
           winCommandOutput = null;
         }
@@ -803,17 +908,24 @@ angular.module('icestudio')
     $scope.selectCollection = function (collection) {
       if (common.selectedCollection.path !== collection.path) {
         var name = collection.name;
-        profile.set('collection', collections.selectCollection(collection.path));
-        alertify.success(gettextCatalog.getString('Collection {{name}} selected', {
-          name: utils.bold(name ? name : 'Default')
-        }));
+        profile.set(
+          'collection',
+          collections.selectCollection(collection.path)
+        );
+        alertify.success(
+          gettextCatalog.getString('Collection {{name}} selected', {
+            name: utils.bold(name ? name : 'Default'),
+          })
+        );
       }
     };
 
     function updateSelectedCollection() {
-      profile.set('collection', collections.selectCollection(profile.get('collection')));
+      profile.set(
+        'collection',
+        collections.selectCollection(profile.get('collection'))
+      );
     }
-
 
     //-- Boards
 
@@ -827,12 +939,17 @@ angular.module('icestudio')
     $scope.selectBoard = function (board) {
       if (common.selectedBoard.name !== board.name) {
         if (!graph.isEmpty()) {
-          alertify.confirm(gettextCatalog.getString('The current FPGA I/O configuration will be lost. Do you want to change to {{name}} board?', {
-              name: utils.bold(board.info.label)
-            }),
+          alertify.confirm(
+            gettextCatalog.getString(
+              'The current FPGA I/O configuration will be lost. Do you want to change to {{name}} board?',
+              {
+                name: utils.bold(board.info.label),
+              }
+            ),
             function () {
               _boardSelected();
-            });
+            }
+          );
         } else {
           _boardSelected();
         }
@@ -842,12 +959,13 @@ angular.module('icestudio')
         var reset = true;
         var newBoard = graph.selectBoard(board, reset);
         profile.set('board', newBoard.name);
-        alertify.success(gettextCatalog.getString('Board {{name}} selected', {
-          name: utils.bold(newBoard.info.label)
-        }));
+        alertify.success(
+          gettextCatalog.getString('Board {{name}} selected', {
+            name: utils.bold(newBoard.info.label),
+          })
+        );
       }
     };
-
 
     //-- Tools
 
@@ -858,17 +976,21 @@ angular.module('icestudio')
         .then(function () {
           return tools.verifyCode(startMessage, endMessage);
         })
-        .catch(function () {
-
-        });
+        .catch(function () {});
     };
 
     $scope.buildCode = function () {
-      if (typeof common.isEditingSubmodule !== 'undefined' &&
-        common.isEditingSubmodule === true) {
-        alertify.alert(gettextCatalog.getString('Build'),
-          gettextCatalog.getString('You can only build at top-level design. Inside submodules you only can <strong>Verify</strong>'),
-          function () {});
+      if (
+        typeof common.isEditingSubmodule !== 'undefined' &&
+        common.isEditingSubmodule === true
+      ) {
+        alertify.alert(
+          gettextCatalog.getString('Build'),
+          gettextCatalog.getString(
+            'You can only build at top-level design. Inside submodules you only can <strong>Verify</strong>'
+          ),
+          function () {}
+        );
         return;
       }
 
@@ -885,15 +1007,20 @@ angular.module('icestudio')
     };
 
     $scope.uploadCode = function () {
-      if (typeof common.isEditingSubmodule !== 'undefined' &&
-        common.isEditingSubmodule === true) {
-        alertify.alert(gettextCatalog.getString('Upload'),
-          gettextCatalog.getString('You can only upload  your design at top-level design. Inside submodules you only can <strong>Verify</strong>'),
-          function () {});
+      if (
+        typeof common.isEditingSubmodule !== 'undefined' &&
+        common.isEditingSubmodule === true
+      ) {
+        alertify.alert(
+          gettextCatalog.getString('Upload'),
+          gettextCatalog.getString(
+            'You can only upload  your design at top-level design. Inside submodules you only can <strong>Verify</strong>'
+          ),
+          function () {}
+        );
 
         return;
       }
-
 
       var startMessage = gettextCatalog.getString('Start upload');
       var endMessage = gettextCatalog.getString('Upload done');
@@ -915,7 +1042,10 @@ angular.module('icestudio')
           if (resultAlert) {
             resultAlert.dismiss(true);
           }
-          resultAlert = alertify.warning(gettextCatalog.getString('Add a block to start'), 5);
+          resultAlert = alertify.warning(
+            gettextCatalog.getString('Add a block to start'),
+            5
+          );
           reject();
         }
       });
@@ -934,39 +1064,47 @@ angular.module('icestudio')
     };
 
     $scope.removeCollection = function (collection) {
-      alertify.confirm(gettextCatalog.getString('Do you want to remove the {{name}} collection?', {
-          name: utils.bold(collection.name)
-        }),
+      alertify.confirm(
+        gettextCatalog.getString(
+          'Do you want to remove the {{name}} collection?',
+          {
+            name: utils.bold(collection.name),
+          }
+        ),
         function () {
           tools.removeCollection(collection);
           updateSelectedCollection();
           utils.rootScopeSafeApply();
-        });
+        }
+      );
     };
 
     $scope.removeAllCollections = function () {
       if (common.internalCollections.length > 0) {
-        alertify.confirm(gettextCatalog.getString('All stored collections will be lost. Do you want to continue?'),
+        alertify.confirm(
+          gettextCatalog.getString(
+            'All stored collections will be lost. Do you want to continue?'
+          ),
           function () {
             tools.removeAllCollections();
             updateSelectedCollection();
             utils.rootScopeSafeApply();
-          });
+          }
+        );
       } else {
         alertify.warning(gettextCatalog.getString('No collections stored'), 5);
       }
     };
 
     $scope.showChromeDevTools = function () {
-
       //win.showDevTools();
       utils.openDevToolsUI();
     };
 
     //-- Help
 
-    $scope.openUrl = function (url ,$event ) {
-       $event.preventDefault();
+    $scope.openUrl = function (url, $event) {
+      $event.preventDefault();
 
       utils.openUrlExternalBrowser(url);
       return false;
@@ -1006,11 +1144,10 @@ angular.module('icestudio')
         '    <p>Thanks to the rest of <a class="action-open-url-external-browser" href="https://github.com/FPGAwars/icestudio">contributors</a></p>',
         '    <p style="margin-top:30px;text-align:right;"><span class="copyleft">&copy;</span> <a class="action-open-url-external-browser" href="http://fpgawars.github.io">FPGAwars</a> 2016-2020</p>',
         '  </div>',
-        '</div>'
+        '</div>',
       ].join('\n');
       alertify.alert(content);
     };
-
 
     // Events
 
@@ -1020,7 +1157,8 @@ angular.module('icestudio')
       project.changed = JSON.stringify(changedUndoStack) !== undoStackString;
       project.updateTitle();
       zeroProject = false;
-      common.hasChangesSinceBuild = JSON.stringify(buildUndoStack) !== undoStackString;
+      common.hasChangesSinceBuild =
+        JSON.stringify(buildUndoStack) !== undoStackString;
       utils.rootScopeSafeApply();
     });
 
@@ -1046,7 +1184,7 @@ angular.module('icestudio')
       },
       onclose: function () {
         promptShown = false;
-      }
+      },
     });
 
     alertify.confirm().set({
@@ -1055,7 +1193,7 @@ angular.module('icestudio')
       },
       onclose: function () {
         promptShown = false;
-      }
+      },
     });
 
     // Configure all shortcuts
@@ -1103,7 +1241,7 @@ angular.module('icestudio')
     $(document).on('keydown', function (event) {
       var opt = {
         prompt: promptShown,
-        disabled: !graph.isEnabled()
+        disabled: !graph.isEnabled(),
       };
       event.stopImmediatePropagation();
       var ret = shortcuts.execute(event, opt);
@@ -1125,9 +1263,11 @@ angular.module('icestudio')
           $scope.snapshotdir = utils.dirname(filepath) + utils.sep;
           $scope.$apply();
           if (!err) {
-            alertify.success(gettextCatalog.getString('Image {{name}} saved', {
-              name: utils.bold(utils.basename(filepath))
-            }));
+            alertify.success(
+              gettextCatalog.getString('Image {{name}} saved', {
+                name: utils.bold(utils.basename(filepath)),
+              })
+            );
           } else {
             throw err;
           }
@@ -1149,8 +1289,10 @@ angular.module('icestudio')
     $(document).on('mousedown', '.paper', function () {
       mousedown = true;
       // Close current menu
-      if (typeof $scope.status !== 'undefined' &&
-        typeof $scope.status[menu] !== 'undefined') {
+      if (
+        typeof $scope.status !== 'undefined' &&
+        typeof $scope.status[menu] !== 'undefined'
+      ) {
         $scope.status[menu] = false;
       }
       utils.rootScopeSafeApply();
@@ -1159,7 +1301,11 @@ angular.module('icestudio')
     // Show menu with delay
     $scope.showMenu = function (newMenu) {
       cancelTimeouts();
-      if (!mousedown && !graph.addingDraggableBlock && !$scope.status[newMenu]) {
+      if (
+        !mousedown &&
+        !graph.addingDraggableBlock &&
+        !$scope.status[newMenu]
+      ) {
         timerOpen = $timeout(function () {
           $scope.fixMenu(newMenu);
         }, 300);
@@ -1192,7 +1338,4 @@ angular.module('icestudio')
         event.preventDefault();
       }
     });
-
-
-
   });

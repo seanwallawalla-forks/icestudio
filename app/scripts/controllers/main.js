@@ -1,9 +1,8 @@
 'use strict';
 
-angular.module('icestudio')
-  .controller('MainCtrl', function ($scope,
-    gettextCatalog, tools, utils) {
-
+angular
+  .module('icestudio')
+  .controller('MainCtrl', function ($scope, gettextCatalog, tools, utils) {
     alertify.defaults.movable = false;
     alertify.defaults.closable = false;
     alertify.defaults.transition = 'fade';
@@ -11,8 +10,8 @@ angular.module('icestudio')
 
     setTimeout(function () {
       var labels = {
-        'ok': gettextCatalog.getString('OK'),
-        'cancel': gettextCatalog.getString('Cancel')
+        ok: gettextCatalog.getString('OK'),
+        cancel: gettextCatalog.getString('Cancel'),
       };
       alertify.set('alert', 'labels', labels);
       alertify.set('prompt', 'labels', labels);
@@ -23,25 +22,24 @@ angular.module('icestudio')
     /* activate development tools */
     tools.ifDevelopmentMode();
 
-
-    $(document).delegate('.action-open-url-external-browser', 'click', function (e) {
-      e.preventDefault();
-      utils.openUrlExternalBrowser($(this).prop('href'));
-      return false;
-    });
+    $(document).delegate(
+      '.action-open-url-external-browser',
+      'click',
+      function (e) {
+        e.preventDefault();
+        utils.openUrlExternalBrowser($(this).prop('href'));
+        return false;
+      }
+    );
 
     /* Functions that checks if new version is available */
     setTimeout(function () {
       tools.checkForNewVersion();
     }, 30000);
 
-
     /* Plugin menu*/
 
-
-
     let icmBodyEl = $('body'),
-
       icmOpenbtn = document.getElementById('icm-open-button'),
       icmClosebtn = document.getElementById('icm-close-button'),
       icmIsOpen = false,
@@ -68,11 +66,16 @@ angular.module('icestudio')
       } else {
         icmBodyEl.addClass('icm-show-menu');
         // animate path
-        icmPath.animate({
-          'path': icmPathOpen
-        }, 400, mina.easeinout, function () {
-          icmIsAnimating = false;
-        });
+        icmPath.animate(
+          {
+            path: icmPathOpen,
+          },
+          400,
+          mina.easeinout,
+          function () {
+            icmIsAnimating = false;
+          }
+        );
       }
       icmIsOpen = !icmIsOpen;
     }
@@ -85,6 +88,5 @@ angular.module('icestudio')
 
     tools.initializePluginManager(icmToggleMenu);
 
-
     /***************************** */
-});
+  });

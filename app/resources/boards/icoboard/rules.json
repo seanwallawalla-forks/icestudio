@@ -1,7 +1,7 @@
 {
-  "input" : [
+  "input": [
     {
-      "port" : "clk",
+      "port": "clk",
       "pin": "R9"
     }
   ],

@@ -1,12 +1,14 @@
 'use strict';
 
-angular.module('icestudio')
-  .service('collections', function (utils,
+angular
+  .module('icestudio')
+  .service('collections', function (
+    utils,
     common,
     profile,
     gettextCatalog,
-    nodePath) {
-
+    nodePath
+  ) {
     const DEFAULT = '';
     const MAX_LEVEL_SEARCH = 20;
 
@@ -25,14 +27,18 @@ angular.module('icestudio')
     };
 
     this.loadInternalCollections = function () {
-      var internalCollections = utils.findCollections(common.INTERNAL_COLLECTIONS_DIR);
+      var internalCollections = utils.findCollections(
+        common.INTERNAL_COLLECTIONS_DIR
+      );
       common.internalCollections = loadCollections(internalCollections);
     };
 
     this.loadExternalCollections = function () {
       var externalCollectionsPath = profile.get('externalCollections');
       if (externalCollectionsPath !== common.INTERNAL_COLLECTIONS_DIR) {
-        var externalCollections = utils.findCollections(externalCollectionsPath);
+        var externalCollections = utils.findCollections(
+          externalCollectionsPath
+        );
         common.externalCollections = loadCollections(externalCollections);
       }
     };
@@ -40,11 +46,13 @@ angular.module('icestudio')
     function loadCollections(paths) {
       var collections = [];
       paths.forEach(function (path) {
-        collections.push(getCollection(
-          nodePath.basename(path),
-          path,
-          utils.getFilesRecursive(path, MAX_LEVEL_SEARCH)
-        ));
+        collections.push(
+          getCollection(
+            nodePath.basename(path),
+            path,
+            utils.getFilesRecursive(path, MAX_LEVEL_SEARCH)
+          )
+        );
       });
       return collections;
     }
@@ -57,8 +65,8 @@ angular.module('icestudio')
           blocks: [],
           examples: [],
           package: {},
-          readme: ''
-        }
+          readme: '',
+        },
       };
       for (var i in children) {
         var child = children[i];
@@ -77,8 +85,7 @@ angular.module('icestudio')
             if (!child.children) {
               try {
                 collection.content.package = require(child.path);
-              }
-              catch (e) { }
+              } catch (e) {}
             }
             break;
           case 'README':
@@ -93,7 +100,9 @@ angular.module('icestudio')
 
     this.selectCollection = function (path) {
       var selectedCollection = null;
-      var collections = common.internalCollections.concat(common.externalCollections);
+      var collections = common.internalCollections.concat(
+        common.externalCollections
+      );
       for (var i in collections) {
         if (collections[i].path === path) {
           selectedCollection = collections[i];
@@ -153,23 +162,31 @@ angular.module('icestudio')
         for (let ib in br) {
           var ari = ar[ia];
           if (ari === undefined) {
-            ari = "";
+            ari = '';
           }
           var bri = br[ib];
           if (bri === undefined) {
-            bri = "";
+            bri = '';
           }
 
-          // If both parts are strictly numeric, compare them as numbers 
+          // If both parts are strictly numeric, compare them as numbers
           if (!isNaN(ari) && !isNaN(bri)) {
-            localeCompare = ari.localeCompare(bri, {}, {
-              numeric: true
-            });
+            localeCompare = ari.localeCompare(
+              bri,
+              {},
+              {
+                numeric: true,
+              }
+            );
           } else {
-            localeCompare = ari.localeCompare(bri, {}, {
-              ignorePunctuation: true,
-              sensitivity: "base"
-            });
+            localeCompare = ari.localeCompare(
+              bri,
+              {},
+              {
+                ignorePunctuation: true,
+                sensitivity: 'base',
+              }
+            );
           }
           if (localeCompare !== 0) {
             // If you run out of parts, the name with the fewest parts comes first
@@ -181,5 +198,4 @@ angular.module('icestudio')
       }
       return localeCompare;
     }
-
   });

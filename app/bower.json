@@ -8,19 +8,9 @@
     "Tom Calvo <calvo.tom@gmail.com>"
   ],
   "license": "GPL-2.0",
-  "keywords": [
-    "FPGA",
-    "open",
-    "hardware"
-  ],
+  "keywords": ["FPGA", "open", "hardware"],
   "homepage": "https://github.com/FPGAwars/icestudio",
-  "ignore": [
-    "**/.*",
-    "node_modules",
-    "bower_components",
-    "test",
-    "tests"
-  ],
+  "ignore": ["**/.*", "node_modules", "bower_components", "test", "tests"],
   "dependencies": {
     "angular": "~1.6.9",
     "angular-route": "~1.6.9",
@@ -37,6 +27,6 @@
     "alertify-js": "~1.11.1",
     "jquery-resize": "v1.1",
     "angular-gettext": "https://github.com/Jesus89/angular-gettext.git#master",
-    "Snap.svg":"~0.5.1"
+    "Snap.svg": "~0.5.1"
   }
 }

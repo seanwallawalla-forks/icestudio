@@ -1,7 +1,9 @@
 'use strict';
 
-angular.module('icestudio')
-  .service('project', function ($rootScope,
+angular
+  .module('icestudio')
+  .service('project', function (
+    $rootScope,
     graph,
     boards,
     compiler,
@@ -11,10 +13,10 @@ angular.module('icestudio')
     gui,
     gettextCatalog,
     nodeFs,
-    nodePath) {
-
-    this.name = '';  // Used in File dialogs
-    this.path = '';  // Used in Save / Save as
+    nodePath
+  ) {
+    this.name = ''; // Used in File dialogs
+    this.path = ''; // Used in Save / Save as
     this.filepath = ''; // Used to find external resources (.v, .vh, .list)
     this.changed = false;
     this.backup = false;
@@ -28,21 +30,20 @@ angular.module('icestudio')
           version: '',
           description: '',
           author: '',
-          image: ''
+          image: '',
         },
         design: {
           board: '',
-          graph: { blocks: [], wires: [] }
+          graph: {blocks: [], wires: []},
         },
-        dependencies: {}
+        dependencies: {},
       };
     }
 
     this.get = function (key) {
       if (key in project) {
         return project[key];
-      }
-      else {
+      } else {
         return project;
       }
     };
@@ -57,15 +58,19 @@ angular.module('icestudio')
       var self = this;
       this.path = emptyPath ? '' : filepath;
       this.filepath = filepath;
-      utils.readFile(filepath)
+      utils
+        .readFile(filepath)
         .then(function (data) {
           var name = utils.basename(filepath);
-          self.filename=name;
-          self.dirname=utils.dirname(filepath);
+          self.filename = name;
+          self.dirname = utils.dirname(filepath);
           self.load(name, data);
         })
         .catch(function () {
-          alertify.error(gettextCatalog.getString('Invalid project format'), 30);
+          alertify.error(
+            gettextCatalog.getString('Invalid project format'),
+            30
+          );
         });
     };
 
@@ -78,12 +83,19 @@ angular.module('icestudio')
       if (project.design.board !== common.selectedBoard.name) {
         var projectBoard = boards.boardLabel(project.design.board);
         alertify.set('confirm', 'labels', {
-          'ok': gettextCatalog.getString('Load'),
-          'cancel': gettextCatalog.getString('Convert')
+          ok: gettextCatalog.getString('Load'),
+          cancel: gettextCatalog.getString('Convert'),
         });
         alertify.confirm(
-          gettextCatalog.getString('This project is designed for the {{name}} board.', { name: utils.bold(projectBoard) }) + '<br>' +
-          gettextCatalog.getString('You can load it as it is or convert it for the {{name}} board.', { name: utils.bold(common.selectedBoard.info.label) }),
+          gettextCatalog.getString(
+            'This project is designed for the {{name}} board.',
+            {name: utils.bold(projectBoard)}
+          ) +
+            '<br>' +
+            gettextCatalog.getString(
+              'You can load it as it is or convert it for the {{name}} board.',
+              {name: utils.bold(common.selectedBoard.info.label)}
+            ),
           function () {
             // Load
             _load();
@@ -92,80 +104,104 @@ angular.module('icestudio')
             // Convert
             project.design.board = common.selectedBoard.name;
 
-            _load(true, boardMigration(projectBoard, common.selectedBoard.name));
-          });
-      }
-      else {
+            _load(
+              true,
+              boardMigration(projectBoard, common.selectedBoard.name)
+            );
+          }
+        );
+      } else {
         _load();
       }
 
       function _load(reset, originalBoard) {
         common.allDependencies = project.dependencies;
-        var opt = { reset: reset || false, disabled: false };
+        var opt = {reset: reset || false, disabled: false};
         if (typeof originalBoard !== 'undefined' && originalBoard !== false) {
           for (var i = 0; i < common.boards.length; i++) {
             if (String(common.boards[i].name) === String(originalBoard)) {
               opt.originalPinout = common.boards[i].pinout;
-
             }
-            if (String(common.boards[i].name) === String(project.design.board)) {
+            if (
+              String(common.boards[i].name) === String(project.design.board)
+            ) {
               opt.designPinout = common.boards[i].pinout;
             }
           }
         }
 
         var ret = graph.loadDesign(project.design, opt, function () {
-
           graph.resetCommandStack();
           graph.fitContent();
-          alertify.success(gettextCatalog.getString('Project {{name}} loaded', { name: utils.bold(name) }));
+          alertify.success(
+            gettextCatalog.getString('Project {{name}} loaded', {
+              name: utils.bold(name),
+            })
+          );
           common.hasChangesSinceBuild = true;
         });
 
         if (ret) {
           profile.set('board', boards.selectBoard(project.design.board).name);
           self.updateTitle(name);
-          let bdir=utils.filepath2buildpath(self.filepath);
+          let bdir = utils.filepath2buildpath(self.filepath);
           common.setBuildDir(bdir);
-        }
-        else {
-          alertify.error(gettextCatalog.getString('Wrong project format: {{name}}', { name: utils.bold(name) }), 30);
+        } else {
+          alertify.error(
+            gettextCatalog.getString('Wrong project format: {{name}}', {
+              name: utils.bold(name),
+            }),
+            30
+          );
         }
         setTimeout(function () {
           alertify.set('confirm', 'labels', {
-            'ok': gettextCatalog.getString('OK'),
-            'cancel': gettextCatalog.getString('Cancel')
+            ok: gettextCatalog.getString('OK'),
+            cancel: gettextCatalog.getString('Cancel'),
           });
         }, 100);
       }
     };
 
     function boardMigration(oldBoard, newBoard) {
-
       var pboard = false;
 
       switch (oldBoard.toLowerCase()) {
-        case 'icezum alhambra': case 'icezum':
+        case 'icezum alhambra':
+        case 'icezum':
           switch (newBoard.toLowerCase()) {
-            case 'alhambra-ii': pboard = 'icezum'; break;
-            default: pboard='icezum';
+            case 'alhambra-ii':
+              pboard = 'icezum';
+              break;
+            default:
+              pboard = 'icezum';
           }
           break;
       }
       return pboard;
     }
 
-
     function checkVersion(version) {
       if (version > common.VERSION) {
-        var errorAlert = alertify.error(gettextCatalog.getString('Unsupported project format {{version}}', { version: version }), 30);
-        alertify.message(gettextCatalog.getString('Click here to <b>download a newer version</b> of Icestudio'), 30)
-          .callback = function (isClicked) {
-            if (isClicked) {
-              errorAlert.dismiss(false);
-              gui.Shell.openExternal('https://github.com/FPGAwars/icestudio/releases');
-            }
-          };
+        var errorAlert = alertify.error(
+          gettextCatalog.getString('Unsupported project format {{version}}', {
+            version: version,
+          }),
+          30
+        );
+        alertify.message(
+          gettextCatalog.getString(
+            'Click here to <b>download a newer version</b> of Icestudio'
+          ),
+          30
+        ).callback = function (isClicked) {
+          if (isClicked) {
+            errorAlert.dismiss(false);
+            gui.Shell.openExternal(
+              'https://github.com/FPGAwars/icestudio/releases'
+            );
+          }
+        };
         return false;
       }
       return true;
@@ -227,7 +263,7 @@ angular.module('icestudio')
         if (!(key in depsInfo)) {
           depsInfo[key] = {
             id: utils.dependencyID(block),
-            content: block
+            content: block,
           };
         }
       }
@@ -251,12 +287,12 @@ angular.module('icestudio')
           version: '',
           description: name || '',
           author: '',
-          image: ''
+          image: '',
         },
         design: {
           board: '',
           graph: {},
-          deps: {}
+          deps: {},
         },
       };
       for (var b in data.graph.blocks) {
@@ -268,39 +304,41 @@ angular.module('icestudio')
           case 'basic.inputLabel':
             block.data = {
               name: block.data.label,
-              pins: [{
-                index: '0',
-                name: block.data.pin ? block.data.pin.name : '',
-                value: block.data.pin ? block.data.pin.value : '0'
-              }],
-              virtual: false
+              pins: [
+                {
+                  index: '0',
+                  name: block.data.pin ? block.data.pin.name : '',
+                  value: block.data.pin ? block.data.pin.value : '0',
+                },
+              ],
+              virtual: false,
             };
             break;
           case 'basic.constant':
             block.data = {
               name: block.data.label,
               value: block.data.value,
-              local: false
+              local: false,
             };
             break;
           case 'basic.code':
             var params = [];
             for (var p in block.data.params) {
               params.push({
-                name: block.data.params[p]
+                name: block.data.params[p],
               });
             }
             var inPorts = [];
             for (var i in block.data.ports.in) {
               inPorts.push({
-                name: block.data.ports.in[i]
+                name: block.data.ports.in[i],
               });
             }
 
             var outPorts = [];
             for (var o in block.data.ports.out) {
               outPorts.push({
-                name: block.data.ports.out[o]
+                name: block.data.ports.out[o],
               });
             }
             block.data = {
@@ -308,8 +346,8 @@ angular.module('icestudio')
               params: params,
               ports: {
                 in: inPorts,
-                out: outPorts
-              }
+                out: outPorts,
+              },
             };
             break;
         }
@@ -329,9 +367,7 @@ angular.module('icestudio')
       var name = utils.basename(filepath);
       if (subModuleActive) {
         backupProject = utils.clone(project);
-
       } else {
-
         this.updateTitle(name);
       }
 
@@ -346,7 +382,9 @@ angular.module('icestudio')
         // 1. Parse and find included files
         var code = compiler.generate('verilog', project)[0].content;
         var listFiles = compiler.generate('list', project);
-        var internalFiles = listFiles.map(function (res) { return res.name; });
+        var internalFiles = listFiles.map(function (res) {
+          return res.name;
+        });
         var files = utils.findIncludedFiles(code);
         files = _.difference(files, internalFiles);
         // Are there included files?
@@ -361,14 +399,12 @@ angular.module('icestudio')
               }
             });
           }
-        }
-        else {
+        } else {
           // No included files to copy
           // 4. Save project
           doSaveProject();
         }
-      }
-      else {
+      } else {
         // Same filepath
         // 4. Save project
         doSaveProject();
@@ -377,28 +413,30 @@ angular.module('icestudio')
         project = utils.clone(backupProject);
         //        sortGraph();
         //        this.update();
-
-
       } else {
         this.path = filepath;
         this.filepath = filepath;
       }
-      let self=this;
+      let self = this;
       function doSaveProject() {
-        utils.saveFile(filepath, pruneProject(project))
+        utils
+          .saveFile(filepath, pruneProject(project))
           .then(function () {
             if (callback) {
               callback();
             }
-            let bdir=utils.filepath2buildpath(self.filepath);
+            let bdir = utils.filepath2buildpath(self.filepath);
             common.setBuildDir(bdir);
-            alertify.success(gettextCatalog.getString('Project {{name}} saved', { name: utils.bold(name) }));
+            alertify.success(
+              gettextCatalog.getString('Project {{name}} saved', {
+                name: utils.bold(name),
+              })
+            );
           })
           .catch(function (error) {
             alertify.error(error, 30);
           });
       }
-
     };
 
     function sortGraph() {
@@ -406,16 +444,20 @@ angular.module('icestudio')
 
       // Sort Constant/Memory cells by x-coordinate
       cells = _.sortBy(cells, function (cell) {
-        if (cell.get('type') === 'ice.Constant' ||
-          cell.get('type') === 'ice.Memory') {
+        if (
+          cell.get('type') === 'ice.Constant' ||
+          cell.get('type') === 'ice.Memory'
+        ) {
           return cell.get('position').x;
         }
       });
 
       // Sort I/O cells by y-coordinate
       cells = _.sortBy(cells, function (cell) {
-        if (cell.get('type') === 'ice.Input' ||
-          cell.get('type') === 'ice.Output') {
+        if (
+          cell.get('type') === 'ice.Input' ||
+          cell.get('type') === 'ice.Output'
+        ) {
           return cell.get('position').y;
         }
       });
@@ -425,21 +467,24 @@ angular.module('icestudio')
 
     this.addBlockFile = function (filepath, notification) {
       var self = this;
-      utils.readFile(filepath)
+      utils
+        .readFile(filepath)
         .then(function (data) {
           if (!checkVersion(data.version)) {
             return;
           }
           var name = utils.basename(filepath);
-          
+
           var block = _safeLoad(data, name);
-           if (block) {
+          if (block) {
             var origPath = utils.dirname(filepath);
             var destPath = utils.dirname(self.path);
             // 1. Parse and find included files
             var code = compiler.generate('verilog', block)[0].content;
             var listFiles = compiler.generate('list', block);
-            var internalFiles = listFiles.map(function (res) { return res.name; });
+            var internalFiles = listFiles.map(function (res) {
+              return res.name;
+            });
             var files = utils.findIncludedFiles(code);
             files = _.difference(files, internalFiles);
             // Are there included files?
@@ -447,20 +492,26 @@ angular.module('icestudio')
               // 2. Check project's directory
               if (self.path) {
                 // 3. Copy the included files
-                copyIncludedFiles(files, origPath, destPath, function (success) {
+                copyIncludedFiles(files, origPath, destPath, function (
+                  success
+                ) {
                   if (success) {
                     // 4. Success: import block
                     doImportBlock();
                   }
                 });
-              }
-              else {
-                alertify.confirm(gettextCatalog.getString('This import operation requires a project path. You need to save the current project. Do you want to continue?'),
+              } else {
+                alertify.confirm(
+                  gettextCatalog.getString(
+                    'This import operation requires a project path. You need to save the current project. Do you want to continue?'
+                  ),
                   function () {
                     $rootScope.$emit('saveProjectAs', function () {
                       setTimeout(function () {
                         // 3. Copy the included files
-                        copyIncludedFiles(files, origPath, destPath, function (success) {
+                        copyIncludedFiles(files, origPath, destPath, function (
+                          success
+                        ) {
                           if (success) {
                             // 4. Success: import block
                             doImportBlock();
@@ -468,10 +519,10 @@ angular.module('icestudio')
                         });
                       }, 500);
                     });
-                  });
+                  }
+                );
               }
-            }
-            else {
+            } else {
               // No included files to copy
               // 4. Import block
               doImportBlock();
@@ -481,48 +532,63 @@ angular.module('icestudio')
           function doImportBlock() {
             self.addBlock(block);
             if (notification) {
-              alertify.success(gettextCatalog.getString('Block {{name}} imported', { name: utils.bold(block.package.name) }));
+              alertify.success(
+                gettextCatalog.getString('Block {{name}} imported', {
+                  name: utils.bold(block.package.name),
+                })
+              );
             }
           }
         })
         .catch(function () {
-          alertify.error(gettextCatalog.getString('Invalid project format'), 30);
+          alertify.error(
+            gettextCatalog.getString('Invalid project format'),
+            30
+          );
         });
     };
 
     function copyIncludedFiles(files, origPath, destPath, callback) {
       var success = true;
-      async.eachSeries(files, function (filename, next) {
-        setTimeout(function () {
-          if (origPath !== destPath) {
-            if (nodeFs.existsSync(nodePath.join(destPath, filename))) {
-              alertify.confirm(gettextCatalog.getString('File {{file}} already exists in the project path. Do you want to replace it?', { file: utils.bold(filename) }),
-                function () {
-                  success = success && doCopySync(origPath, destPath, filename);
-                  if (!success) {
-                    return next(); // break
+      async.eachSeries(
+        files,
+        function (filename, next) {
+          setTimeout(function () {
+            if (origPath !== destPath) {
+              if (nodeFs.existsSync(nodePath.join(destPath, filename))) {
+                alertify.confirm(
+                  gettextCatalog.getString(
+                    'File {{file}} already exists in the project path. Do you want to replace it?',
+                    {file: utils.bold(filename)}
+                  ),
+                  function () {
+                    success =
+                      success && doCopySync(origPath, destPath, filename);
+                    if (!success) {
+                      return next(); // break
+                    }
+                    next();
+                  },
+                  function () {
+                    next();
                   }
-                  next();
-                },
-                function () {
-                  next();
-                });
-            }
-            else {
-              success = success && doCopySync(origPath, destPath, filename);
-              if (!success) {
-                return next(); // break
+                );
+              } else {
+                success = success && doCopySync(origPath, destPath, filename);
+                if (!success) {
+                  return next(); // break
+                }
+                next();
               }
-              next();
+            } else {
+              return next(); // break
             }
-          }
-          else {
-            return next(); // break
-          }
-        }, 0);
-      }, function (/*result*/) {
-        return callback(success);
-      });
+          }, 0);
+        },
+        function (/*result*/) {
+          return callback(success);
+        }
+      );
     }
 
     function doCopySync(origPath, destPath, filename) {
@@ -530,10 +596,19 @@ angular.module('icestudio')
       var dest = nodePath.join(destPath, filename);
       var success = utils.copySync(orig, dest);
       if (success) {
-        alertify.message(gettextCatalog.getString('File {{file}} imported', { file: utils.bold(filename) }), 5);
-      }
-      else {
-        alertify.error(gettextCatalog.getString('Original file {{file}} does not exist', { file: utils.bold(filename) }), 30);
+        alertify.message(
+          gettextCatalog.getString('File {{file}} imported', {
+            file: utils.bold(filename),
+          }),
+          5
+        );
+      } else {
+        alertify.error(
+          gettextCatalog.getString('Original file {{file}} does not exist', {
+            file: utils.bold(filename),
+          }),
+          30
+        );
       }
       return success;
     }
@@ -583,7 +658,6 @@ angular.module('icestudio')
 
     this.restoreSnapshot = function () {
       project = utils.clone(this.backup);
-
     };
 
     this.update = function (opt, callback) {
@@ -592,16 +666,20 @@ angular.module('icestudio')
       project.design.board = p.design.board;
       project.design.graph = p.design.graph;
       project.dependencies = p.dependencies;
-      if (subModuleActive && typeof common.submoduleId !== 'undefined' && typeof common.allDependencies[common.submoduleId] !== 'undefined') {
+      if (
+        subModuleActive &&
+        typeof common.submoduleId !== 'undefined' &&
+        typeof common.allDependencies[common.submoduleId] !== 'undefined'
+      ) {
         project.package = common.allDependencies[common.submoduleId].package;
       }
       var state = graph.getState();
       project.design.state = {
         pan: {
           x: parseFloat(state.pan.x.toFixed(4)),
-          y: parseFloat(state.pan.y.toFixed(4))
+          y: parseFloat(state.pan.y.toFixed(4)),
         },
-        zoom: parseFloat(state.zoom.toFixed(4))
+        zoom: parseFloat(state.zoom.toFixed(4)),
       };
 
       if (callback) {
@@ -620,7 +698,7 @@ angular.module('icestudio')
 
     this.compile = function (target) {
       this.update();
-      var opt = { boardRules: profile.get('boardRules') };
+      var opt = {boardRules: profile.get('boardRules')};
       return compiler.generate(target, project, opt);
     };
 
@@ -650,14 +728,16 @@ angular.module('icestudio')
       delete block.design.board;
       var i, pins;
       for (i in block.design.graph.blocks) {
-        if (block.design.graph.blocks[i].type === 'basic.input' ||
+        if (
+          block.design.graph.blocks[i].type === 'basic.input' ||
           block.design.graph.blocks[i].type === 'basic.output' ||
           block.design.graph.blocks[i].type === 'basic.outputLabel' ||
           block.design.graph.blocks[i].type === 'inputLabel'
         ) {
           if (block.design.graph.blocks[i].data.size === undefined) {
             pins = block.design.graph.blocks[i].data.pins;
-            block.design.graph.blocks[i].data.size = (pins && pins.length > 1) ? pins.length : undefined;
+            block.design.graph.blocks[i].data.size =
+              pins && pins.length > 1 ? pins.length : undefined;
           }
           delete block.design.graph.blocks[i].data.pins;
           delete block.design.graph.blocks[i].data.virtual;
@@ -676,5 +756,4 @@ angular.module('icestudio')
       graph.resetBreadcrumbs();
       graph.resetCommandStack();
     };
-
   });

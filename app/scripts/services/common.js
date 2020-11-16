@@ -1,9 +1,8 @@
 'use strict';
 
-angular.module('icestudio')
-  .service('common', function (nodePath,
-    nodeTmp,nodeFs) {
-
+angular
+  .module('icestudio')
+  .service('common', function (nodePath, nodeTmp, nodeFs) {
     // Project version
     this.VERSION = '1.2';
 
@@ -31,7 +30,7 @@ angular.module('icestudio')
       luts: '-',
       pios: '-',
       plbs: '-',
-      brams: '-'
+      brams: '-',
     };
 
     // Debug mode (uncomment)
@@ -40,8 +39,9 @@ angular.module('icestudio')
     // Command output
     this.commandOutput = '';
 
-    // Apio develop URL
-    this.APIO_PIP_VCS = 'git+https://github.com/FPGAwars/apio.git@%BRANCH%#egg=apio';
+    // Apio URL
+    this.APIO_PIP_VCS =
+      'git+https://github.com/FPGAwars/apio.git@%BRANCH%#egg=apio';
 
     // OS
     this.LINUX = Boolean(process.platform.indexOf('linux') > -1);
@@ -51,14 +51,23 @@ angular.module('icestudio')
     // Paths
     this.LOCALE_DIR = nodePath.join('resources', 'locale');
     this.SAMPLE_DIR = nodePath.join('resources', 'sample');
-    this.DEFAULT_COLLECTION_DIR = nodePath.resolve(nodePath.join('resources', 'collection'));
-    this.DEFAULT_PLUGIN_DIR = nodePath.resolve(nodePath.join('resources', 'plugins'));
-
+    this.DEFAULT_COLLECTION_DIR = nodePath.resolve(
+      nodePath.join('resources', 'collection')
+    );
+    this.DEFAULT_PLUGIN_DIR = nodePath.resolve(
+      nodePath.join('resources', 'plugins')
+    );
 
     this.BASE_DIR = process.env.HOME || process.env.USERPROFILE;
     this.LOGFILE = nodePath.join(this.BASE_DIR, 'icestudio.log');
-    this.ICESTUDIO_DIR = safeDir(nodePath.join(this.BASE_DIR, '.icestudio'), this);
-    this.INTERNAL_COLLECTIONS_DIR = nodePath.join(this.ICESTUDIO_DIR, 'collections');
+    this.ICESTUDIO_DIR = safeDir(
+      nodePath.join(this.BASE_DIR, '.icestudio'),
+      this
+    );
+    this.INTERNAL_COLLECTIONS_DIR = nodePath.join(
+      this.ICESTUDIO_DIR,
+      'collections'
+    );
     this.APIO_HOME_DIR = nodePath.join(this.ICESTUDIO_DIR, 'apio');
     this.PROFILE_PATH = nodePath.join(this.ICESTUDIO_DIR, 'profile.json');
     this.CACHE_DIR = nodePath.join(this.ICESTUDIO_DIR, '.cache');
@@ -68,27 +77,51 @@ angular.module('icestudio')
     this.TOOLCHAIN_DIR = nodePath.join(this.APP_DIR, 'toolchain');
 
     this.DEFAULT_PYTHON_PACKAGES = 'default-python-packages';
-    this.DEFAULT_PYTHON_PACKAGES_DIR = nodePath.join(this.CACHE_DIR, this.DEFAULT_PYTHON_PACKAGES);
-    this.DEFAULT_PYTHON_PACKAGES_ZIP = nodePath.join(this.TOOLCHAIN_DIR, this.DEFAULT_PYTHON_PACKAGES + '.zip');
+    this.DEFAULT_PYTHON_PACKAGES_DIR = nodePath.join(
+      this.CACHE_DIR,
+      this.DEFAULT_PYTHON_PACKAGES
+    );
+    this.DEFAULT_PYTHON_PACKAGES_ZIP = nodePath.join(
+      this.TOOLCHAIN_DIR,
+      this.DEFAULT_PYTHON_PACKAGES + '.zip'
+    );
 
     this.DEFAULT_APIO = 'default-apio';
     this.DEFAULT_APIO_DIR = nodePath.join(this.CACHE_DIR, this.DEFAULT_APIO);
-    this.DEFAULT_APIO_ZIP = nodePath.join(this.TOOLCHAIN_DIR, this.DEFAULT_APIO + '.zip');
+    this.DEFAULT_APIO_ZIP = nodePath.join(
+      this.TOOLCHAIN_DIR,
+      this.DEFAULT_APIO + '.zip'
+    );
 
     this.DEFAULT_APIO_PACKAGES = 'default-apio-packages';
-    this.DEFAULT_APIO_PACKAGES_ZIP = nodePath.join(this.TOOLCHAIN_DIR, this.DEFAULT_APIO_PACKAGES + '.zip');
+    this.DEFAULT_APIO_PACKAGES_ZIP = nodePath.join(
+      this.TOOLCHAIN_DIR,
+      this.DEFAULT_APIO_PACKAGES + '.zip'
+    );
 
     //-- Folder name for the virtual environment
     this.ENV_DIR = nodePath.join(this.ICESTUDIO_DIR, 'venv');
-
-    this.ENV_BIN_DIR = nodePath.join(this.ENV_DIR, this.WIN32 ? 'Scripts' : 'bin');
+    this.ENV_BIN_DIR = nodePath.join(
+      this.ENV_DIR,
+      this.WIN32 ? 'Scripts' : 'bin'
+    );
     this.ENV_PIP = nodePath.join(this.ENV_BIN_DIR, 'pip');
-    this.ENV_APIO = nodePath.join(this.ENV_BIN_DIR, this.WIN32 ? 'apio.exe' : 'apio');
-    this.APIO_CMD = (this.WIN32 ? 'set' : 'export') + ' APIO_HOME_DIR=' + this.APIO_HOME_DIR + (this.WIN32 ? '& ' : '; ') + '"' + this.ENV_APIO + '"';
+    this.ENV_APIO = nodePath.join(
+      this.ENV_BIN_DIR,
+      this.WIN32 ? 'apio.exe' : 'apio'
+    );
+    this.APIO_CMD =
+      (this.WIN32 ? 'set' : 'export') +
+      ' APIO_HOME_DIR=' +
+      this.APIO_HOME_DIR +
+      (this.WIN32 ? '& ' : '; ') +
+      '"' +
+      this.ENV_APIO +
+      '"';
 
     this.BUILD_DIR_OBJ = new nodeTmp.dirSync({
       prefix: 'icestudio-',
-      unsafeCleanup: true
+      unsafeCleanup: true,
     });
     this.BUILD_DIR = this.BUILD_DIR_OBJ.name;
     this.BUILD_DIR_TMP = this.BUILD_DIR_OBJ.name;
@@ -117,28 +150,32 @@ angular.module('icestudio')
       }
       return _dir;
     }
-    this.setBuildDir = function(buildpath){
+    this.setBuildDir = function (buildpath) {
       let fserror=false;
-      if (!nodeFs.existsSync(buildpath)){
-        try{
-          nodeFs.mkdirSync(buildpath, { recursive: true });
-        }catch (e) {
+      if (!nodeFs.existsSync(buildpath)) {
+        try {
+          nodeFs.mkdirSync(buildpath, {recursive: true});
+        } catch (e) {
           fserror=true;
         }
       }
-      if(!fserror){
-        this.BUILD_DIR=buildpath;
-      }else{
-        this.BUILD_DIR=this.BUILD_DIR_TMP;
-      }
+      this.BUILD_DIR = (fserror) ? his.BUILD_DIR_TMP : buildpath;
     };
-    
+
     this.showToolchain = function () {
-      return (this.selectedBoard && this.selectedBoard.info.interface !== 'GPIO') || false;
+      return (
+        (this.selectedBoard && this.selectedBoard.info.interface !== 'GPIO') ||
+        false
+      );
     };
 
     this.showDrivers = function () {
-      return (this.selectedBoard && (this.selectedBoard.info.interface === 'FTDI' || this.selectedBoard.info.interface === 'Serial')) || false;
+      return (
+        (this.selectedBoard &&
+          (this.selectedBoard.info.interface === 'FTDI' ||
+            this.selectedBoard.info.interface === 'Serial')) ||
+        false
+      );
     };
     this.isEditingSubmodule = false;
   });
